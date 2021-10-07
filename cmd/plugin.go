@@ -1,0 +1,30 @@
+// ------------------------------------------------------------
+// Copyright 2021 The TKeel Contributors.
+// Licensed under the Apache License.
+// ------------------------------------------------------------
+
+package cmd
+
+import (
+	"github.com/spf13/cobra"
+)
+
+var PluginCmd = &cobra.Command{
+	Use:   "plugin",
+	Short: "Manager plugins. Supported platforms: Kubernetes",
+	Example: `
+# Manager plugins. in Kubernetes mode
+tkeel plugin list -k
+tkeel plugin delete -k
+tkeel plugin register -k
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+
+	},
+}
+
+func init() {
+	PluginCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", false, "List tenant's enabled plugins in a Kubernetes cluster")
+	PluginCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	RootCmd.AddCommand(PluginCmd)
+}
