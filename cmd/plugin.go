@@ -19,7 +19,11 @@ tkeel plugin delete -k
 tkeel plugin register -k
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		// Prompt help information If there is no parameter
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
 	},
 }
 
