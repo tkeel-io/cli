@@ -19,7 +19,6 @@ func Register(pluginId string) error {
 	return RegisterPlugins(clientset, namespace, pluginId)
 }
 
-
 func Delete(pluginId string) error {
 	clientset, err := Client()
 	if err != nil {

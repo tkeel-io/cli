@@ -27,8 +27,8 @@ func CreateTenant(client k8s.Interface, namespace, tenantTitle string) (*TenantC
 		Namespace(namespace).
 		Resource("services").
 		SubResource("proxy").
-		Name(net.JoinSchemeNamePort("", "auth", "8080")).
-		Suffix("tenant/create").
+		Name(net.JoinSchemeNamePort("", "keel", "8080")).
+		Suffix("auth/tenant/create").
 		Body([]byte(fmt.Sprintf(`{"title":"%s"}`, tenantTitle)))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
@@ -55,8 +55,9 @@ func ListTenant(client k8s.Interface, namespace string) (*TenantListData, error)
 		Namespace(namespace).
 		Resource("services").
 		SubResource("proxy").
-		Name(net.JoinSchemeNamePort("", "auth", "8080")).
-		Suffix("tenant/list")
+		Name(net.JoinSchemeNamePort("", "keel", "8080")).
+		Suffix("auth/tenant/list").
+		Body([]byte(`{}`))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	resp := TenantListResponse{}

@@ -6,6 +6,6 @@
 package api
 
 var (
-	PlatformAPIVersion    = "1.0"
-	RuntimeAPIVersion = "1.0"
+	PlatformAPIVersion = "1.0"
+	RuntimeAPIVersion  = "1.0"
 )

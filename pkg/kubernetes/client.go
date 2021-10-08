@@ -69,7 +69,7 @@ func doRegisterPlugins(client k8s.Interface, namespace string, pluginId string) 
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	if err != nil {
-		return  err
+		return err
 	}
 	resp := PluginResponse{}
 	err = json.Unmarshal(raw, &resp)
@@ -91,7 +91,7 @@ func DeletePlugins(client k8s.Interface, namespace string, pluginId string) erro
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	if err != nil {
-		return  err
+		return err
 	}
 	resp := PluginResponse{}
 	err = json.Unmarshal(raw, &resp)

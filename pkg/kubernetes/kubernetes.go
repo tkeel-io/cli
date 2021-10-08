@@ -29,7 +29,7 @@ import (
 const (
 	tKeelReleaseName = "tkeel-platform"
 	tKeelHelmRepo    = "https://tkeel-io.github.io/helm-charts/"
-	latestVersion = "latest"
+	latestVersion    = "latest"
 )
 
 var (

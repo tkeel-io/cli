@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	kubernetesMode   bool
-	wait             bool
-	timeout          uint
-	runtimeVersion   string
-	initNamespace    string
-	enableMTLS       bool
-	enableHA         bool
-	values           []string
+	kubernetesMode bool
+	wait           bool
+	timeout        uint
+	runtimeVersion string
+	initNamespace  string
+	enableMTLS     bool
+	enableHA       bool
+	values         []string
 )
 
 var InitCmd = &cobra.Command{
