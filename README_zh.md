@@ -63,7 +63,7 @@ Output should look like so:
 ℹ️  install plugins...                                                        
 ℹ️  install plugins done.                                                                                                        
 ✅  Deploying the tKeel Platform to your cluster...
-↖  Registry the plugins ... 
+↖  Register the plugins ... 
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
@@ -110,10 +110,10 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 ```
 
 
-2. Registry plugin
+2. Register plugin
 
 ```bash
-tkeel plugin registry echo-demo
+tkeel plugin register echo-demo
 ```
 
 Check the status

@@ -64,7 +64,7 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	err = registryPlugins(config)
+	err = registerPlugins(config)
 	if err != nil {
 		return err
 	}
@@ -86,8 +86,8 @@ func deploy(config InitConfiguration) (err error) {
 	return err
 }
 
-func registryPlugins(config InitConfiguration) error {
-	msg := "Registry the plugins ..."
+func registerPlugins(config InitConfiguration) error {
+	msg := "Register the plugins ..."
 
 	stopSpinning := print.Spinner(os.Stdout, msg)
 	defer stopSpinning(print.Failure)
