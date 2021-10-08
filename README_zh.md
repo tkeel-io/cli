@@ -37,10 +37,10 @@ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install
 Each release of TKeel CLI includes various OSes and architectures. These binary versions can be manually downloaded and installed.
 
 1. Download the [TKeel CLI](https://github.com/tkeel-io/cli/releases)
-2. Unpack it (e.g. dapr_linux_amd64.tar.gz, dapr_windows_amd64.zip)
+2. Unpack it (e.g. tkeel_linux_amd64.tar.gz, tkeel_windows_amd64.zip)
 3. Move it to your desired location.
    * For Linux/MacOS - `/usr/local/bin`
-   * For Windows, create a directory and add this to your System PATH. For example create a directory called `c:\dapr` and add this directory to your path, by editing your system environment variable.
+   * For Windows, create a directory and add this to your System PATH. For example create a directory called `c:\tkeel` and add this directory to your path, by editing your system environment variable.
 
 ### Init TKeel Platform on Kubernetes
 
@@ -52,7 +52,7 @@ Use the init command to initialize TKeel.
 tkeel init
 ```
 
-> For Linux users, if you run your docker cmds with sudo, you need to use "**sudo dapr init**"
+> For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tkeel init**"
 
 Output should look like so:
 
@@ -76,14 +76,14 @@ Exiting.
 To remove TKeel from your Kubernetes cluster, use the `uninstall` command.
 
 ```
-$ dapr uninstall
+$ tkeel uninstall
 ```
 
 ### Deploy plugin
 
 ([Prerequisite](#Prerequisites): Dapr and Kubectl is available in the environment)
 
-You can deploy the plugin app with the Dapr sidecar
+You can deploy the plugin app with the Dapr
 
 [deploy-the-plugin-app](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
 
@@ -114,6 +114,12 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 
 ```bash
 tkeel plugin register echo-demo
+```
+
+Output should look like so:
+
+```
+✅  Success! Plugin<echo-demo> has been Registered to TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
 Check the status
