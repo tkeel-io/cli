@@ -18,7 +18,11 @@ tKeel tenant create -k tenantTitle
 tKeel tenant list -k
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
+		// Prompt help information If there is no parameter
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
 	},
 }
 
