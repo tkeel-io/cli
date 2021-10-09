@@ -49,6 +49,7 @@ type InitConfiguration struct {
 	Args       []string
 	Wait       bool
 	Timeout    uint
+	DebugMode  bool
 }
 
 // Init deploys the TKeel operator using the supplied runtime version.
@@ -143,12 +144,12 @@ func createNamespace(namespace string) error {
 	return nil
 }
 
-func helmConfig(namespace string) (*helm.Configuration, error) {
+func helmConfig(namespace string, log helm.DebugLog) (*helm.Configuration, error) {
 	ac := helm.Configuration{}
 	flags := &genericclioptions.ConfigFlags{
 		Namespace: &namespace,
 	}
-	err := ac.Init(flags, namespace, "secret", debugLogf)
+	err := ac.Init(flags, namespace, "secret", log)
 	return &ac, err
 }
 
@@ -219,7 +220,7 @@ func install(config InitConfiguration) error {
 		return err
 	}
 
-	helmConf, err := helmConfig(config.Namespace)
+	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
 	}
@@ -249,5 +250,14 @@ func install(config InitConfiguration) error {
 	return nil
 }
 
-func debugLogf(format string, v ...interface{}) {
+func getLog(DebugMode bool) helm.DebugLog {
+	if DebugMode {
+		return func(format string, v ...interface{}) {
+			print.InfoStatusEvent(os.Stdout, format, v...)
+		}
+	} else {
+		return func(format string, v ...interface{}) {
+
+		}
+	}
 }

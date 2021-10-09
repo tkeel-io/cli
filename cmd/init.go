@@ -16,6 +16,7 @@ import (
 
 var (
 	kubernetesMode bool
+	debugMode      bool
 	wait           bool
 	timeout        uint
 	runtimeVersion string
@@ -36,21 +37,9 @@ tkeel init
 
 # Initialize Keel in Kubernetes and wait for the installation to complete (default timeout is 300s/5m)
 tkeel init --wait --timeout 600
-
-# Initialize particular Keel runtime in self-hosted mode
-tkeel init --runtime-version 0.10.0
-
-# Initialize particular Keel runtime in Kubernetes
-tkeel init --runtime-version 0.10.0
-
-# Initialize Keel in slim self-hosted mode
-tkeel init -s
-
-# See more at: https://docs.tkeel.io/getting-started/
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
-
 		if kubernetesMode {
 			config := kubernetes.InitConfiguration{
 				Namespace:  initNamespace,
@@ -60,6 +49,7 @@ tkeel init -s
 				Args:       values,
 				Wait:       wait,
 				Timeout:    timeout,
+				DebugMode:  debugMode,
 			}
 			err := kubernetes.Init(config)
 			if err != nil {
@@ -67,6 +57,8 @@ tkeel init -s
 				os.Exit(1)
 			}
 			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! TKeel Platform has been installed to namespace %s. To verify, run `tkeel status -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace))
+		}else{
+			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error! TKeel Platform should be in Kubernetes mode"))
 		}
 	},
 }
@@ -78,6 +70,7 @@ func init() {
 	InitCmd.Flags().String("network", "", "The Docker network on which to deploy the TKeel Platform")
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	InitCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
+	InitCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	InitCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(InitCmd)
 }
