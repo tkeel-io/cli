@@ -43,7 +43,7 @@ tKeel tenant list -k
 }
 
 func init() {
-	TenantListCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", false, "List tenant's enabled plugins in a Kubernetes cluster")
+	TenantListCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	TenantListCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	TenantListCmd.MarkFlagRequired("kubernetes")
 	TenantCmd.AddCommand(TenantListCmd)
