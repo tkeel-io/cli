@@ -28,7 +28,7 @@ tkeel plugin register -k
 }
 
 func init() {
-	PluginCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", false, "List tenant's enabled plugins in a Kubernetes cluster")
+	PluginCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(PluginCmd)
 }
