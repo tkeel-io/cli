@@ -7,8 +7,8 @@ import (
 )
 
 // Uninstall removes TKeel from a Kubernetes cluster.
-func Uninstall(namespace string, timeout uint) error {
-	config, err := helmConfig(namespace)
+func Uninstall(namespace string, timeout uint, debugMode bool) error {
+	config, err := helmConfig(namespace, getLog(debugMode))
 	if err != nil {
 		return err
 	}
