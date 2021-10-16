@@ -9,27 +9,29 @@ import (
 	"context"
 	"fmt"
 	dapr "github.com/dapr/cli/pkg/kubernetes"
-	"github.com/pkg/errors"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"time"
-
 	"github.com/dapr/cli/pkg/print"
+	"github.com/pkg/errors"
 	helm "helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
+	"io/ioutil"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/helm/pkg/strvals"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
 const (
-	tKeelReleaseName = "tkeel-platform"
-	tKeelHelmRepo    = "https://tkeel-io.github.io/helm-charts/"
-	latestVersion    = "latest"
+	tKeelReleaseName             = "tkeel-platform"
+	tKeelHelmRepo                = "https://tkeel-io.github.io/helm-charts/"
+	tKeelPluginConfigHelmRepo    = "tkeel-plugin-components"
+	tKeelPluginComponentHelmRepo = "tkeel-middleware"
+	latestVersion                = "latest"
 )
 
 var (
@@ -37,6 +39,7 @@ var (
 		"plugins",
 		"keel",
 		"auth",
+		"core",
 	}
 	DaprNotInstall = errors.New("dapr is not installed in your cluster")
 )
@@ -169,7 +172,7 @@ func locateChartFile(dirPath string) (string, error) {
 	return filepath.Join(dirPath, files[0].Name()), nil
 }
 
-func tKeelChart(version string, config *helm.Configuration) (*chart.Chart, error) {
+func tKeelChart(version, chartName string, config *helm.Configuration) (*chart.Chart, error) {
 	pull := helm.NewPull()
 	pull.RepoURL = tKeelHelmRepo
 	pull.Settings = &cli.EnvSettings{}
@@ -186,7 +189,7 @@ func tKeelChart(version string, config *helm.Configuration) (*chart.Chart, error
 
 	pull.DestDir = dir
 
-	_, err = pull.Run(tKeelReleaseName)
+	_, err = pull.Run(chartName)
 	if err != nil {
 		return nil, err
 	}
@@ -225,9 +228,29 @@ func install(config InitConfiguration) error {
 		return err
 	}
 
-	tKeelChart, err := tKeelChart(config.Version, helmConf)
+	platformChart, err := tKeelChart(config.Version, tKeelPluginComponentHelmRepo, helmConf)
 	if err != nil {
 		return err
+	}
+
+	for _, corePluginName := range controlPlanePlugins {
+		tKeelPluginChart, err := tKeelChart(config.Version, corePluginName, helmConf)
+		if err != nil {
+			return err
+		}
+
+		configChart, err := tKeelChart(config.Version, tKeelPluginConfigHelmRepo, helmConf)
+		if err != nil {
+			return err
+		}
+		configChart.Values["pluginID"] = corePluginName
+		tKeelPluginChart.AddDependency(configChart)
+
+		if tKeelPluginChart.Values["daprConfig"] != corePluginName {
+			print.InfoStatusEvent(os.Stdout, "Update Plugin<%s>'s Values[daprConfig] = %s.", corePluginName, corePluginName)
+			tKeelPluginChart.Values["daprConfig"] = corePluginName
+		}
+		platformChart.AddDependency(tKeelPluginChart)
 	}
 
 	installClient := helm.NewInstall(helmConf)
@@ -241,12 +264,12 @@ func install(config InitConfiguration) error {
 		return err
 	}
 
-	print.InfoStatusEvent(os.Stdout, "install plugins...")
-	if _, err = installClient.Run(tKeelChart, values); err != nil {
+	if _, err = installClient.Run(platformChart, values); err != nil {
 		return err
 	}
 
-	print.InfoStatusEvent(os.Stdout, "install plugins done.")
+	print.InfoStatusEvent(os.Stdout, "install plugin<%s> done.", strings.Join(controlPlanePlugins, ", "))
+
 	return nil
 }
 
