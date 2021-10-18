@@ -18,42 +18,42 @@ var completionExample = `
 	## or, if running Bash 4.1+
 	brew install bash-completion@2
 	## Add the completion to your completion directory
-	keel completion bash > $(brew --prefix)/etc/bash_completion.d/keel
+	tkeel completion bash > $(brew --prefix)/etc/bash_completion.d/tkeel
 	source ~/.bash_profile
 
 	# Installing bash completion on Linux
 	## If bash-completion is not installed on Linux, please install the 'bash-completion' package
 	## via your distribution's package manager.
-	## Load the keel completion code for bash into the current shell
-	source <(keel completion bash)
+	## Load the tkeel completion code for bash into the current shell
+	source <(tkeel completion bash)
 	## Write bash completion code to a file and source if from .bash_profile
-	keel completion bash > ~/.keel/completion.bash.inc
+	tkeel completion bash > ~/.tkeel/completion.bash.inc
 	printf "
-	## keel shell completion
-	source '$HOME/.keel/completion.bash.inc'
+	## tkeel shell completion
+	source '$HOME/.tkeel/completion.bash.inc'
 	" >> $HOME/.bash_profile
 	source $HOME/.bash_profile
 
 	# Installing zsh completion on macOS using homebrew
 	## If zsh-completion is not installed on macOS, please install the 'zsh-completion' package
 	brew install zsh-completions
-	## Set the keel completion code for zsh[1] to autoload on startup
-	keel completion zsh > "${fpath[1]}/_keel"
+	## Set the tkeel completion code for zsh[1] to autoload on startup
+	tkeel completion zsh > "${fpath[1]}/_tkeel"
 	source ~/.zshrc
 
 	# Installing zsh completion on Linux
 	## If zsh-completion is not installed on Linux, please install the 'zsh-completion' package
 	## via your distribution's package manager.
-	## Load the keel completion code for zsh into the current shell
-	source <(keel completion zsh)
-	# Set the keel completion code for zsh[1] to autoload on startup
-  	keel completion zsh > "${fpath[1]}/_keel"
+	## Load the tkeel completion code for zsh into the current shell
+	source <(tkeel completion zsh)
+	# Set the tkeel completion code for zsh[1] to autoload on startup
+	tkeel completion zsh > "${fpath[1]}/_tkeel"
 
 	# Installing powershell completion on Windows
 	## Create $PROFILE if it not exists
 	if (!(Test-Path -Path $PROFILE )){ New-Item -Type File -Path $PROFILE -Force }
 	## Add the completion to your profile
-	keel completion powershell >> $PROFILE
+	tkeel completion powershell >> $PROFILE
 `
 
 func newCompletionCmd() *cobra.Command {
