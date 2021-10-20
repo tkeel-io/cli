@@ -94,6 +94,21 @@ jobs:
       ARTIFACT_DIR: ./release
     runs-on: ubuntu-latest
     steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: Auto build from ${{ github.sha }} (master)
+          draft: false
+          prerelease: true
+      - name: Print Release
+        shell: bash
+        run: |
+          echo "${{ steps.create_release.outputs.upload_url }}"
       - name: download artifacts
         uses: actions/download-artifact@master
         with:
@@ -110,20 +125,8 @@ jobs:
       - name: lists artifacts
         run: ls -l ${{ env.ARTIFACT_DIR }}
       - name: publish binaries to github
-        if: startswith(github.ref, 'refs/tags/v')
-        run: |
-          echo "installing github-release-cli..."
-          sudo npm install --silent --no-progress -g github-release-cli@1.3.1
-          # Get the list of files
-          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
-          # Parse repository to get owner and repo names
-          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          export GITHUB_TOKEN=${{ secrets.TKEEL_BOT_TOKEN }}
-          echo "Uploading TKeel CLI Binaries to GitHub Release"
-          github-release upload \
-            --owner $OWNER_NAME --repo $REPO_NAME \
-            --tag "v${REL_VERSION}" \
-            --name "TKeel CLI v${REL_VERSION}" \
-            --prerelease true \
-            ${RELEASE_ARTIFACT[*]}
+        uses: alexellis/upload-assets@0.2.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_paths: '["${{ env.ARTIFACT_DIR }}/*"]'
