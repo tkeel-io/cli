@@ -71,7 +71,7 @@ Output should look like so:
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! TKeel Platform has been installed to namespace keel-system. To verify, run `tkeel status -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+✅  Success! TKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 Exiting.
 ```
 
