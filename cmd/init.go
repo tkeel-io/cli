@@ -56,7 +56,7 @@ tkeel init --wait --timeout 600
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! TKeel Platform has been installed to namespace %s. To verify, run `tkeel status -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace))
+			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! TKeel Platform has been installed to namespace %s. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace))
 		}else{
 			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error! TKeel Platform should be in Kubernetes mode"))
 		}
