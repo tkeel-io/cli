@@ -1,58 +1,70 @@
-# Keel CLI
+<h1 align="center"> tKeel CLI </h1>
+<div align="center">
 
-TKeel CLI 是您用于各种 TKeel 相关任务的主要工具。
-您可以使用它来安装TKeel平台、管理插件以及用户。 TKeel CLI 暂时工作在 Kubernetes 模式.
+[![Go Report Card](https://goreportcard.com/badge/github.com/tkeel-io/cli)](https://goreportcard.com/report/github.com/tkeel-io/cli)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tkeel-io/cli)
+![GitHub](https://img.shields.io/github/license/tkeel-io/cli?style=plastic)
+[![GoDoc](https://godoc.org/github.com/tkeel-io/cli?status.png)](http://godoc.org/github.com/tkeel-io/cli)
+</div>
 
-### Prerequisites
+🕹️ tKeel CLI 是您用于各种 tKeel 相关任务操作的简易使用工具。
 
-TKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
+您可以使用它来 **安装 TKeel 平台**、**管理插件** 以及 **用户模块**。
 
-TKeel 现阶段依赖于 Dapr(Kubernetes mode).
+### 安装须知
 
-* Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-* Install [Dapr on Kubernetes](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-deploy/)
+tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 
-### Install TKeel CLI
+> ⚠️ tKeel 现阶段依赖于 Dapr（Kubernetes mode）。
 
-#### Using script to install the latest release
+- 安装 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- 安装 [Dapr on Kubernetes](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-deploy/)
 
-**Linux**
+### 安装
 
-Install the latest linux TKeel CLI to `/usr/local/bin`
+🔧 我们提供了多种安装方式，您根据您的偏好选择您觉得最合适的安装方式进行安装。
 
-```bash
-wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
-```
+#### 使用脚本安装最新版本
 
-**MacOS**
+通过我们编写好的脚本自动为您安装整个 `tKeel` 平台所需组件。
 
-Install the latest darwin TKeel CLI to `/usr/local/bin`
+##### Linux
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
-```
-
-#### From the Binary Releases
-
-Each release of TKeel CLI includes various OSes and architectures. These binary versions can be manually downloaded and installed.
-
-1. Download the [TKeel CLI](https://github.com/tkeel-io/cli/releases)
-2. Unpack it (e.g. tkeel_linux_amd64.tar.gz, tkeel_windows_amd64.zip)
-3. Move it to your desired location.
-   * For Linux/MacOS - `/usr/local/bin`
-   * For Windows, create a directory and add this to your System PATH. For example create a directory called `c:\tkeel` and add this directory to your path, by editing your system environment variable.
-
-### Init TKeel Platform on Kubernetes
-
-([Prerequisite](#Prerequisites): Dapr and Kubectl is available in the environment)
-
-Use the init command to initialize TKeel. 
+通过 tKeel CLI 将最新版 tKeel 平台安装至 Linux 系统的 `/usr/local/bin`
 
 ```bash
-tkeel init
+$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
-> For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tkeel init**"
+##### MacOS
+
+通过 tKeel CLI 将最新版 tKeel 平台安装至 MacOS(darwin) 系统的 `/usr/local/bin`
+
+```bash
+$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+```
+
+#### 通过发行的二进制程序
+
+每个发行版本的 tKeel CLI 包括各种操作系统和架构。这些二进制版本可以手动下载和安装。
+
+1. 下载 [tKeel CLI](https://github.com/tkeel-io/cli/releases)
+2. 将下载的文件解压 (e.g. tkeel_linux_amd64.tar.gz, tkeel_windows_amd64.zip)
+3. 把它移到你想要的位置
+   * 如果你是 Linux/MacOS 用户 - `/usr/local/bin`
+   * 如果你是 Windows 用户 - 创建一个目录并将其添加到你的 `系统 PATH `中。例如，通过编辑系统环境变量，创建一个名为`c:\tkeel`的目录，并将这个目录添加到你的 `系统 PATH` 中。
+
+### 在 Kubernetes 初始 tKeel 平台
+
+> 请注意 [安装须知](#安装须知) 确保你的系统中有所有环境。
+ 
+使用命令行初始 `tKeel`
+
+```bash
+$ tkeel init
+```
+
+> 注意：Linux 用户请注意，如果你的 docker 需要使用 sudo 权限才能使用，那么请你使用 `sudo tkeel init`
 
 Output should look like so:
 
@@ -71,37 +83,31 @@ Output should look like so:
 Exiting.
 ```
 
-### Uninstall TKeel on Kubernetes
+### 卸载 tKeel 平台
 
-To remove TKeel from your Kubernetes cluster, use the `uninstall` command.
+要从你的 Kubernetes 集群中移除 `tKeel`，请使用 `uninstall`命令。
 
-```
+```bash
 $ tkeel uninstall
 ```
 
-### Deploy plugin
+### 部署插件
 
-([Prerequisite](#Prerequisites): Dapr and Kubectl is available in the environment)
-
-You can deploy the plugin app with the Dapr
-
-[deploy-the-plugin-app](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
+你能通过 Dapr 部署 tKeel 的插件， 详细请见 [deploy-the-plugin-app 文档](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
 
 
-### Manage plugins
+### 管理插件
 
-Use the plugin command to manage plugins.
+使用插件命令去管理平台上的插件。
 
-1. List plugin
+#### 展示所有插件
 
 ```bash
-tkeel plugin list
+$ tkeel plugin list
 ```
-
-Output should look like so:
-
-```
-plugin list              
+您会得到像是这样的一串输出:
+```bash
+$ plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -110,28 +116,17 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 ```
 
 
-2. Register plugin
+#### 注册插件
 
 ```bash
-tkeel plugin register echo-demo
-```
-
-Output should look like so:
-
-```
+$ tkeel plugin register echo-demo
 ✅  Success! Plugin<echo-demo> has been Registered to TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
-Check the status
+使用` plugin list ` 可以查看插件状态
 
 ```bash
-tkeel plugin list
-```
-
-Output should look like so:
-
-```
-plugin list              
+$ tkeel plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -140,14 +135,9 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 ```
 
 
-3. Delete plugin
+#### 删除插件
 
 ```bash
-tkeel plugin delete echo-demo
-```
-
-Output should look like so:
-
-```
+$ tkeel plugin delete echo-demo
 ✅  Success! Plugin<echo-demo> has been deleted from TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
