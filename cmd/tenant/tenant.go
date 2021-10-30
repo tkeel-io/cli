@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-package cmd
+package tenant
 
 import (
 	"github.com/spf13/cobra"
