@@ -1,39 +1,49 @@
-# Keel CLI
+<h1 align="center"> tKeel CLI </h1>
+<div align="center">
 
-[中文](README_zh.md)
+[![Go Report Card](https://goreportcard.com/badge/github.com/tkeel-io/cli)](https://goreportcard.com/report/github.com/tkeel-io/cli)
+![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tkeel-io/cli)
+![GitHub](https://img.shields.io/github/license/tkeel-io/cli?style=plastic)
+[![GoDoc](https://godoc.org/github.com/tkeel-io/cli?status.png)](http://godoc.org/github.com/tkeel-io/cli)
+</div>
 
-TKeel CLI is your main tool for various tasks related to TKeel.
+🕹️ tKeel CLI is your main tool for various tasks related to tKeel Platform.
 
-You can use it to install the TKeel platform, manage plugins and users. 
-TKeel CLI temporarily works in Kubernetes mode.
+You can use it to **install** the tKeel platform, **manage plugins and users**.
+
+👉 [中文文档](README_zh.md)
 
 ### Prerequisites
 
-TKeel CLI can help you install the tKeel platform and help you manage the platform.
+tKeel CLI can help you install the tKeel platform and help you manage the platform.
 
-TKeel currently relies on Dapr (Kubernetes mode).
+> ⚠️ tKeel currently relies on Dapr (Kubernetes mode).
 
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install [Dapr on Kubernetes](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-deploy/)
 
-### Install TKeel CLI
+### Install
+
+🔧 We offer a variety of installation options, you choose the one you feel most comfortable installing according to your preference.
 
 #### Using script to install the latest release
 
-**Linux**
+The components required for the entire `tKeel` platform are automatically installed for you by means of scripts we have written.
 
-Install the latest linux TKeel CLI to `/usr/local/bin`
+##### Linux
+
+Install the latest linux tKeel CLI to `/usr/local/bin`
 
 ```bash
-wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
+$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
-**MacOS**
+##### MacOS
 
-Install the latest darwin TKeel CLI to `/usr/local/bin`
+Install the latest darwin tKeel CLI to `/usr/local/bin`
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
 ```
 
 #### From the Binary Releases
@@ -48,12 +58,10 @@ Each release of TKeel CLI includes various OSes and architectures. These binary 
 
 ### Init TKeel Platform on Kubernetes
 
-([Prerequisite](#Prerequisites): Dapr and Kubectl is available in the environment)
-
 Use the init command to initialize TKeel. 
 
 ```bash
-tkeel init
+$ tkeel init
 ```
 
 > For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tkeel init**"
@@ -84,11 +92,7 @@ $ tkeel uninstall
 
 ### Deploy plugin
 
-([Prerequisite](#Prerequisites): Dapr and Kubectl is available in the environment)
-
-You can deploy the plugin app with the Dapr
-
-[deploy-the-plugin-app](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
+You can deploy the plugin app with the Dapr. There is [deploy-the-plugin-app Doc](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
 
 
 ### Manage plugins
@@ -98,13 +102,7 @@ Use the plugin command to manage plugins.
 1. List plugin
 
 ```bash
-tkeel plugin list
-```
-
-Output should look like so:
-
-```
-plugin list              
+$ tkeel plugin list      
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -116,25 +114,14 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 2. Register plugin
 
 ```bash
-tkeel plugin register echo-demo
-```
-
-Output should look like so:
-
-```
+$ tkeel plugin register echo-demo
 ✅  Success! Plugin<echo-demo> has been Registered to TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
 Check the status
 
 ```bash
-tkeel plugin list
-```
-
-Output should look like so:
-
-```
-plugin list              
+$ tkeel plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -146,11 +133,6 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 3. Delete plugin
 
 ```bash
-tkeel plugin delete echo-demo
-```
-
-Output should look like so:
-
-```
+$ tkeel plugin delete echo-demo
 ✅  Success! Plugin<echo-demo> has been deleted from TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
