@@ -3,7 +3,7 @@
 // Licensed under the MIT License.
 // ------------------------------------------------------------
 
-package cmd
+package tenant
 
 import (
 	"github.com/gocarina/gocsv"
@@ -15,28 +15,23 @@ import (
 	"github.com/tkeel-io/cli/utils"
 )
 
-var TenantCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "create tenant . Supported platforms: Kubernetes",
+var TenantListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "list tenant . Supported platforms: Kubernetes",
 	Example: `
 # Manager plugins. in Kubernetes mode
 tKeel tenant create -k tenantTitle
 tKeel tenant list -k
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle")
-			return
-		}
 		if kubernetesMode {
-			title := args[0]
-			data, err := kubernetes.TenantCreate(title)
+
+			data, err := kubernetes.TenantList()
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			dataSlice := []kubernetes.TenantCreateResp{*data}
-			table, err := gocsv.MarshalString(dataSlice)
+			table, err := gocsv.MarshalString(data.TenantList)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
@@ -48,8 +43,8 @@ tKeel tenant list -k
 }
 
 func init() {
-	TenantCreateCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	TenantCreateCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	TenantCreateCmd.MarkFlagRequired("kubernetes")
-	TenantCmd.AddCommand(TenantCreateCmd)
+	TenantListCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	TenantListCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	TenantListCmd.MarkFlagRequired("kubernetes")
+	TenantCmd.AddCommand(TenantListCmd)
 }
