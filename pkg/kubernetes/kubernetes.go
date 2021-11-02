@@ -32,6 +32,7 @@ var (
 		"plugins",
 		"keel",
 		"auth",
+		"iothub",
 		"core",
 	}
 	DaprNotInstall = errors.New("dapr is not installed in your cluster")
