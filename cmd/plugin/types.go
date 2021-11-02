@@ -7,4 +7,10 @@ package plugin
 
 var (
 	kubernetesMode bool
+	debugMode      bool
+	wait           bool
+	timeout        uint
+	runtimeVersion string
+	initNamespace  string
+	values         []string
 )

@@ -31,5 +31,4 @@ func init() {
 	TenantCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	//ListCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "Tenant ID")
 	//ListCmd.MarkFlagRequired("tenant")
-	RootCmd.AddCommand(TenantCmd)
 }
