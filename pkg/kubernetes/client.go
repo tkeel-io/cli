@@ -44,6 +44,10 @@ func ListPlugins(client k8s.Interface, namespace string) ([]Plugin, error) {
 func RegisterPlugins(client k8s.Interface, namespace, pluginId string) error {
 	_ = doRegisterPlugins(client, namespace, pluginId)
 	plugins, err := ListPlugins(client, namespace)
+	if err != nil {
+		return err
+	}
+
 	notFound := true
 	for _, plugin := range plugins {
 		if plugin.PluginId == pluginId && plugin.Status == "ACTIVE" {
@@ -51,11 +55,11 @@ func RegisterPlugins(client k8s.Interface, namespace, pluginId string) error {
 			break
 		}
 	}
-	if !notFound {
-		return nil
-	} else {
-		return err
+	if notFound {
+		return errors.Errorf("plugin<%s> not found.", pluginId)
 	}
+	
+	return nil
 }
 
 func doRegisterPlugins(client k8s.Interface, namespace string, pluginId string) error {
