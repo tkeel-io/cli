@@ -7,6 +7,8 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/tkeel-io/cli/cmd/plugin"
+	"github.com/tkeel-io/cli/cmd/tenant"
 	"os"
 	"strings"
 
@@ -64,4 +66,7 @@ func initConfig() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
+
+	RootCmd.AddCommand(plugin.PluginCmd)
+	RootCmd.AddCommand(tenant.TenantCmd)
 }
