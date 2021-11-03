@@ -3,7 +3,7 @@
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
-package cmd
+package plugin
 
 import (
 	"github.com/spf13/cobra"
@@ -30,5 +30,4 @@ tkeel plugin register -k
 func init() {
 	PluginCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	RootCmd.AddCommand(PluginCmd)
 }

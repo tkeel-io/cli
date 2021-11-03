@@ -12,18 +12,11 @@ import (
 	"github.com/dapr/cli/pkg/print"
 	"github.com/pkg/errors"
 	helm "helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"helm.sh/helm/v3/pkg/cli"
 	"io/ioutil"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"k8s.io/helm/pkg/strvals"
 	"os"
 	"path/filepath"
-	"strings"
-	"time"
 )
 
 const (
@@ -39,6 +32,7 @@ var (
 		"plugins",
 		"keel",
 		"auth",
+		"iothub",
 		"core",
 	}
 	DaprNotInstall = errors.New("dapr is not installed in your cluster")
@@ -63,7 +57,7 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	err = deploy(config)
+	err = deploy(config, controlPlanePlugins)
 	if err != nil {
 		return err
 	}
@@ -76,13 +70,13 @@ func Init(config InitConfiguration) (err error) {
 	return nil
 }
 
-func deploy(config InitConfiguration) (err error) {
+func deploy(config InitConfiguration, pluginNames []string) (err error) {
 	msg := "Deploying the tKeel Platform to your cluster..."
 
 	stopSpinning := print.Spinner(os.Stdout, msg)
 	defer stopSpinning(print.Failure)
 
-	err = install(config)
+	err = install(config, pluginNames)
 	if err != nil {
 		return err
 	}
@@ -147,15 +141,6 @@ func createNamespace(namespace string) error {
 	return nil
 }
 
-func helmConfig(namespace string, log helm.DebugLog) (*helm.Configuration, error) {
-	ac := helm.Configuration{}
-	flags := &genericclioptions.ConfigFlags{
-		Namespace: &namespace,
-	}
-	err := ac.Init(flags, namespace, "secret", log)
-	return &ac, err
-}
-
 func createTempDir() (string, error) {
 	dir, err := ioutil.TempDir("", "tkeel")
 	if err != nil {
@@ -172,106 +157,6 @@ func locateChartFile(dirPath string) (string, error) {
 	return filepath.Join(dirPath, files[0].Name()), nil
 }
 
-func tKeelChart(version, chartName string, config *helm.Configuration) (*chart.Chart, error) {
-	pull := helm.NewPull()
-	pull.RepoURL = tKeelHelmRepo
-	pull.Settings = &cli.EnvSettings{}
-
-	if version != latestVersion {
-		pull.Version = chartVersion(version)
-	}
-
-	dir, err := createTempDir()
-	if err != nil {
-		return nil, err
-	}
-	defer os.RemoveAll(dir)
-
-	pull.DestDir = dir
-
-	_, err = pull.Run(chartName)
-	if err != nil {
-		return nil, err
-	}
-
-	chartPath, err := locateChartFile(dir)
-	if err != nil {
-		return nil, err
-	}
-	return loader.Load(chartPath)
-}
-
-func chartValues(config InitConfiguration) (map[string]interface{}, error) {
-	chartVals := map[string]interface{}{}
-	globalVals := []string{
-		fmt.Sprintf("global.ha.enabled=%t", config.EnableHA),
-		fmt.Sprintf("global.mtls.enabled=%t", config.EnableMTLS),
-	}
-	globalVals = append(globalVals, config.Args...)
-
-	for _, v := range globalVals {
-		if err := strvals.ParseInto(v, chartVals); err != nil {
-			return nil, err
-		}
-	}
-	return chartVals, nil
-}
-
-func install(config InitConfiguration) error {
-	err := createNamespace(config.Namespace)
-	if err != nil {
-		return err
-	}
-
-	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
-	if err != nil {
-		return err
-	}
-
-	platformChart, err := tKeelChart(config.Version, tKeelPluginComponentHelmRepo, helmConf)
-	if err != nil {
-		return err
-	}
-
-	for _, corePluginName := range controlPlanePlugins {
-		tKeelPluginChart, err := tKeelChart(config.Version, corePluginName, helmConf)
-		if err != nil {
-			return err
-		}
-
-		configChart, err := tKeelChart(config.Version, tKeelPluginConfigHelmRepo, helmConf)
-		if err != nil {
-			return err
-		}
-		configChart.Values["pluginID"] = corePluginName
-		tKeelPluginChart.AddDependency(configChart)
-
-		if tKeelPluginChart.Values["daprConfig"] != corePluginName {
-			print.InfoStatusEvent(os.Stdout, "Update Plugin<%s>'s Values[daprConfig] = %s.", corePluginName, corePluginName)
-			tKeelPluginChart.Values["daprConfig"] = corePluginName
-		}
-		platformChart.AddDependency(tKeelPluginChart)
-	}
-
-	installClient := helm.NewInstall(helmConf)
-	installClient.ReleaseName = tKeelReleaseName
-	installClient.Namespace = config.Namespace
-	installClient.Wait = config.Wait
-	installClient.Timeout = time.Duration(config.Timeout) * time.Second
-
-	values, err := chartValues(config)
-	if err != nil {
-		return err
-	}
-
-	if _, err = installClient.Run(platformChart, values); err != nil {
-		return err
-	}
-
-	print.InfoStatusEvent(os.Stdout, "install plugin<%s> done.", strings.Join(controlPlanePlugins, ", "))
-
-	return nil
-}
 
 func getLog(DebugMode bool) helm.DebugLog {
 	if DebugMode {

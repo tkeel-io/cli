@@ -3,7 +3,7 @@
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
-package cmd
+package plugin
 
 import (
 	"os"

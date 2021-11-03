@@ -3,7 +3,7 @@
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
-package cmd
+package plugin
 
 import (
 	"fmt"
@@ -14,8 +14,8 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var PluginDeleteCmd = &cobra.Command{
-	Use:   "delete",
+var PluginRegisterCmd = &cobra.Command{
+	Use:   "register",
 	Short: "Register plugins. Supported platforms: Kubernetes",
 	Example: `
 # Manager plugins. in Kubernetes mode
@@ -25,23 +25,23 @@ tkeel plugin register -k pluginID
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginId not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin delete -k pluginID")
+			print.PendingStatusEvent(os.Stdout, "PluginId not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register -k pluginID")
 			return
 		}
 		if kubernetesMode {
 			pluginID := args[0]
-			err := kubernetes.Delete(pluginID)
+			err := kubernetes.Register(pluginID)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been deleted from TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
+			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
 		}
 	},
 }
 
 func init() {
-	PluginDeleteCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	PluginDeleteCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	PluginCmd.AddCommand(PluginDeleteCmd)
+	PluginRegisterCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	PluginRegisterCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	PluginCmd.AddCommand(PluginRegisterCmd)
 }
