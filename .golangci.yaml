@@ -67,7 +67,6 @@ linters-settings:
   funlen:
     lines: 60
     statements: 40
-
   govet:
     # report about shadowed variables
     check-shadowing: true
@@ -217,6 +216,15 @@ linters-settings:
     allow-case-traling-whitespace: true
     # Allow declarations (var) to be cuddled.
     allow-cuddle-declarations: false
+  gomoddirectives:
+    # List of allowed `replace` directives. Default is empty.
+    replace-allow-list:
+      - github.com/Azure/go-autorest
+      - github.com/docker/distribution
+      - github.com/docker/docker
+      - github.com/russross/blackfriday
+      - k8s.io/client
+
   tagliatelle:
     # check the struck tag name case
     case:
@@ -239,6 +247,7 @@ linters:
     # TODO Enforce the below linters later
     - dupl
     - errcheck
+    - forbidigo
     - funlen
     - gochecknoglobals
     - gochecknoinits
