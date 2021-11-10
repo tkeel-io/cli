@@ -1,5 +1,10 @@
 ---
-name: Question about: Ask a question about tKeel CLI title: ''
+name: Question
+
+about: Ask a question about tKeel CLI
+
+title: ''
+
 labels: kind/question assignees: ''
 
 ---

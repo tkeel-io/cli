@@ -1,5 +1,10 @@
 ---
-name: Feature Request about: Create a Feature Request for tKeel CLI title: ''
+name: Feature Request
+
+about: Create a Feature Request for tKeel CLI
+
+title: ''
+
 labels: kind/enhancement assignees: ''
 
 ---

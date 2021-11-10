@@ -1,5 +1,10 @@
 ---
-name: Proposal about: Create a proposal for tKeel CLI title: ''
+name: Proposal
+
+about: Create a proposal for tKeel CLI
+
+title: ''
+
 labels: kind/proposal assignees: ''
 
 ---
