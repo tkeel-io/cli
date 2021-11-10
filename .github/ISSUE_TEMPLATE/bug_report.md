@@ -1,9 +1,9 @@
 ---
 name: Bug reports
 
-about: Report a bug in tKeel
+about: Report a bug in tKeel CLI
 
-CLI title: ''
+title: ''
 
 labels: kind/bug assignees: ''
 
