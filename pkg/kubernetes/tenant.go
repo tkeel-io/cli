@@ -32,9 +32,12 @@ func CreateTenant(client k8s.Interface, namespace, tenantTitle string) (*TenantC
 		Body([]byte(fmt.Sprintf(`{"title":"%s"}`, tenantTitle)))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
+	if err != nil {
+		return nil, fmt.Errorf("do k8s query err: %w", err)
+	}
 	resp := TenantCreateResponse{}
 	err = json.Unmarshal(raw, &resp)
-	return &resp.Data, err
+	return &resp.Data, fmt.Errorf("unmarshall to struct: %w", err)
 }
 
 func TenantList() (*TenantListData, error) {
@@ -60,8 +63,14 @@ func ListTenant(client k8s.Interface, namespace string) (*TenantListData, error)
 		Body([]byte(`{}`))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
+	if err != nil {
+		return nil, fmt.Errorf("k8s query err:%w", err)
+	}
 	resp := TenantListResponse{}
 	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		err = fmt.Errorf("unmarshall json to struct err :%w", err)
+	}
 	return &resp.Data, err
 }
 

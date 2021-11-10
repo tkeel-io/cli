@@ -1,11 +1,12 @@
-package printutil
+package fmtutil
 
 import (
 	"bufio"
-	"github.com/olekukonko/tablewriter"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 // PrintTable to print in the table format.

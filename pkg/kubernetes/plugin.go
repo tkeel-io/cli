@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
@@ -15,7 +15,7 @@ type ListOutput struct {
 }
 
 type Plugin struct {
-	PluginId     string `json:"plugin_id"`
+	PluginID     string `json:"plugin_id"`
 	Version      string `json:"version"`
 	Secret       string `json:"secret"`
 	RegisterTime int64  `json:"register_time"`
@@ -39,10 +39,9 @@ func List() ([]Plugin, error) {
 	}
 
 	return ListPlugins(client, namespace)
-
 }
 
-func Register(pluginId string) error {
+func Register(pluginID string) error {
 	clientset, err := Client()
 	if err != nil {
 		return err
@@ -53,10 +52,10 @@ func Register(pluginId string) error {
 		return err
 	}
 
-	return RegisterPlugins(clientset, namespace, pluginId)
+	return RegisterPlugins(clientset, namespace, pluginID)
 }
 
-func Delete(pluginId string) error {
+func Delete(pluginID string) error {
 	clientset, err := Client()
 	if err != nil {
 		return err
@@ -67,5 +66,5 @@ func Delete(pluginId string) error {
 		return err
 	}
 
-	return DeletePlugins(clientset, namespace, pluginId)
+	return DeletePlugins(clientset, namespace, pluginID)
 }

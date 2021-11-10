@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
@@ -8,18 +8,18 @@ package plugin
 import (
 	"os"
 
-	"github.com/dapr/cli/utils"
 	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/fmtutil"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var PluginStatusCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Show the health status of TKeel plugins. Supported platforms: Kubernetes",
+	Short: "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
 	Example: `
-# Get status of TKeel plugins from Kubernetes
+# Get status of tKeel plugins from Kubernetes
 tkeel plugin list -k
 tkeel plugin delete -k pluginID
 tkeel plugin register -k pluginID
@@ -36,16 +36,16 @@ tkeel plugin register -k pluginID
 			os.Exit(1)
 		}
 		if len(status) == 0 {
-			print.FailureStatusEvent(os.Stdout, "No status returned. Is TKeel initialized in your cluster?")
+			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel initialized in your cluster?")
 			os.Exit(1)
 		}
-		table, err := gocsv.MarshalString(status)
+		csv, err := gocsv.MarshalString(status)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
 
-		utils.PrintTable(table)
+		fmtutil.PrintTable(csv)
 	},
 }
 

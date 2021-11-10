@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 

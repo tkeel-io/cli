@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
@@ -7,13 +7,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/tkeel-io/cli/cmd/plugin"
-	"github.com/tkeel-io/cli/cmd/tenant"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/tkeel-io/cli/cmd/plugin"
+	"github.com/tkeel-io/cli/cmd/tenant"
 	"github.com/tkeel-io/cli/pkg/api"
 	"github.com/tkeel-io/cli/pkg/print"
 )

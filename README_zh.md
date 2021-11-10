@@ -9,7 +9,7 @@
 
 🕹️ tKeel CLI 是您用于各种 tKeel 相关任务操作的简易使用工具。
 
-您可以使用它来 **安装 TKeel 平台**、**管理插件** 以及 **用户模块**。
+您可以使用它来 **安装 tKeel 平台**、**管理插件** 以及 **用户模块**。
 
 ### 安装须知
 
@@ -51,13 +51,13 @@ $ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/insta
 1. 下载 [tKeel CLI](https://github.com/tkeel-io/cli/releases)
 2. 将下载的文件解压 (e.g. tkeel_linux_amd64.tar.gz, tkeel_windows_amd64.zip)
 3. 把它移到你想要的位置
-   * 如果你是 Linux/MacOS 用户 - `/usr/local/bin`
-   * 如果你是 Windows 用户 - 创建一个目录并将其添加到你的 `系统 PATH `中。例如，通过编辑系统环境变量，创建一个名为`c:\tkeel`的目录，并将这个目录添加到你的 `系统 PATH` 中。
+    * 如果你是 Linux/MacOS 用户 - `/usr/local/bin`
+    * 如果你是 Windows 用户 - 创建一个目录并将其添加到你的 `系统 PATH `中。例如，通过编辑系统环境变量，创建一个名为`c:\tkeel`的目录，并将这个目录添加到你的 `系统 PATH` 中。
 
 ### 在 Kubernetes 初始 tKeel 平台
 
 > 请注意 [安装须知](#安装须知) 确保你的系统中有所有环境。
- 
+
 使用命令行初始 `tKeel`
 
 ```bash
@@ -79,7 +79,7 @@ Output should look like so:
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! TKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### 卸载 tKeel 平台
@@ -92,8 +92,8 @@ $ tkeel uninstall
 
 ### 部署插件
 
-你能通过 Dapr 部署 tKeel 的插件， 详细请见 [deploy-the-plugin-app 文档](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
-
+你能通过 Dapr 部署 tKeel 的插件，
+详细请见 [deploy-the-plugin-app 文档](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
 
 ### 管理插件
 
@@ -104,7 +104,9 @@ $ tkeel uninstall
 ```bash
 $ tkeel plugin list
 ```
+
 您会得到像是这样的一串输出:
+
 ```bash
 $ plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
@@ -114,12 +116,11 @@ keel       keel-system  True     Running   ACTIVE        1         0.0.1    37m 
 echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m   2021-10-05 11:25.19  
 ```
 
-
 #### 注册插件
 
 ```bash
 $ tkeel plugin register echo-demo
-✅  Success! Plugin<echo-demo> has been Registered to TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
 使用` plugin list ` 可以查看插件状态
@@ -133,10 +134,9 @@ keel       keel-system  True     Running   ACTIVE        1         0.0.1    37m 
 echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m   2021-10-05 11:25.19  
 ```
 
-
 #### 删除插件
 
 ```bash
 $ tkeel plugin delete echo-demo
-✅  Success! Plugin<echo-demo> has been deleted from TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+✅  Success! Plugin<echo-demo> has been deleted from tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
