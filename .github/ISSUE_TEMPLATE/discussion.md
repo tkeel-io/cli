@@ -1,8 +1,10 @@
 ---
-name: Feature Request
-about: Start a discussion for TKeel  CLI
+name: Feature Requests
+
+about: Start a discussion for tKeel CLI
+
 title: ''
-labels: kind/discussion
-assignees: ''
+
+labels: kind/discussion assignees: ''
 
 ---

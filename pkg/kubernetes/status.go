@@ -1,16 +1,16 @@
 package kubernetes
 
 import (
+	"errors"
 	"fmt"
-	"github.com/dapr/cli/pkg/age"
-	dapr "github.com/dapr/cli/pkg/kubernetes"
 	"os"
 	"strings"
 	"sync"
 
-	"errors"
-
+	"github.com/dapr/cli/pkg/age"
+	dapr "github.com/dapr/cli/pkg/kubernetes"
 	"github.com/dapr/cli/pkg/print"
+	k8score "k8s.io/api/core/v1"
 	k8s "k8s.io/client-go/kubernetes"
 )
 
@@ -18,7 +18,7 @@ type StatusClient struct {
 	client k8s.Interface
 }
 
-// StatusOutput represents the status of a named TKeel resource.
+// StatusOutput represents the status of a named tKeel resource.
 type StatusOutput struct {
 	Name         string `csv:"NAME"`
 	Namespace    string `csv:"NAMESPACE"`
@@ -42,7 +42,7 @@ func NewStatusClient() (*StatusClient, error) {
 	}, nil
 }
 
-// List status for TKeel resources.
+// List status for tKeel resources.
 func (s *StatusClient) Status() ([]StatusOutput, error) {
 	client := s.client
 	if client == nil {
@@ -61,7 +61,7 @@ func (s *StatusClient) Status() ([]StatusOutput, error) {
 
 	pluginsMap := make(map[string]Plugin)
 	for _, plugin := range tKeelPlugins {
-		pluginsMap[plugin.PluginId] = plugin
+		pluginsMap[plugin.PluginID] = plugin
 	}
 
 	daprAppStatus, err := s.daprAppsStatus()
@@ -91,27 +91,26 @@ func (s *StatusClient) Status() ([]StatusOutput, error) {
 }
 
 func (s *StatusClient) daprAppsStatus() ([]StatusOutput, error) {
-	client := s.client
-	if client == nil {
+	if s.client == nil {
 		return nil, errors.New("kubernetes client not initialized")
 	}
 
 	daprApps, err := dapr.List()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("err dapr do list: %w", err)
 	}
 
-	var wg sync.WaitGroup
+	var (
+		wg sync.WaitGroup
+		m  sync.Mutex
+	)
+	statuses := make([]StatusOutput, 0, len(daprApps))
 	wg.Add(len(daprApps))
-
-	m := sync.Mutex{}
-	statuses := []StatusOutput{}
-
 	for _, app := range daprApps {
 		go func(label string) {
 			defer wg.Done()
-			// Query all namespaces for TKeel pods.
-			p, err := ListPodsInterface(client, map[string]string{
+			// Query all namespaces for tKeel pods.
+			podList, err := ListPodsInterface(s.client, map[string]string{
 				"app": label,
 			})
 			if err != nil {
@@ -119,64 +118,71 @@ func (s *StatusClient) daprAppsStatus() ([]StatusOutput, error) {
 				return
 			}
 
-			if len(p.Items) == 0 {
+			if len(podList.Items) == 0 {
 				return
 			}
-			pod := p.Items[0]
-			replicas := len(p.Items)
-			image := pod.Spec.Containers[0].Image
-			namespace := pod.GetNamespace()
-			age := age.GetAge(pod.CreationTimestamp.Time)
-			created := pod.CreationTimestamp.Format("2006-01-02 15:04.05")
-			version := image[strings.IndexAny(image, ":")+1:]
-			status := ""
+			firstPod := podList.Items[0]
+			replicas := len(podList.Items)
+			namespace, podAge, created, version := extractPod(firstPod)
+			status, healthy := GetStatusAndHealthyInPodList(podList)
 
-			// loop through all replicas and update to Running/Healthy status only if all instances are Running and Healthy
-			healthy := "False"
-			running := true
-
-			for _, p := range p.Items {
-				if len(p.Status.ContainerStatuses) == 0 {
-					status = string(p.Status.Phase)
-				} else if p.Status.ContainerStatuses[0].State.Waiting != nil {
-					status = fmt.Sprintf("Waiting (%s)", p.Status.ContainerStatuses[0].State.Waiting.Reason)
-				} else if pod.Status.ContainerStatuses[0].State.Terminated != nil {
-					status = "Terminated"
-				}
-
-				if len(p.Status.ContainerStatuses) == 0 ||
-					p.Status.ContainerStatuses[0].State.Running == nil {
-					running = false
-
-					break
-				}
-
-				if p.Status.ContainerStatuses[0].Ready {
-					healthy = "True"
-				}
-			}
-
-			if running {
-				status = "Running"
-			}
-
-			s := StatusOutput{
+			m.Lock()
+			statuses = append(statuses, StatusOutput{
 				Name:      label,
 				Namespace: namespace,
 				Created:   created,
-				Age:       age,
+				Age:       podAge,
 				Status:    status,
 				Version:   version,
 				Healthy:   healthy,
 				Replicas:  replicas,
-			}
-
-			m.Lock()
-			statuses = append(statuses, s)
+			})
 			m.Unlock()
 		}(app.AppID)
 	}
 
 	wg.Wait()
 	return statuses, nil
+}
+
+// GetStatusAndHealthyInPodList loop through all replicas and update to Running/Healthy status only if all instances are Running and Healthy.
+func GetStatusAndHealthyInPodList(podList *k8score.PodList) (status string, healthy string) {
+	healthy = "False"
+	running := true
+	if len(podList.Items) == 0 {
+		return status, healthy
+	}
+	firstPod := podList.Items[0]
+	for _, pod := range podList.Items {
+		if len(pod.Status.ContainerStatuses) == 0 {
+			status = string(pod.Status.Phase)
+		} else if pod.Status.ContainerStatuses[0].State.Waiting != nil {
+			status = fmt.Sprintf("Waiting (%s)", pod.Status.ContainerStatuses[0].State.Waiting.Reason)
+		} else if firstPod.Status.ContainerStatuses[0].State.Terminated != nil {
+			status = "Terminated"
+		}
+
+		if len(pod.Status.ContainerStatuses) == 0 ||
+			pod.Status.ContainerStatuses[0].State.Running == nil {
+			running = false
+			break
+		}
+
+		if pod.Status.ContainerStatuses[0].Ready {
+			healthy = "True"
+		}
+	}
+	if running {
+		status = "Running"
+	}
+	return status, healthy
+}
+
+func extractPod(firstPod k8score.Pod) (string, string, string, string) {
+	image := firstPod.Spec.Containers[0].Image
+	namespace := firstPod.GetNamespace()
+	podAge := age.GetAge(firstPod.CreationTimestamp.Time)
+	created := firstPod.CreationTimestamp.Format("2006-01-02 15:04.05")
+	version := image[strings.IndexAny(image, ":")+1:]
+	return namespace, podAge, created, version
 }

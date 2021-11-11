@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
@@ -9,12 +9,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/dapr/cli/pkg/age"
 	dapr "github.com/dapr/cli/pkg/kubernetes"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/net"
 	k8s "k8s.io/client-go/kubernetes"
-	"strings"
 )
 
 var Client = dapr.Client
@@ -29,20 +30,18 @@ func ListPlugins(client k8s.Interface, namespace string) ([]Plugin, error) {
 	result := res.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("k8s query err:%w", err)
 	}
 	resp := PluginResponse{}
 	err = json.Unmarshal(rawbody, &resp)
 	if err != nil {
-		return nil, err
-	} else {
-		return resp.Data, nil
+		return nil, fmt.Errorf("unmarshak json to struct err: %w", err)
 	}
-
+	return resp.Data, nil
 }
 
-func RegisterPlugins(client k8s.Interface, namespace, pluginId string) error {
-	_ = doRegisterPlugins(client, namespace, pluginId)
+func RegisterPlugins(client k8s.Interface, namespace, pluginID string) error {
+	_ = doRegisterPlugins(client, namespace, pluginID)
 	plugins, err := ListPlugins(client, namespace)
 	if err != nil {
 		return err
@@ -50,60 +49,57 @@ func RegisterPlugins(client k8s.Interface, namespace, pluginId string) error {
 
 	notFound := true
 	for _, plugin := range plugins {
-		if plugin.PluginId == pluginId && plugin.Status == "ACTIVE" {
+		if plugin.PluginID == pluginID && plugin.Status == "ACTIVE" {
 			notFound = false
 			break
 		}
 	}
 	if notFound {
-		return errors.Errorf("plugin<%s> not found.", pluginId)
+		return errors.Errorf("plugin<%s> not found.", pluginID)
 	}
-	
+
 	return nil
 }
 
-func doRegisterPlugins(client k8s.Interface, namespace string, pluginId string) error {
+func doRegisterPlugins(client k8s.Interface, namespace string, pluginID string) error {
 	res := client.CoreV1().RESTClient().Post().
 		Namespace(namespace).
 		Resource("services").
 		SubResource("proxy").
 		Name(net.JoinSchemeNamePort("", "plugins", "8080")).
 		Suffix("register").
-		Body([]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginId)))
+		Body([]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	if err != nil {
-		return err
+		return fmt.Errorf("k8s query err:%w", err)
 	}
 	resp := PluginResponse{}
-	err = json.Unmarshal(raw, &resp)
-	if err != nil {
-		return err
-	} else {
-		return nil
+	if err := json.Unmarshal(raw, &resp); err != nil {
+		return fmt.Errorf("unmarshall json to struct err:%w", err)
 	}
+	return nil
 }
 
-func DeletePlugins(client k8s.Interface, namespace string, pluginId string) error {
+func DeletePlugins(client k8s.Interface, namespace string, pluginID string) error {
 	res := client.CoreV1().RESTClient().Post().
 		Namespace(namespace).
 		Resource("services").
 		SubResource("proxy").
 		Name(net.JoinSchemeNamePort("", "plugins", "8080")).
 		Suffix("delete").
-		Body([]byte(fmt.Sprintf(`{"id":"%s"}`, pluginId)))
+		Body([]byte(fmt.Sprintf(`{"id":"%s"}`, pluginID)))
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	if err != nil {
-		return err
+		return fmt.Errorf("k8s qeury err:%w", err)
 	}
 	resp := PluginResponse{}
 	err = json.Unmarshal(raw, &resp)
 	if err != nil {
-		return err
-	} else {
-		return nil
+		return fmt.Errorf("unmarshal json to struct err:%w", err)
 	}
+	return nil
 }
 
 func GetTKeelNameSpace(client k8s.Interface) (string, error) {
@@ -118,63 +114,33 @@ func GetTKeelNameSpace(client k8s.Interface) (string, error) {
 }
 
 func GetPodsInterface(client k8s.Interface, label string) (*StatusOutput, error) {
-	// Query all namespaces for TKeel pods.
-	p, err := ListPodsInterface(client, map[string]string{
+	// Query all namespaces for tKeel pods.
+	podList, err := ListPodsInterface(client, map[string]string{
 		"app": label,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	if len(p.Items) == 0 {
+	if len(podList.Items) == 0 {
 		return nil, err
 	}
-	pod := p.Items[0]
-	replicas := len(p.Items)
+	pod := podList.Items[0]
+	replicas := len(podList.Items)
 	image := pod.Spec.Containers[0].Image
 	namespace := pod.GetNamespace()
-	age := age.GetAge(pod.CreationTimestamp.Time)
+	podAge := age.GetAge(pod.CreationTimestamp.Time)
 	created := pod.CreationTimestamp.Format("2006-01-02 15:04.05")
 	version := image[strings.IndexAny(image, ":")+1:]
-	status := ""
-
-	// loop through all replicas and update to Running/Healthy status only if all instances are Running and Healthy
-	healthy := "False"
-	running := true
-
-	for _, p := range p.Items {
-		if len(p.Status.ContainerStatuses) == 0 {
-			status = string(p.Status.Phase)
-		} else if p.Status.ContainerStatuses[0].State.Waiting != nil {
-			status = fmt.Sprintf("Waiting (%s)", p.Status.ContainerStatuses[0].State.Waiting.Reason)
-		} else if pod.Status.ContainerStatuses[0].State.Terminated != nil {
-			status = "Terminated"
-		}
-
-		if len(p.Status.ContainerStatuses) == 0 ||
-			p.Status.ContainerStatuses[0].State.Running == nil {
-			running = false
-			break
-		}
-
-		if p.Status.ContainerStatuses[0].Ready {
-			healthy = "True"
-		}
-	}
-
-	if running {
-		status = "Running"
-	}
-
-	so := StatusOutput{
+	status, healthy := GetStatusAndHealthyInPodList(podList)
+	return &StatusOutput{
 		Name:      label,
 		Namespace: namespace,
 		Created:   created,
-		Age:       age,
+		Age:       podAge,
 		Status:    status,
 		Version:   version,
 		Healthy:   healthy,
 		Replicas:  replicas,
-	}
-	return &so, nil
+	}, nil
 }

@@ -1,5 +1,5 @@
 # ------------------------------------------------------------
-# Copyright 2021 The TKeel Contributors.
+# Copyright 2021 The tKeel Contributors.
 # Licensed under the Apache License.
 # ------------------------------------------------------------
 param (
@@ -17,7 +17,7 @@ $TKeelRoot = $TKeelRoot -replace ' ', '` '
 $TKeelCliFileName = "tkeel.exe"
 $TKeelCliFilePath = "${TKeelRoot}\${TKeelCliFileName}"
 
-# GitHub Org and repo hosting TKeel CLI
+# GitHub Org and repo hosting tKeel CLI
 $GitHubOrg = "tkeel-io"
 $GitHubRepo = "cli"
 
@@ -40,17 +40,17 @@ if ((Get-ExecutionPolicy) -gt 'RemoteSigned' -or (Get-ExecutionPolicy) -eq 'ByPa
 # Change security protocol to support TLS 1.2 / 1.1 / 1.0 - old powershell uses TLS 1.0 as a default protocol
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
-# Check if TKeel CLI is installed.
+# Check if tKeel CLI is installed.
 if (Test-Path $TKeelCliFilePath -PathType Leaf) {
-    Write-Warning "TKeel is detected - $TKeelCliFilePath"
+    Write-Warning "tKeel is detected - $TKeelCliFilePath"
     Invoke-Expression "$TKeelCliFilePath --version"
-    Write-Output "Reinstalling TKeel..."
+    Write-Output "Reinstalling tKeel..."
 }
 else {
-    Write-Output "Installing TKeel..."
+    Write-Output "Installing tKeel..."
 }
 
-# Create TKeel Directory
+# Create tKeel Directory
 Write-Output "Creating $TKeelRoot directory"
 New-Item -ErrorAction Ignore -Path $TKeelRoot -ItemType "directory"
 if (!(Test-Path $TKeelRoot -PathType Container)) {
@@ -67,7 +67,7 @@ if ($releases.Count -eq 0) {
 if (!$Version) {
     $windowsAsset = $releases | Where-Object { $_.tag_name -notlike "*rc*" } | Select-Object -First 1 | Select-Object -ExpandProperty assets | Where-Object { $_.name -Like "*windows_amd64.zip" }
     if (!$windowsAsset) {
-        throw "Cannot find the windows TKeel CLI binary"
+        throw "Cannot find the windows tKeel CLI binary"
     }
     $zipFileUrl = $windowsAsset.url
     $assetName = $windowsAsset.name
@@ -82,17 +82,17 @@ Write-Output "Downloading $zipFileUrl ..."
 $githubHeader.Accept = "application/octet-stream"
 Invoke-WebRequest -Headers $githubHeader -Uri $zipFileUrl -OutFile $zipFilePath
 if (!(Test-Path $zipFilePath -PathType Leaf)) {
-    throw "Failed to download TKeel Cli binary - $zipFilePath"
+    throw "Failed to download tKeel Cli binary - $zipFilePath"
 }
 
-# Extract TKeel CLI to $TKeelRoot
+# Extract tKeel CLI to $TKeelRoot
 Write-Output "Extracting $zipFilePath..."
 Microsoft.Powershell.Archive\Expand-Archive -Force -Path $zipFilePath -DestinationPath $TKeelRoot
 if (!(Test-Path $TKeelCliFilePath -PathType Leaf)) {
-    throw "Failed to download TKeel Cli archieve - $zipFilePath"
+    throw "Failed to download tKeel Cli archieve - $zipFilePath"
 }
 
-# Check the TKeel CLI version
+# Check the tKeel CLI version
 Invoke-Expression "$TKeelCliFilePath --version"
 
 # Clean up zipfile
@@ -112,5 +112,5 @@ else {
 }
 
 Write-Output "`r`nTKeel CLI is installed successfully."
-Write-Output "To get started with TKeel, please visit https://docs.tkeel.io/getting-started/ ."
-Write-Output "Ensure that Docker Desktop is set to Linux containers mode when you run TKeel in self hosted mode."
+Write-Output "To get started with tKeel, please visit https://docs.tkeel.io/getting-started/ ."
+Write-Output "Ensure that Docker Desktop is set to Linux containers mode when you run tKeel in self hosted mode."

@@ -1,4 +1,4 @@
-# TKeel CLI Installer
+# tKeel CLI Installer
 
 ## Windows
 

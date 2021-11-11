@@ -1,4 +1,4 @@
-package print
+package print //nolint
 
 import (
 	"encoding/json"
@@ -131,7 +131,7 @@ func logJSON(w io.Writer, status, message string) {
 	type jsonLog struct {
 		Time    time.Time `json:"time"`
 		Status  string    `json:"status"`
-		Message string    `json:"msg"`
+		Message string    `json:"msg"` //nolint
 	}
 
 	l := jsonLog{

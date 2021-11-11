@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	core_v1 "k8s.io/api/core/v1"
@@ -15,7 +16,11 @@ func ListPodsInterface(client k8s.Interface, labelSelector map[string]string) (*
 	if labelSelector != nil {
 		opts.LabelSelector = labels.FormatLabels(labelSelector)
 	}
-	return client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
+	list, err := client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
+	if err != nil {
+		return nil, fmt.Errorf("err get pods list:%w", err)
+	}
+	return list, nil
 }
 
 func ListPods(client *k8s.Clientset, namespace string, labelSelector map[string]string) (*core_v1.PodList, error) {
@@ -23,7 +28,11 @@ func ListPods(client *k8s.Clientset, namespace string, labelSelector map[string]
 	if labelSelector != nil {
 		opts.LabelSelector = labels.FormatLabels(labelSelector)
 	}
-	return client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
+	list, err := client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
+	if err != nil {
+		return nil, fmt.Errorf("err get pods list:%w", err)
+	}
+	return list, nil
 }
 
 // CheckPodExists returns a boolean representing the pod's existence and the namespace that the given pod resides in,

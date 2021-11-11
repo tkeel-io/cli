@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # ------------------------------------------------------------
-# Copyright 2021 The TKeel Contributors.
+# Copyright 2021 The tKeel Contributors.
 # Licensed under the Apache License.
 # ------------------------------------------------------------
 
-# TKeel CLI location
+# tKeel CLI location
 : ${TKEEL_INSTALL_DIR:="/usr/local/bin"}
 
 # sudo is required to copy binary to TKEEL_INSTALL_DIR for linux
@@ -18,7 +18,7 @@ TKEEL_HTTP_REQUEST_CLI=curl
 GITHUB_ORG=tkeel-io
 GITHUB_REPO=cli
 
-# TKeel CLI filename
+# tKeel CLI filename
 TKEEL_CLI_FILENAME=tkeel
 
 TKEEL_CLI_FILE="${TKEEL_INSTALL_DIR}/${TKEEL_CLI_FILENAME}"
@@ -85,11 +85,11 @@ checkHttpRequestCLI() {
 
 checkExistingTKeel() {
     if [ -f "$TKEEL_CLI_FILE" ]; then
-        echo -e "\nTKeel CLI is detected:"
+        echo -e "\ntKeel CLI is detected:"
         $TKEEL_CLI_FILE --version
-        echo -e "Reinstalling TKeel CLI - ${TKEEL_CLI_FILE}...\n"
+        echo -e "Reinstalling tKeel CLI - ${TKEEL_CLI_FILE}...\n"
     else
-        echo -e "Installing TKeel CLI...\n"
+        echo -e "Installing tKeel CLI...\n"
     fi
 }
 
@@ -135,7 +135,7 @@ installFile() {
     local tmp_root_tkeel_cli="$TKEEL_TMP_ROOT/$TKEEL_CLI_FILENAME"
 
     if [ ! -f "$tmp_root_tkeel_cli" ]; then
-        echo "Failed to unpack TKeel CLI executable."
+        echo "Failed to unpack tKeel CLI executable."
         exit 1
     fi
 
@@ -155,7 +155,7 @@ installFile() {
 fail_trap() {
     result=$?
     if [ "$result" != "0" ]; then
-        echo "Failed to install TKeel CLI"
+        echo "Failed to install tKeel CLI"
         echo "For support, go to https://tkeel.io"
     fi
     cleanup
@@ -169,7 +169,7 @@ cleanup() {
 }
 
 installCompleted() {
-    echo -e "\nTo get started with TKeel, please visit https://docs.tkeel.io/getting-started/"
+    echo -e "\nTo get started with tKeel, please visit https://docs.tkeel.io/getting-started/"
 }
 
 # -----------------------------------------------------------------------------
@@ -184,13 +184,13 @@ checkHttpRequestCLI
 
 
 if [ -z "$1" ]; then
-    echo "Getting the latest TKeel CLI..."
+    echo "Getting the latest tKeel CLI..."
     getLatestRelease
 else
     ret_val=v$1
 fi
 
-echo "Installing $ret_val TKeel CLI..."
+echo "Installing $ret_val tKeel CLI..."
 
 downloadFile $ret_val
 installFile

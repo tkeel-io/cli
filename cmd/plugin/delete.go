@@ -1,5 +1,5 @@
 // ------------------------------------------------------------
-// Copyright 2021 The TKeel Contributors.
+// Copyright 2021 The tKeel Contributors.
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
@@ -25,7 +25,7 @@ tkeel plugin register -k pluginID
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginId not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin delete -k pluginID")
+			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin delete -k pluginID")
 			return
 		}
 		if kubernetesMode {
@@ -35,7 +35,7 @@ tkeel plugin register -k pluginID
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been deleted from TKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
+			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been deleted from tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
 		}
 	},
 }

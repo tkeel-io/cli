@@ -7,32 +7,29 @@ package kubernetes
 
 import (
 	"fmt"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
-	"k8s.io/helm/pkg/strvals"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/dapr/cli/pkg/print"
 	helm "helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"k8s.io/helm/pkg/strvals"
 )
 
-type helmChart struct {
-
-}
-
-
-
 func helmConfig(namespace string, log helm.DebugLog) (*helm.Configuration, error) {
-	ac := helm.Configuration{}
+	helmConf := helm.Configuration{}
 	flags := &genericclioptions.ConfigFlags{
 		Namespace: &namespace,
 	}
-	err := ac.Init(flags, namespace, "secret", log)
-	return &ac, err
+	err := helmConf.Init(flags, namespace, "secret", log)
+	if err != nil {
+		err = fmt.Errorf("helm configuration init err:%w", err)
+	}
+	return &helmConf, err
 }
 
 func tKeelChart(version, chartName string, config *helm.Configuration) (*chart.Chart, error) {
@@ -54,14 +51,19 @@ func tKeelChart(version, chartName string, config *helm.Configuration) (*chart.C
 
 	_, err = pull.Run(chartName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("err helm run pull:%w", err)
 	}
 
 	chartPath, err := locateChartFile(dir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("err locate chart file:%w", err)
 	}
-	return loader.Load(chartPath)
+	c, err := loader.Load(chartPath)
+	if err != nil {
+		return nil, fmt.Errorf("err load chart file and parse:%w", err)
+	}
+
+	return c, nil
 }
 
 func chartValues(config InitConfiguration) (map[string]interface{}, error) {
@@ -74,38 +76,44 @@ func chartValues(config InitConfiguration) (map[string]interface{}, error) {
 
 	for _, v := range globalVals {
 		if err := strvals.ParseInto(v, chartVals); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("parse value err:%w", err)
 		}
 	}
 	return chartVals, nil
 }
 
 func install(config InitConfiguration, pluginNames []string) error {
-	err := createNamespace(config.Namespace)
+	if err := createNamespace(config.Namespace); err != nil {
+		return err
+	}
+	var (
+		err           error
+		helmConf      *helm.Configuration
+		platformChart *chart.Chart
+	)
+	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
 	}
 
-	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
-	if err != nil {
-		return err
-	}
-
-	platformChart, err := tKeelChart(config.Version, tKeelPluginComponentHelmRepo, helmConf)
+	platformChart, err = tKeelChart(config.Version, tKeelPluginComponentHelmRepo, helmConf)
 	if err != nil {
 		return err
 	}
 
 	for _, corePluginName := range pluginNames {
-		tKeelPluginChart, err := tKeelChart(config.Version, corePluginName, helmConf)
+		var tKeelPluginChart, configChart *chart.Chart
+
+		tKeelPluginChart, err = tKeelChart(config.Version, corePluginName, helmConf)
 		if err != nil {
 			return err
 		}
 
-		configChart, err := tKeelChart(config.Version, tKeelPluginConfigHelmRepo, helmConf)
+		configChart, err = tKeelChart(config.Version, tKeelPluginConfigHelmRepo, helmConf)
 		if err != nil {
 			return err
 		}
+
 		configChart.Values["pluginID"] = corePluginName
 		tKeelPluginChart.AddDependency(configChart)
 
@@ -113,6 +121,7 @@ func install(config InitConfiguration, pluginNames []string) error {
 			print.InfoStatusEvent(os.Stdout, "Update Plugin<%s>'s Values[daprConfig] = %s.", corePluginName, corePluginName)
 			tKeelPluginChart.Values["daprConfig"] = corePluginName
 		}
+
 		platformChart.AddDependency(tKeelPluginChart)
 	}
 
@@ -122,13 +131,13 @@ func install(config InitConfiguration, pluginNames []string) error {
 	installClient.Wait = config.Wait
 	installClient.Timeout = time.Duration(config.Timeout) * time.Second
 
-	values, err := chartValues(config)
+	var values map[string]interface{}
+	values, err = chartValues(config)
 	if err != nil {
 		return err
 	}
-
 	if _, err = installClient.Run(platformChart, values); err != nil {
-		return err
+		return fmt.Errorf("helm install err:%w", err)
 	}
 
 	print.InfoStatusEvent(os.Stdout, "install plugin<%s> done.", strings.Join(controlPlanePlugins, ", "))
@@ -136,7 +145,7 @@ func install(config InitConfiguration, pluginNames []string) error {
 	return nil
 }
 
-// InstallPlugin deploys the TKeel plugin.
+// InstallPlugins deploys the tKeel plugin.
 func InstallPlugins(config InitConfiguration, plugins []string) (err error) {
 	print.InfoStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
 	err = check(config)
