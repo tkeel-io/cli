@@ -6,7 +6,6 @@
 package plugin
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -53,7 +52,6 @@ tkeel plugin create plugin_name
 			gitCloneCMD := exec.Command("git", "clone", githubRepoURL, name)
 			gitCloneCMD.Stdout = os.Stdout
 			gitCloneCMD.Stderr = os.Stdout
-			fmt.Println(gitCloneCMD.String())
 			if err = gitCloneCMD.Run(); err != nil {
 				print.FailureStatusEvent(os.Stdout, "Git clone err:"+err.Error())
 				return
@@ -78,7 +76,6 @@ tkeel plugin create plugin_name
 		unzipcmd := exec.Command("unzip", "-o", tmpDest)
 		unzipcmd.Stderr = os.Stdout
 		unzipcmd.Stdout = os.Stdout
-		fmt.Println(unzipcmd.String())
 		if err := unzipcmd.Run(); err != nil {
 			print.FailureStatusEvent(os.Stdout, "Unzip err:"+err.Error())
 			return
