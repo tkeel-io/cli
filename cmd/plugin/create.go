@@ -19,9 +19,10 @@ import (
 const (
 	windowsOS  = "windows"
 	windowsTmp = "C:\\WINDOWS\\TEMP"
+	unixTmp    = "/tmp"
 
-	zipDownloadURL = "https://github.com/tkeel-io/tkeel-template-go/archive/refs/heads/main.zip"
-	githubRepoURL  = "https://github.com/tkeel-io/tkeel-template-go.git"
+	templateZipDownloadURL = "https://github.com/tkeel-io/tkeel-template-go/archive/refs/heads/main.zip"
+	githubRepoURL          = "https://github.com/tkeel-io/tkeel-template-go.git"
 
 	downloadedZipFilename   = "template.zip"
 	defaultUnzippedFilename = "tkeel-template-go-main"
@@ -30,7 +31,6 @@ const (
 
 var (
 	_gitMode = false
-	_tempDir = "/tmp"
 )
 
 var Create = &cobra.Command{
@@ -42,70 +42,26 @@ tkeel plugin create
 tkeel plugin create plugin_name
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		name := "my_plugin"
+		dirName := "my_plugin"
 		if len(args) != 0 {
-			name = args[0]
+			dirName = args[0]
 		}
 
 		wd, err := os.Getwd()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 		}
-		targetDir := path.Join(wd, name)
-
+		targetDest := path.Join(wd, dirName)
+		if i, err := os.Stat(targetDest); err == nil {
+			print.FailureStatusEvent(os.Stdout, "The '%s' is exited!", i.Name())
+			return
+		}
 		if _gitMode {
-			gitCloneCMD := exec.Command("git", "clone", githubRepoURL, name)
-			gitCloneCMD.Stdout = os.Stdout
-			gitCloneCMD.Stderr = os.Stdout
-			if err = gitCloneCMD.Run(); err != nil {
-				print.FailureStatusEvent(os.Stdout, "Git clone err:"+err.Error())
-				return
-			}
-			if err = os.RemoveAll(path.Join(targetDir, gitConfigDir)); err != nil {
-				print.FailureStatusEvent(os.Stdout, "Remove .git form template err:"+err.Error())
-			}
-			print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
+			createByGit(targetDest, dirName)
 			return
 		}
 
-		if runtime.GOOS == windowsOS {
-			_tempDir = windowsTmp
-		}
-
-		print.InfoStatusEvent(os.Stdout, "Downloading template...")
-
-		tmpDest := path.Join(_tempDir, downloadedZipFilename)
-		err = downloadutil.Download(tmpDest, zipDownloadURL)
-		if err != nil {
-			print.FailureStatusEvent(os.Stdout, "Template download err:"+err.Error())
-			return
-		}
-
-		var (
-			unzip     = "unzip"
-			unzipArgs = []string{"-o", tmpDest}
-		)
-
-		if runtime.GOOS == windowsOS {
-			unzip = "Expand-Archive"
-			unzipArgs = []string{"-Path", "'" + tmpDest + "'", "-DestinationsPath", "'" + wd + "'"}
-		}
-
-		print.InfoStatusEvent(os.Stdout, "Unpacking template...")
-		unzipcmd := exec.Command(unzip, unzipArgs...)
-		unzipcmd.Stderr = os.Stdout
-		unzipcmd.Stdout = os.Stdout
-		if err := unzipcmd.Run(); err != nil {
-			print.FailureStatusEvent(os.Stdout, "Unzip err:"+err.Error())
-			return
-		}
-
-		if err := os.Rename(defaultUnzippedFilename, targetDir); err != nil {
-			print.FailureStatusEvent(os.Stdout, "Move err:"+err.Error())
-			return
-		}
-
-		print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
+		createByUnzip(targetDest, wd)
 	},
 }
 
@@ -113,4 +69,58 @@ func init() {
 	Create.Flags().BoolP("help", "h", false, "Print this help message")
 	Create.Flags().BoolVarP(&_gitMode, "git", "", false, "use git to download this template")
 	PluginCmd.AddCommand(Create)
+}
+
+func createByGit(targetDest, dirname string) {
+	gitCloneCMD := exec.Command("git", "clone", githubRepoURL, dirname)
+	gitCloneCMD.Stdout = os.Stdout
+	gitCloneCMD.Stderr = os.Stdout
+	if err := gitCloneCMD.Run(); err != nil {
+		print.FailureStatusEvent(os.Stdout, "Git clone err:"+err.Error())
+		return
+	}
+	if err := os.RemoveAll(path.Join(targetDest, gitConfigDir)); err != nil {
+		print.FailureStatusEvent(os.Stdout, "Remove .git form template err:"+err.Error())
+	}
+	print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
+}
+
+func createByUnzip(targetDest, workingDir string) {
+	tempDir := unixTmp
+	if runtime.GOOS == windowsOS {
+		tempDir = windowsTmp
+	}
+
+	print.InfoStatusEvent(os.Stdout, "Downloading template...")
+	tmpDest := path.Join(tempDir, downloadedZipFilename)
+	if err := downloadutil.Download(tmpDest, templateZipDownloadURL); err != nil {
+		print.FailureStatusEvent(os.Stdout, "Template download err:"+err.Error())
+		return
+	}
+
+	var (
+		unzip     = "unzip"
+		unzipArgs = []string{"-o", tmpDest}
+	)
+
+	if runtime.GOOS == windowsOS {
+		unzip = "powershell"
+		unzipArgs = []string{"-Command", "Expand-Archive", "-Path", "'" + tmpDest + "'", "-DestinationPath", "'" + workingDir + "'"}
+	}
+
+	print.InfoStatusEvent(os.Stdout, "Unpacking template...")
+	unzipcmd := exec.Command(unzip, unzipArgs...)
+	unzipcmd.Stderr = os.Stdout
+	unzipcmd.Stdout = os.Stdout
+	if err := unzipcmd.Run(); err != nil {
+		print.FailureStatusEvent(os.Stdout, "Unzip err:"+err.Error())
+		return
+	}
+
+	if err := os.Rename(defaultUnzippedFilename, targetDest); err != nil {
+		print.FailureStatusEvent(os.Stdout, "Move err:"+err.Error())
+		return
+	}
+
+	print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
 }
