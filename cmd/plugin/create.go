@@ -17,6 +17,9 @@ import (
 )
 
 const (
+	windowsOS  = "windows"
+	windowsTmp = "C:\\WINDOWS\\TEMP"
+
 	zipDownloadURL = "https://github.com/tkeel-io/tkeel-template-go/archive/refs/heads/main.zip"
 	githubRepoURL  = "https://github.com/tkeel-io/tkeel-template-go.git"
 
@@ -65,10 +68,12 @@ tkeel plugin create plugin_name
 			return
 		}
 
-		print.InfoStatusEvent(os.Stdout, "Downloading template...")
-		if runtime.GOOS == "windows" {
-			_tempDir = "C:\\WINDOWS\\TEMP"
+		if runtime.GOOS == windowsOS {
+			_tempDir = windowsTmp
 		}
+
+		print.InfoStatusEvent(os.Stdout, "Downloading template...")
+
 		tmpDest := path.Join(_tempDir, downloadedZipFilename)
 		err = downloadutil.Download(tmpDest, zipDownloadURL)
 		if err != nil {
@@ -76,8 +81,18 @@ tkeel plugin create plugin_name
 			return
 		}
 
+		var (
+			unzip     = "unzip"
+			unzipArgs = []string{"-o", tmpDest}
+		)
+
+		if runtime.GOOS == windowsOS {
+			unzip = "Expand-Archive"
+			unzipArgs = []string{"-Path", "'" + tmpDest + "'", "-DestinationsPath", "'" + wd + "'"}
+		}
+
 		print.InfoStatusEvent(os.Stdout, "Unpacking template...")
-		unzipcmd := exec.Command("unzip", "-o", tmpDest)
+		unzipcmd := exec.Command(unzip, unzipArgs...)
 		unzipcmd.Stderr = os.Stdout
 		unzipcmd.Stdout = os.Stdout
 		if err := unzipcmd.Run(); err != nil {
