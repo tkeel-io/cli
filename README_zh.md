@@ -146,7 +146,8 @@ $ tkeel plugin delete echo-demo
 我们设计一套 [插件开发模板](https://github.com/tkeel-io/tkeel-template-go) 您可以直接基于这个模板组织您的代码，我们帮助您梳理了代码层级关系，并提供了快速构建 API
 的工具，您应该会爱不释手的。
 
-直接使用 `plugin create` 命令可以快速下载这套我们提供的模板：
+直接使用 `plugin create` 命令可以快速下载这套我们提供的模板。 默认将模板安装至当前工作目录下，并命名为 `my_plugin`。
+> 注意：该用法需要用户系统中有 `unzip` 命令，暂时不支持 Windows 使用该用法
 
 ```bash
 $ tkeel plugin create 
@@ -211,9 +212,8 @@ Archive:  /tmp/template.zip
 ✅  Success!! Plugin template created.
 ```
 
-默认将模板安装至当前工作目录下，并命名为 `my_plugin`
-
 您可以在创建命令后面添加您想要创建的目录名，也可以通过 `--git` 标志使用 git 的方式安装该模板。
+> 注意：该用法需要用户的系统中有 `git` 命令
 
 ```bash
 $ tkeel plugin create --git my_plugin

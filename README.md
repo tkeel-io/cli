@@ -150,6 +150,7 @@ You'll love it.
 Templates can be quickly downloaded using the `plugin create` command directly.
 
 By default, the template is installed in the current working directory and named `my_plugin`.
+> Note: This usage requires the `unzip` command on the user's system, and is not supported for Windows at this time.
 
 ```bash
 $ tkeel plugin create 
@@ -216,6 +217,7 @@ Archive:  /tmp/template.zip
 
 You can add the name of the directory you want to create after the create command, or you can install the template as a
 git with the `-git` flag.
+> Note: This usage requires the user to have the `git` command on their system
 
 ```bash
 $ tkeel plugin create --git my_plugin
