@@ -147,7 +147,7 @@ $ tkeel plugin delete echo-demo
 的工具，您应该会爱不释手的。
 
 直接使用 `plugin create` 命令可以快速下载这套我们提供的模板。 默认将模板安装至当前工作目录下，并命名为 `my_plugin`。
-> 注意：该用法需要用户系统中有 `unzip` 命令，暂时不支持 Windows 使用该用法
+> 注意：该用法需要用户系统中有 `unzip` 命令，如果你是 Windows 用户，你可以使用包管理器（比如说 winget, Chocolate）安装 `unzip` 然后使用
 
 ```bash
 $ tkeel plugin create 
