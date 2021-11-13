@@ -59,7 +59,7 @@ tkeel plugin create plugin_name
 			if err = os.RemoveAll(path.Join(targetDir, gitConfigDir)); err != nil {
 				print.FailureStatusEvent(os.Stdout, "Remove .git form template err:"+err.Error())
 			}
-			print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template created.")
+			print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
 			return
 		}
 
@@ -86,7 +86,7 @@ tkeel plugin create plugin_name
 			return
 		}
 
-		print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template created.")
+		print.SuccessStatusEvent(os.Stdout, "Success!! Plugin template is created.")
 	},
 }
 
