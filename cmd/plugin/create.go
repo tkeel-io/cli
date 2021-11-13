@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime"
 
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/downloadutil"
@@ -65,7 +66,9 @@ tkeel plugin create plugin_name
 		}
 
 		print.InfoStatusEvent(os.Stdout, "Downloading template...")
-
+		if runtime.GOOS == "windows" {
+			_tempDir = "C:\\WINDOWS\\TEMP"
+		}
 		tmpDest := path.Join(_tempDir, downloadedZipFilename)
 		err = downloadutil.Download(tmpDest, zipDownloadURL)
 		if err != nil {
