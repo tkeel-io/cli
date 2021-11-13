@@ -38,7 +38,7 @@ tkeel plugin create
 tkeel plugin create plugin_name
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		name := "app_plugin"
+		name := "my_plugin"
 		if len(args) != 0 {
 			name = args[0]
 		}
