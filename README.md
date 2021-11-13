@@ -138,3 +138,93 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 $ tkeel plugin delete echo-demo
 ✅  Success! Plugin<echo-demo> has been deleted from tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
+
+### Quickstart to plugin development
+
+We've designed the [Plugin Development Template](https://github.com/tkeel-io/tkeel-template-go) to organise your code
+directly based on this template, and we've helped you to sort out the code hierarchy and provide tools for building APIs
+quickly.
+
+You'll love it.
+
+Templates can be quickly downloaded using the `plugin create` command directly.
+
+By default, the template is installed in the current working directory and named `my_plugin`.
+
+```bash
+$ tkeel plugin create 
+ℹ️  Downloading template...
+ℹ️  Unpacking template...
+/usr/bin/unzip -o /tmp/template.zip
+Archive:  /tmp/template.zip
+59700ef3ee2bbe545f9a4c4c84488c8feacaab6b
+   creating: tkeel-template-go-main/
+  inflating: tkeel-template-go-main/.gitignore
+  inflating: tkeel-template-go-main/Dockerfile
+  inflating: tkeel-template-go-main/LICENSE
+  inflating: tkeel-template-go-main/Makefile
+ extracting: tkeel-template-go-main/README.md
+   creating: tkeel-template-go-main/api/
+   creating: tkeel-template-go-main/api/helloworld/
+   creating: tkeel-template-go-main/api/helloworld/v1/
+  inflating: tkeel-template-go-main/api/helloworld/v1/greeter.pb.go
+  inflating: tkeel-template-go-main/api/helloworld/v1/greeter.proto
+  inflating: tkeel-template-go-main/api/helloworld/v1/greeter_grpc.pb.go
+  inflating: tkeel-template-go-main/api/helloworld/v1/greeter_http.pb.go
+   creating: tkeel-template-go-main/api/openapi/
+   creating: tkeel-template-go-main/api/openapi/v1/
+  inflating: tkeel-template-go-main/api/openapi/v1/openapi.pb.go
+  inflating: tkeel-template-go-main/api/openapi/v1/openapi.proto
+  inflating: tkeel-template-go-main/api/openapi/v1/server.pb.go
+  inflating: tkeel-template-go-main/api/openapi/v1/server.proto
+  inflating: tkeel-template-go-main/api/openapi/v1/server_grpc.pb.go
+  inflating: tkeel-template-go-main/api/openapi/v1/server_http.pb.go
+   creating: tkeel-template-go-main/cmd/
+   creating: tkeel-template-go-main/cmd/hello/
+  inflating: tkeel-template-go-main/cmd/hello/main.go
+  inflating: tkeel-template-go-main/go.mod
+  inflating: tkeel-template-go-main/go.sum
+   creating: tkeel-template-go-main/pkg/
+   creating: tkeel-template-go-main/pkg/server/
+  inflating: tkeel-template-go-main/pkg/server/grpc.go
+  inflating: tkeel-template-go-main/pkg/server/http.go
+   creating: tkeel-template-go-main/pkg/service/
+ extracting: tkeel-template-go-main/pkg/service/README.md
+  inflating: tkeel-template-go-main/pkg/service/greeter.go
+  inflating: tkeel-template-go-main/pkg/service/openapi.go
+   creating: tkeel-template-go-main/pkg/util/
+  inflating: tkeel-template-go-main/pkg/util/util.go
+   creating: tkeel-template-go-main/third_party/
+ extracting: tkeel-template-go-main/third_party/README.md
+   creating: tkeel-template-go-main/third_party/google/
+   creating: tkeel-template-go-main/third_party/google/api/
+  inflating: tkeel-template-go-main/third_party/google/api/annotations.proto
+  inflating: tkeel-template-go-main/third_party/google/api/http.proto
+  inflating: tkeel-template-go-main/third_party/google/api/httpbody.proto
+   creating: tkeel-template-go-main/third_party/google/protobuf/
+  inflating: tkeel-template-go-main/third_party/google/protobuf/descriptor.proto
+  inflating: tkeel-template-go-main/third_party/google/protobuf/empty.proto
+   creating: tkeel-template-go-main/third_party/protoc-gen-openapiv2/
+   creating: tkeel-template-go-main/third_party/protoc-gen-openapiv2/options/
+  inflating: tkeel-template-go-main/third_party/protoc-gen-openapiv2/options/annotations.proto
+  inflating: tkeel-template-go-main/third_party/protoc-gen-openapiv2/options/openapiv2.proto
+   creating: tkeel-template-go-main/third_party/validate/
+  inflating: tkeel-template-go-main/third_party/validate/README.md
+  inflating: tkeel-template-go-main/third_party/validate/validate.proto
+✅  Success!! Plugin template created.
+```
+
+You can add the name of the directory you want to create after the create command, or you can install the template as a
+git with the `-git` flag.
+
+```bash
+$ tkeel plugin create --git my_plugin
+Cloning into 'my_plugin'...
+remote: Enumerating objects: 95, done.
+remote: Counting objects: 100% (95/95), done.
+remote: Compressing objects: 100% (56/56), done.
+remote: Total 95 (delta 22), reused 87 (delta 20), pack-reused 0
+Receiving objects: 100% (95/95), 63.05 KiB | 15.76 MiB/s, done.
+Resolving deltas: 100% (22/22), done.
+✅  Success!! Plugin template created.
+```
