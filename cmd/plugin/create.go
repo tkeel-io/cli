@@ -15,10 +15,6 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var (
-	_gitMode bool
-)
-
 const (
 	zipDownloadURL = "https://github.com/tkeel-io/tkeel-template-go/archive/refs/heads/main.zip"
 	githubRepoURL  = "https://github.com/tkeel-io/tkeel-template-go.git"
@@ -28,8 +24,13 @@ const (
 	gitConfigDir            = ".git"
 )
 
+var (
+	_gitMode = false
+	_tempDir = "/tmp"
+)
+
 var Create = &cobra.Command{
-	Use:   "create",
+	Use:   "create [dir]",
 	Short: "Create a plugin in quickstart template.",
 	Example: `
 # Create a plugin in quickstart template.
@@ -65,7 +66,7 @@ tkeel plugin create plugin_name
 
 		print.InfoStatusEvent(os.Stdout, "Downloading template...")
 
-		tmpDest := path.Join("/tmp", downloadedZipFilename)
+		tmpDest := path.Join(_tempDir, downloadedZipFilename)
 		err = downloadutil.Download(tmpDest, zipDownloadURL)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "Template download err:"+err.Error())
@@ -92,6 +93,6 @@ tkeel plugin create plugin_name
 
 func init() {
 	Create.Flags().BoolP("help", "h", false, "Print this help message")
-	Create.Flags().BoolVarP(&_gitMode, "git", "", false, "use github")
+	Create.Flags().BoolVarP(&_gitMode, "git", "", false, "use git to download this template")
 	PluginCmd.AddCommand(Create)
 }
