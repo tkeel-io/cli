@@ -1,0 +1,16 @@
+name: main
+on:
+  push:
+    branches:
+      - master
+      - main
+      - dev
+  pull_request:
+    branches:
+      - master
+      - main
+jobs:
+  check:
+    uses: tkeel-io/tkeel/.github/workflows/public_call.yml@main
+    with:
+      upload_require: false

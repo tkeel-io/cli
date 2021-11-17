@@ -9,12 +9,12 @@ import (
 	"github.com/tkeel-io/cli/cmd"
 )
 
-// Values for version and apiVersion are injected by the build.
+// Values for version and _apiVersion are injected by the build.
 var (
-	version    = ""
-	apiVersion = "1.0"
+	version     = ""
+	_apiVersion = "1.0"
 )
 
 func main() {
-	cmd.Execute(version, apiVersion)
+	cmd.Execute(version, _apiVersion)
 }
