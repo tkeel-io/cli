@@ -2,11 +2,12 @@ package helm
 
 import (
 	"fmt"
+	"io"
+
 	"github.com/gosuri/uitable"
 	"github.com/pkg/errors"
 	"github.com/tkeel-io/cli/pkg/output"
 	"helm.sh/helm/v3/cmd/helm/search"
-	"io"
 )
 
 func searchAll() (output.Writer, error) {
@@ -15,8 +16,7 @@ func searchAll() (output.Writer, error) {
 		return nil, errors.Wrap(err, "build index failed")
 	}
 
-	var res []*search.Result
-	res = index.All()
+	res := index.All()
 	search.SortScore(res)
 	data, err := applyConstraint(defaultSelectVersion, res)
 	if err != nil {
@@ -42,7 +42,7 @@ func (r *repoSearchWriter) WriteTable(out io.Writer) error {
 	if len(r.results) == 0 {
 		_, err := out.Write([]byte("No results found\n"))
 		if err != nil {
-			return fmt.Errorf("unable to write results: %s", err)
+			return fmt.Errorf("unable to write results: %w", err)
 		}
 		return nil
 	}
@@ -52,7 +52,13 @@ func (r *repoSearchWriter) WriteTable(out io.Writer) error {
 	for _, r := range r.results {
 		table.AddRow(r.Name, r.Chart.Version, r.Chart.AppVersion, r.Chart.Description)
 	}
-	return output.EncodeTable(out, table)
+	err := output.EncodeTable(out, table)
+	if err != nil {
+		err = errors.Wrap(err, "encode info to a table format err")
+		return err
+	}
+
+	return nil
 }
 
 func (r *repoSearchWriter) WriteJSON(out io.Writer) error {
@@ -73,9 +79,19 @@ func (r *repoSearchWriter) encodeByFormat(out io.Writer, format output.Format) e
 
 	switch format {
 	case output.JSON:
-		return output.EncodeJSON(out, chartList)
+		err := output.EncodeJSON(out, chartList)
+		if err != nil {
+			err = errors.Wrap(err, "encode data to json err")
+			return err
+		}
+		return nil
 	case output.YAML:
-		return output.EncodeYAML(out, chartList)
+		err := output.EncodeYAML(out, chartList)
+		if err != nil {
+			err = errors.Wrap(err, "encode data to yaml err")
+			return err
+		}
+		return nil
 	}
 
 	// Because this is a non-exported function and only called internally by

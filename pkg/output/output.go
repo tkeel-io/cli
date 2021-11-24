@@ -2,15 +2,15 @@ package output
 
 import (
 	"encoding/json"
-	"github.com/gosuri/uitable"
 	"io"
 	"strings"
 
+	"github.com/gosuri/uitable"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
 )
 
-// Format is a type for capturing supported output formats
+// Format is a type for capturing supported output formats.
 type Format string
 
 const (
@@ -19,29 +19,29 @@ const (
 	TABLE Format = "table"
 )
 
-// ErrInvalidFormatType is returned when an unsupported format type is used
+// ErrInvalidFormatType is returned when an unsupported format type is used.
 var ErrInvalidFormatType = errors.New("invalid format type")
 
-// Writer is an interface that any type can implement to write supported formats
+// Writer is an interface that any type can implement to write supported formats.
 type Writer interface {
 	// WriteTable will write tabular output into the given io.Writer, returning
-	// an error if any occur
+	// an error if any occur.
 	WriteTable(out io.Writer) error
 	// WriteJSON will write JSON formatted output into the given io.Writer,
-	// returning an error if any occur
+	// returning an error if any occur.
 	WriteJSON(out io.Writer) error
 	// WriteYAML will write YAML formatted output into the given io.Writer,
-	// returning an error if any occur
+	// returning an error if any occur.
 	WriteYAML(out io.Writer) error
 }
 
-// String returns the string representation of the Format
+// String returns the string representation of the Format.
 func (o Format) String() string {
 	return string(o)
 }
 
 // Write the output in the given format to the io.Writer. Unsupported formats
-// will return an error
+// will return an error.
 func (o Format) Write(w io.Writer, obj interface{}) error {
 	switch o {
 	case JSON:
@@ -57,7 +57,7 @@ func (o Format) Write(w io.Writer, obj interface{}) error {
 }
 
 // ParseFormat takes a raw string and returns the matching Format.
-// If the format does not exists, ErrInvalidFormatType is returned
+// If the format does not exists, ErrInvalidFormatType is returned.
 func ParseFormat(s string) (out Format, err error) {
 	switch strings.ToLower(s) {
 	case JSON.String():
@@ -76,15 +76,14 @@ func ParseFormat(s string) (out Format, err error) {
 // context and avoid writing the same code over and over for printers.
 func EncodeJSON(out io.Writer, obj interface{}) error {
 	enc := json.NewEncoder(out)
-	err := enc.Encode(obj)
-	if err != nil {
+	if err := enc.Encode(obj); err != nil {
 		return errors.Wrap(err, "unable to write JSON output")
 	}
 	return nil
 }
 
 // EncodeYAML is a helper function to decorate any error message with a bit more
-// context and avoid writing the same code over and over for printers
+// context and avoid writing the same code over and over for printers.
 func EncodeYAML(out io.Writer, obj interface{}) error {
 	raw, err := yaml.Marshal(obj)
 	if err != nil {
@@ -99,7 +98,7 @@ func EncodeYAML(out io.Writer, obj interface{}) error {
 }
 
 // EncodeTable is a helper function to decorate any error message with a bit
-// more context and avoid writing the same code over and over for printers
+// more context and avoid writing the same code over and over for printers.
 func EncodeTable(out io.Writer, table *uitable.Table) error {
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)

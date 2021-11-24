@@ -30,6 +30,7 @@ func RepoUpdate(names ...string) error {
 		if updateAllRepos || isRepoRequested(repocfg.Name, names) {
 			r, err := repo.NewChartRepository(repocfg, getter.All(env))
 			if err != nil {
+				err = errors.Wrap(err, "new chart repository err")
 				return err
 			}
 			if env.RepositoryCache != "" {
@@ -56,8 +57,7 @@ func RepoUpdate(names ...string) error {
 	wg.Wait()
 
 	if len(repoFailList) > 0 {
-		return errors.New(fmt.Sprintf("Failed to update the following repositories: %s",
-			repoFailList))
+		return fmt.Errorf("failed to update the following repositories: %s", repoFailList)
 	}
 
 	return nil

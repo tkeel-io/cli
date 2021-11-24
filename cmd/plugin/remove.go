@@ -2,12 +2,13 @@ package plugin
 
 import (
 	"context"
+	"os"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
-	"os"
-	"strings"
 )
 
 var PluginRemoveCmd = &cobra.Command{
@@ -31,7 +32,6 @@ tkeel plugin register -k pluginID
 			return
 		}
 		print.SuccessStatusEvent(os.Stdout, "Remove %q success!", strings.Join(args, ","))
-		return
 	},
 }
 

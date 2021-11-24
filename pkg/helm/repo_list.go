@@ -36,7 +36,11 @@ func (r repoListWriter) WriteTable(out io.Writer) error {
 	for _, re := range r.repos {
 		table.AddRow(re.Name, re.URL)
 	}
-	return output.EncodeTable(out, table)
+	if err := output.EncodeTable(out, table); err != nil {
+		err = errors.Wrap(err, "encode data to table format err")
+		return err
+	}
+	return nil
 }
 
 func (r *repoListWriter) encodeByFormat(out io.Writer, format output.Format) error {
@@ -49,9 +53,17 @@ func (r *repoListWriter) encodeByFormat(out io.Writer, format output.Format) err
 
 	switch format {
 	case output.JSON:
-		return output.EncodeJSON(out, repolist)
+		if err := output.EncodeJSON(out, repolist); err != nil {
+			err = errors.Wrap(err, "encode data to json fomat err")
+			return err
+		}
+		return nil
 	case output.YAML:
-		return output.EncodeYAML(out, repolist)
+		if err := output.EncodeYAML(out, repolist); err != nil {
+			err = errors.Wrap(err, "encode data to yaml format err")
+			return err
+		}
+		return nil
 	case output.TABLE:
 		return r.WriteTable(out)
 	}

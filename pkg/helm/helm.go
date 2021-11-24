@@ -54,11 +54,11 @@ func checkRepositoryConfigPath() string {
 		log.Fatal(err)
 	}
 	repoConfigPath := filepath.Join(home, tkeelDir, configFilename)
-	if _, err := os.Stat(repoConfigPath); !os.IsNotExist(err) {
+	if _, err = os.Stat(repoConfigPath); !os.IsNotExist(err) {
 		return repoConfigPath
 	}
 
-	if err := os.MkdirAll(filepath.Join(home, tkeelDir), os.ModePerm); err != nil {
+	if err = os.MkdirAll(filepath.Join(home, tkeelDir), os.ModePerm); err != nil {
 		if !os.IsExist(err) {
 			log.Fatal(err)
 		}
@@ -108,7 +108,9 @@ func loadRepoFile() (*repo.File, error) {
 	case len(rf.Repositories) == 0:
 		return nil, errNoRepositories
 	}
-
+	if err != nil {
+		err = errors.Wrap(err, "load repo config err")
+	}
 	return rf, err
 }
 

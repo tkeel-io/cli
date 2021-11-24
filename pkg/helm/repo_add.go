@@ -20,6 +20,7 @@ func addRepo(name, url string) error {
 	// Ensure the file directory exists as it is required for file locking
 	err := os.MkdirAll(filepath.Dir(env.RepositoryConfig), os.ModePerm)
 	if err != nil && !os.IsExist(err) {
+		err = errors.Wrap(err, "mkdir "+env.RepositoryConfig+" err")
 		return err
 	}
 	// Acquire a file lock for process synchronization
@@ -38,16 +39,19 @@ func addRepo(name, url string) error {
 		defer fileLock.Unlock()
 	}
 	if err != nil {
+		err = errors.Wrap(err, "try to lock err")
 		return err
 	}
 
 	b, err := ioutil.ReadFile(env.RepositoryConfig)
 	if err != nil && !os.IsNotExist(err) {
+		err = errors.Wrap(err, "open a file err")
 		return err
 	}
 
 	var f repo.File
-	if err := yaml.Unmarshal(b, &f); err != nil {
+	if err = yaml.Unmarshal(b, &f); err != nil {
+		err = errors.Wrap(err, "unmarshal yaml err")
 		return err
 	}
 
@@ -59,6 +63,7 @@ func addRepo(name, url string) error {
 	// always force update repo file
 	r, err := repo.NewChartRepository(&c, getter.All(env))
 	if err != nil {
+		err = errors.Wrap(err, "new chart repository err")
 		return err
 	}
 
@@ -72,6 +77,7 @@ func addRepo(name, url string) error {
 	f.Update(&c)
 
 	if err := f.WriteFile(env.RepositoryConfig, 0644); err != nil {
+		err = errors.Wrap(err, "write data to file err")
 		return err
 	}
 	log.Infof("%q has been added to your repositories\n", name)

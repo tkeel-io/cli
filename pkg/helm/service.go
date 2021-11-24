@@ -20,6 +20,7 @@ func AddRepo(addr string) error {
 func ListRepo(format string) ([]byte, error) {
 	o, err := output.ParseFormat(format)
 	if err != nil {
+		err = errors.Wrap(err, "parse format err")
 		return nil, err
 	}
 
@@ -39,10 +40,11 @@ func ListRepo(format string) ([]byte, error) {
 func ListInstallable(format string, updateRepo bool) ([]byte, error) {
 	o, err := output.ParseFormat(format)
 	if err != nil {
+		err = errors.Wrap(err, "parse format err")
 		return nil, err
 	}
 	if updateRepo {
-		if err := RepoUpdate(); err != nil {
+		if err = RepoUpdate(); err != nil {
 			return nil, errors.Wrap(err, "update repo failed")
 		}
 	}
@@ -86,6 +88,7 @@ func Install(ctx context.Context, name, chart, version string) error {
 		}
 		matched, err := regexp.MatchString(versionRegex, version)
 		if err != nil {
+			err = errors.Wrap(err, "check regexp err")
 			return err
 		}
 		if !matched {

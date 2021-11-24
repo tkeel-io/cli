@@ -38,7 +38,6 @@ tkeel plugin register -k pluginID
 			return
 		}
 		print.SuccessStatusEvent(os.Stdout, "Install %q success! It's named %q in k8s", plugin, name)
-		return
 	},
 }
 
