@@ -20,6 +20,7 @@ tkeel plugin list -k
 tkeel plugin list --installable || -i
 tkeel plugin delete -k pluginID
 tkeel plugin register -k pluginID
+tkeel plugin remove pluginName
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
