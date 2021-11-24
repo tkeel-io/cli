@@ -90,8 +90,7 @@ func EncodeYAML(out io.Writer, obj interface{}) error {
 		return errors.Wrap(err, "unable to write YAML output")
 	}
 
-	_, err = out.Write(raw)
-	if err != nil {
+	if _, err = out.Write(raw); err != nil {
 		return errors.Wrap(err, "unable to write YAML output")
 	}
 	return nil
@@ -102,8 +101,7 @@ func EncodeYAML(out io.Writer, obj interface{}) error {
 func EncodeTable(out io.Writer, table *uitable.Table) error {
 	raw := table.Bytes()
 	raw = append(raw, []byte("\n")...)
-	_, err := out.Write(raw)
-	if err != nil {
+	if _, err := out.Write(raw); err != nil {
 		return errors.Wrap(err, "unable to write table output")
 	}
 	return nil
