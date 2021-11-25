@@ -20,7 +20,6 @@ var (
 	wait           bool
 	timeout        uint
 	runtimeVersion string
-	initNamespace  string
 	enableMTLS     bool
 	enableHA       bool
 	values         []string
@@ -42,7 +41,7 @@ tkeel init --wait --timeout 600
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		if kubernetesMode {
 			config := kubernetes.InitConfiguration{
-				Namespace:  initNamespace,
+				Namespace:  namespace,
 				Version:    runtimeVersion,
 				EnableMTLS: enableMTLS,
 				EnableHA:   enableHA,
@@ -67,11 +66,6 @@ tkeel init --wait --timeout 600
 func init() {
 	InitCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "Deploy tKeel to a Kubernetes cluster")
 	InitCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	InitCmd.Flags().StringVarP(&initNamespace,
-		"namespace",      /* name */
-		"n",              /*shorthand */
-		"tkeel-platform", /* value */
-		"The Kubernetes namespace to install tKeel in") /* usage */
 	InitCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	InitCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")

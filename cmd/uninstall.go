@@ -15,7 +15,6 @@ import (
 )
 
 var (
-	uninstallNamespace  string
 	uninstallKubernetes bool
 	uninstallAll        bool
 )
@@ -43,7 +42,7 @@ dapr uninstall -k
 
 		if uninstallKubernetes {
 			print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
-			err = kubernetes.Uninstall(uninstallNamespace, timeout, debugMode)
+			err = kubernetes.Uninstall(namespace, timeout, debugMode)
 		}
 
 		if err != nil {
@@ -59,7 +58,6 @@ func init() {
 	UninstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The timeout for the Kubernetes uninstall")
 	UninstallCmd.Flags().BoolVar(&uninstallAll, "all", false, "Remove @TODO .dapr directory, Redis, Placement and Zipkin containers")
 	UninstallCmd.Flags().String("network", "", "The Docker network from which to remove the tKeel Platform")
-	UninstallCmd.Flags().StringVarP(&uninstallNamespace, "namespace", "n", "tkeel-platform", "The Kubernetes namespace to install tKeel in")
 	UninstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	UninstallCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(UninstallCmd)

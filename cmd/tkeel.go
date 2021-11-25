@@ -15,6 +15,7 @@ import (
 	"github.com/tkeel-io/cli/cmd/plugin"
 	"github.com/tkeel-io/cli/cmd/tenant"
 	"github.com/tkeel-io/cli/pkg/api"
+	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
@@ -30,9 +31,18 @@ var RootCmd = &cobra.Command{
 									   
 ===============================
 Things Keel Platform`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if err := helm.SetNamespace(namespace); err != nil {
+			fmt.Println("set helm namespace err")
+			os.Exit(-1)
+		}
+	},
 }
 
-var logAsJSON bool
+var (
+	logAsJSON bool
+	namespace string
+)
 
 // Execute adds all child commands to the root command.
 func Execute(version, apiVersion string) {
@@ -66,7 +76,7 @@ func initConfig() {
 
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
-
+	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "tkeel-platform", "The Kubernetes namespace to install tKeel in")
 	RootCmd.AddCommand(plugin.PluginCmd)
 	RootCmd.AddCommand(tenant.TenantCmd)
 }

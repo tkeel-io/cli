@@ -239,6 +239,8 @@ linters-settings:
         bson: camel
         avro: snake
         mapstructure: snake
+  cyclop:
+    max-complexity: 15
 
 linters:
   fast: false
