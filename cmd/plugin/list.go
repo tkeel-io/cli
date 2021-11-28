@@ -59,12 +59,7 @@ tkeel plugin register -k pluginID
 			return
 		}
 
-		sc, err := kubernetes.NewStatusClient()
-		if err != nil {
-			print.FailureStatusEvent(os.Stdout, err.Error())
-			os.Exit(1)
-		}
-		status, err := sc.Status()
+		status, err := kubernetes.List()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
