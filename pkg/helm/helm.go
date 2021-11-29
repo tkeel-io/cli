@@ -194,6 +194,7 @@ func getLog() helmAction.DebugLog {
 func isNotExist(err error) bool {
 	return os.IsNotExist(errors.Cause(err))
 }
+
 func loadComponentChart() *chart.Chart {
 	pullAction := helmAction.NewPull()
 	pullAction.ChartPathOptions.RepoURL = tkeelRepo

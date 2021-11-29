@@ -1,11 +1,11 @@
 package plugin
 
 import (
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
 )

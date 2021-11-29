@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"testing"
 )
 
 func ExampleListPluginPods() {
@@ -35,12 +36,12 @@ func ExampleListPluginPods() {
 	}
 
 	// Output:
-	//pods: 4
-	//pods: 1
-	//{"pluginList":[{"id":"keel-echo","tkeel_version":"v0.2.0","secret":"changeme","register_timestamp":1637909273}]} <nil>
+	// pods: 4
+	// pods: 1
+	// {"pluginList":[{"id":"keel-echo","tkeel_version":"v0.2.0","secret":"changeme","register_timestamp":1637909273}]} <nil>
 }
 
-func ExampleRegisterAndRemovePluginPods() {
+func TestExampleRegisterAndRemovePluginPods(t *testing.T) {
 	err := Register("keel-echo")
 	if err != nil {
 		fmt.Println(err)

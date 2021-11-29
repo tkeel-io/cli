@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/dapr/cli/pkg/print"
+	"github.com/pkg/errors"
 	helm "helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -173,8 +174,8 @@ func InstallPlugin(config InitConfiguration, releaseName, pluginRepo, pluginName
 	}
 	namespace := rudder.Namespace
 
-	if err := createNamespace(namespace); err != nil {
-		return err
+	if err = createNamespace(namespace); err != nil {
+		return errors.Wrap(err, "create namespace err")
 	}
 	helmConf, err = helmConfig(namespace, getLog(config.DebugMode))
 	if err != nil {

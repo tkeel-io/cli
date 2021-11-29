@@ -11,7 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-func installChart(name, chart, version string, injects ...*chart.Chart) error {
+func installChart(name, chart, version string, injects ...*chart.Chart) error { // nolint
 	installClient := action.NewInstall(defaultCfg)
 	valueOpts := &values.Options{}
 	installClient.Version = version
@@ -19,10 +19,9 @@ func installChart(name, chart, version string, injects ...*chart.Chart) error {
 		log.Debug("setting version to >0.0.0-0")
 		installClient.Version = ">0.0.0-0"
 	}
-	var err error
-
 	installClient.ReleaseName = name
 
+	var err error
 	cp, err := installClient.ChartPathOptions.LocateChart(chart, env)
 	if err != nil {
 		err = errors.Wrap(err, "get helm chart path options err")
@@ -55,8 +54,7 @@ func installChart(name, chart, version string, injects ...*chart.Chart) error {
 
 	// Add inject dependencies
 	if err := checkInjects(injects); err != nil {
-		err = errors.Wrap(err, "get injects dependency chart err")
-		return err
+		return errors.Wrap(err, "get injects dependency chart err")
 	}
 	if len(injects) == 0 {
 		log.Warn("no component request")
@@ -81,16 +79,14 @@ func installChart(name, chart, version string, injects ...*chart.Chart) error {
 					Debug:            env.Debug,
 				}
 				if err = man.Update(); err != nil {
-					err = errors.Wrap(err, "helm download manager update err")
-					return err
+					return errors.Wrap(err, "helm download manager update err")
 				}
 				// Reload the chart with the updated Chart.lock file.
 				if chartRequested, err = loader.Load(cp); err != nil {
 					return errors.Wrap(err, "failed reloading chart after repo update")
 				}
 			} else {
-				err = errors.Wrap(err, "check dependencies err")
-				return err
+				return errors.Wrap(err, "check dependencies err")
 			}
 		}
 	}

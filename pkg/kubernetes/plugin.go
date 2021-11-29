@@ -3,8 +3,6 @@
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
-
-
 package kubernetes
 
 import (
@@ -96,7 +94,7 @@ func Register(pluginID string) error {
 		return err
 	}
 
-	//check
+	// check
 	plugins, err := ListPlugins(clientset)
 	if err != nil {
 		return err
@@ -108,7 +106,6 @@ func Register(pluginID string) error {
 		}
 	}
 	return fmt.Errorf("plugin<%s> not found", pluginID)
-
 }
 
 func Remove(pluginID string) error {

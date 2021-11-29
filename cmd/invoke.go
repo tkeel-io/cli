@@ -18,13 +18,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"io/ioutil"
 	"net/http"
 	"os"
 
 	"github.com/dapr/cli/pkg/print"
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 )
 
 const defaultHTTPVerb = http.MethodPost
@@ -67,7 +67,7 @@ tkeel invoke --plugin-id target --method v1/sample --verb GET
 
 		response, err := kubernetes.Invoke(invokeAppID, invokeAppMethod, bytePayload, invokeVerb)
 		if err != nil {
-			err = fmt.Errorf("error invoking plugin %s: %s", invokeAppID, err)
+			err = fmt.Errorf("error invoking plugin %s: %w", invokeAppID, err)
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			return
 		}

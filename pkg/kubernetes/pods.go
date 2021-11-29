@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/dapr/cli/pkg/age"
 	core_v1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/net"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"strings"
 )
 
 type DaprPod core_v1.Pod
@@ -53,15 +54,16 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 			g = DaprPodList{}
 		}
 		g = append(g, c)
+		ret[id] = g
 	}
 	return ret
 }
 
 type App struct {
-	AppID     string `csv:"APP ID"   json:"appId"   yaml:"appId"`
-	AppPort   string `csv:"APP PORT" json:"appPort" yaml:"appPort"`
-	PodName   string `csv:"POD NAME" json:"podName" yaml:"podName"`
-	NameSpace string `csv:"NAMESPACE" json:"nameSpace" yaml:"nameSpace"`
+	AppID     string `csv:"APP ID"   json:"appId"   yaml:"appId"`        // nolint
+	AppPort   string `csv:"APP PORT" json:"appPort" yaml:"appPort"`      // nolint
+	PodName   string `csv:"POD NAME" json:"podName" yaml:"podName"`      // nolint
+	NameSpace string `csv:"NAMESPACE" json:"nameSpace" yaml:"nameSpace"` // nolint
 	Age       string `csv:"AGE"      json:"age"     yaml:"age"`
 	Created   string `csv:"CREATED"  json:"created" yaml:"created"`
 	Version   string `csv:"VERSION"  json:"version" yaml:"version"`

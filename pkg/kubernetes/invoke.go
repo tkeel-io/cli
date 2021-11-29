@@ -18,7 +18,8 @@ package kubernetes
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pkg/errors"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
@@ -35,14 +36,14 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 
 	res := app.App().Request(client.CoreV1().RESTClient().Verb(verb))
 	res = res.Suffix(makeEndpoint(pluginID, method))
-	if data != nil && len(data) > 0 {
+	if len(data) > 0 {
 		res = res.Body(data)
 	}
-	
+
 	result := res.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "get raw body err")
 	}
 
 	if len(rawbody) > 0 {
@@ -53,5 +54,5 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 }
 
 func makeEndpoint(appID, method string) string {
-	return fmt.Sprintf("%s", method)
+	return method
 }

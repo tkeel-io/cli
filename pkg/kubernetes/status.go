@@ -21,7 +21,7 @@ type StatusOutput struct {
 	Created      string `csv:"CREATED"`
 }
 
-// Create a new k8s client for status commands.
+// NewStatusClient Create a new k8s client for status commands.
 func NewStatusClient() (*StatusClient, error) {
 	clientset, err := Client()
 	if err != nil {
@@ -31,5 +31,3 @@ func NewStatusClient() (*StatusClient, error) {
 		client: clientset,
 	}, nil
 }
-
-
