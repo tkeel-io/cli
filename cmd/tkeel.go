@@ -80,6 +80,8 @@ func initConfig() {
 		print.EnableJSONFormat()
 	}
 
+	helm.SetNamespace(namespace)
+
 	viper.SetEnvPrefix("keel")
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
