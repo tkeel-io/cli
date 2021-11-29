@@ -11,7 +11,7 @@ import (
 	"helm.sh/helm/v3/pkg/getter"
 )
 
-func installChart(name, chart, version string) error {
+func installChart(name, chart, version string, injects ...*chart.Chart) error {
 	installClient := action.NewInstall(defaultCfg)
 	valueOpts := &values.Options{}
 	installClient.Version = version
@@ -20,10 +20,7 @@ func installChart(name, chart, version string) error {
 		installClient.Version = ">0.0.0-0"
 	}
 	var err error
-	if name, chart, err = installClient.NameAndChart([]string{name, chart}); err != nil {
-		err = errors.Wrap(err, "get the chart info err")
-		return err
-	}
+
 	installClient.ReleaseName = name
 
 	cp, err := installClient.ChartPathOptions.LocateChart(chart, env)
@@ -54,6 +51,17 @@ func installChart(name, chart, version string) error {
 
 	if chartRequested.Metadata.Deprecated {
 		log.Warn("This chart is deprecated")
+	}
+
+	// Add inject dependencies
+	if err := checkInjects(injects); err != nil {
+		err = errors.Wrap(err, "get injects dependency chart err")
+		return err
+	}
+	if len(injects) == 0 {
+		log.Warn("no component request")
+	} else {
+		chartRequested.AddDependency(injects...)
 	}
 
 	if req := chartRequested.Metadata.Dependencies; req != nil {
@@ -91,6 +99,15 @@ func installChart(name, chart, version string) error {
 
 	if _, err := installClient.Run(chartRequested, vals); err != nil {
 		return errors.Wrap(err, "INSTALLATION FAILED")
+	}
+	return nil
+}
+
+func checkInjects(injects []*chart.Chart) error {
+	for i := range injects {
+		if injects[i] == nil {
+			return errors.New("unable dependency chart try to injects")
+		}
 	}
 	return nil
 }
