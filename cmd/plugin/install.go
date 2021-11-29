@@ -25,7 +25,8 @@ tkeel plugin list -k
 tkeel plugin list --installable || -i
 tkeel plugin delete -k pluginID
 tkeel plugin register -k pluginID
-tkeel plugin install repo/plugin name || repo/plugin@version name
+tkeel plugin install https://tkeel-io.github.io/helm-charts/auth auth
+tkeel plugin install https://tkeel-io.github.io/helm-charts/auth@v0.1.0 auth
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
