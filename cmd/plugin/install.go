@@ -1,14 +1,19 @@
 package plugin
 
 import (
-	"context"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
+)
+
+var (
+	debugMode bool
+	wait      bool
+	timeout   uint
 )
 
 var PluginInstallCmd = &cobra.Command{
@@ -33,7 +38,21 @@ tkeel plugin install repo/plugin name || repo/plugin@version name
 		if sp := strings.Split(pluginFormInput, "@"); len(sp) == 2 {
 			plugin, version = sp[0], sp[1]
 		}
-		if err := helm.Install(context.Background(), name, plugin, version); err != nil {
+		urls := strings.Split(plugin, "/")
+		if len(urls) < 2 {
+			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
+			return
+		}
+		repo := strings.Join(urls[:len(urls)-1], "/")
+		plugin = urls[len(urls)-1]
+
+		config := kubernetes.InitConfiguration{
+			Wait:      wait,
+			Timeout:   timeout,
+			DebugMode: debugMode,
+		}
+
+		if err := kubernetes.InstallPlugin(config, name, repo, plugin, version); err != nil {
 			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
 			return
@@ -43,6 +62,10 @@ tkeel plugin install repo/plugin name || repo/plugin@version name
 }
 
 func init() {
+	PluginInstallCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "Deploy tKeel to a Kubernetes cluster")
+	PluginInstallCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
+	PluginInstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
+	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginInstallCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginCmd.AddCommand(PluginInstallCmd)
 }
