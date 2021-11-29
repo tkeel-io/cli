@@ -71,6 +71,7 @@ func (a AppInfo) Request(r *rest.Request) *rest.Request {
 	r.Namespace(a.NameSpace).
 		Resource("pods").
 		SubResource("proxy").
+		SetHeader("Content-Type", "application/json").
 		Name(net.JoinSchemeNamePort("", a.PodName, a.AppPort))
 	return r
 }
@@ -157,7 +158,6 @@ func RegisterPlugins(client k8s.Interface, pluginID string) error {
 		Suffix("v1/plugins").
 		Body([]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
 
-	fmt.Println(res.URL())
 	ret := res.Do(context.TODO())
 	raw, err := ret.Raw()
 	if err != nil {
