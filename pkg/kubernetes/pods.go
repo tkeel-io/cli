@@ -15,8 +15,8 @@ import (
 
 type DaprPod core_v1.Pod
 
-func (p *DaprPod) App() AppInfo {
-	ap := AppInfo{
+func (p *DaprPod) App() App {
+	ap := App{
 		PodName:   p.Name,
 		NameSpace: p.Namespace,
 	}
@@ -57,7 +57,7 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 	return ret
 }
 
-type AppInfo struct {
+type App struct {
 	AppID     string `csv:"APP ID"   json:"appId"   yaml:"appId"`
 	AppPort   string `csv:"APP PORT" json:"appPort" yaml:"appPort"`
 	PodName   string `csv:"POD NAME" json:"podName" yaml:"podName"`
@@ -67,7 +67,7 @@ type AppInfo struct {
 	Version   string `csv:"VERSION"  json:"version" yaml:"version"`
 }
 
-func (a AppInfo) Request(r *rest.Request) *rest.Request {
+func (a App) Request(r *rest.Request) *rest.Request {
 	r.Namespace(a.NameSpace).
 		Resource("pods").
 		SubResource("proxy").
