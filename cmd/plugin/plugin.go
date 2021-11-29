@@ -14,6 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+//
+//          developer         +        paas manager         +     tantent manager
+//        						|                             |
+//           +------------+       |       +-----------+         |      +----------+
+//           |            |       |       |           |         |      |          |
+//           | developing |       |       | published |         |      | disabled |
+//           |            |       |       |           |         |      |          |
+//           +----+-------+       |       +---+-------+         |      +---+------+
+//        		|               |   install |                 |          |
+//        		|  ^            |           v   ^             |          | ^
+//        		|  |            |               | uninstall   |          | |
+//        		|  |            |       +-------+---+         |          | |
+//      release |  |            |       |           |         |   enable | |
+//        		|  | upgrade    |       | installed |         |          | | disable
+//        		|  |            |       |           |         |          | |
+//        		|  |            |       +---+-------+         |          | |
+//        		|  |            |  register |                 |          | |
+//        		v  |            |           v  ^              |          v |
+//        		   |            |              | remove       |            |
+//           +-------+----+       |       +------+----+         |      +-----+----+
+//           |            |       |       |           |         |      |          |
+//           |  release   |       |       |registered |         |      | enabled  |
+//           |            |       |       |           |         |      |          |
+//           +------------+       +       +-----------+         +      +----------+
+
+
+
+
 package plugin
 
 import (

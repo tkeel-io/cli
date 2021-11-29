@@ -107,7 +107,7 @@ func registerPlugins(config InitConfiguration) error {
 	}
 
 	for _, pluginID := range controlPlanePlugins {
-		err = RegisterPlugins(clientset, config.Namespace, pluginID)
+		err = RegisterPlugins(clientset, pluginID)
 		if err != nil {
 			return err
 		}
