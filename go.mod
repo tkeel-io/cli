@@ -18,11 +18,11 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tkeel-io/kit v0.0.0-20211122161648-31b3986683f2
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	helm.sh/helm/v3 v3.5.3
-	k8s.io/api v0.20.2
-	k8s.io/apimachinery v0.20.2
-	k8s.io/cli-runtime v0.20.2
-	k8s.io/client-go v0.20.2
+	helm.sh/helm/v3 v3.7.1
+	k8s.io/api v0.22.1
+	k8s.io/apimachinery v0.22.1
+	k8s.io/cli-runtime v0.22.1
+	k8s.io/client-go v0.22.1
 	k8s.io/helm v2.16.10+incompatible
 	sigs.k8s.io/yaml v1.2.0
 )

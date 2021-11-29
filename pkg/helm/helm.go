@@ -11,6 +11,8 @@ import (
 	"github.com/tkeel-io/kit/log"
 	"helm.sh/helm/v3/cmd/helm/search"
 	helmAction "helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chart/loader"
 	helmCLI "helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/helmpath"
 	"helm.sh/helm/v3/pkg/repo"
@@ -22,6 +24,7 @@ const (
 	privateRepoName      = "own"
 	configFilename       = "repositories.yaml"
 	tkeelDir             = ".tkeel"
+	tkeelRepo            = "https://tkeel-io.github.io/helm-charts"
 
 	repositoryConfig = `apiVersion: ""
 generated: "0001-01-01T00:00:00Z"
@@ -41,9 +44,11 @@ var (
 	env                     = helmCLI.New()
 	defaultCfg, _           = getConfiguration()
 	ownRepositoryConfigPath = checkRepositoryConfigPath()
+	componentChart          = loadComponentChart()
 
-	driver    = "secret"
-	namespace = "tkeel"
+	componentChartName = "tkeel-plugin-components"
+	driver             = "secret"
+	namespace          = "tkeel"
 
 	errNoRepositories = errors.New("no repositories found. You must add one before updating")
 )
@@ -188,4 +193,29 @@ func getLog() helmAction.DebugLog {
 
 func isNotExist(err error) bool {
 	return os.IsNotExist(errors.Cause(err))
+}
+func loadComponentChart() *chart.Chart {
+	pullAction := helmAction.NewPull()
+	pullAction.ChartPathOptions.RepoURL = tkeelRepo
+	cp, err := pullAction.ChartPathOptions.LocateChart(componentChartName, env)
+	if err != nil {
+		log.Warn("can't get the chart: %s", componentChartName)
+		return nil
+	}
+	log.Debugf("CHART PATH: %s\n", cp)
+	c, err := loader.Load(cp)
+	if err != nil {
+		log.Warn("can't parse the file %q", cp, err)
+		return nil
+	}
+	if err := checkIfInstallable(c); err != nil {
+		log.Warn("uninstallable chart request")
+		return nil
+	}
+
+	if c.Metadata.Deprecated {
+		log.Warn("%q: This chart is deprecated", cp)
+	}
+
+	return c
 }
