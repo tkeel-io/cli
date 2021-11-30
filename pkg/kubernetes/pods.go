@@ -4,13 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/dapr/cli/pkg/age"
 	core_v1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/net"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"strings"
 )
 
 type DaprPod core_v1.Pod
@@ -53,6 +55,7 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 			g = DaprPodList{}
 		}
 		g = append(g, c)
+		ret[id] = g
 	}
 	return ret
 }
@@ -127,7 +130,7 @@ func AppPod(client k8s.Interface, appID string) (*DaprPod, error) {
 	return &appPod, nil
 }
 
-func ListPlugins(client k8s.Interface) ([]Plugin, error) {
+func ListPlugins(client k8s.Interface) ([]*Plugin, error) {
 	rudder, err := AppPod(client, "rudder")
 	if err != nil {
 		return nil, err
@@ -136,16 +139,19 @@ func ListPlugins(client k8s.Interface) ([]Plugin, error) {
 	res := rudder.App().Request(client.CoreV1().RESTClient().Get()).
 		Suffix("v1/plugins")
 	result := res.Do(context.TODO())
+	if result.Error() != nil {
+		return nil, fmt.Errorf("k8s query resutl err: %w", err)
+	}
 	rawbody, err := result.Raw()
 	if err != nil {
-		return nil, fmt.Errorf("k8s query err:%w", err)
+		return nil, fmt.Errorf("k8s query err: %w", err)
 	}
-	resp := PluginResponse{}
-	err = json.Unmarshal(rawbody, &resp)
+	resp := &ListResponse{}
+	err = json.Unmarshal(rawbody, resp)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshak json to struct err: %w", err)
 	}
-	return resp.Data, nil
+	return resp.PluginList, nil
 }
 
 func RegisterPlugins(client k8s.Interface, pluginID string) error {
@@ -159,39 +165,42 @@ func RegisterPlugins(client k8s.Interface, pluginID string) error {
 		Body([]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
 
 	ret := res.Do(context.TODO())
-	raw, err := ret.Raw()
-	if err != nil {
-		return fmt.Errorf("k8s query err:%w", err)
+	if ret.Error() != nil {
+		return fmt.Errorf("k8s query result err: %w", err)
 	}
-	resp := PluginResponse{}
-	if err := json.Unmarshal(raw, &resp); err != nil {
-		return fmt.Errorf("unmarshall json to struct err:%w", err)
+	statusCode := http.StatusOK
+	ret.StatusCode(&statusCode)
+	if statusCode != http.StatusNoContent {
+		return fmt.Errorf("k8s query status_code not invaild: %d", statusCode)
 	}
 	return nil
 }
 
-// DeletePlugins
+// UnregisterPlugins
 // curl -XDELETE "http://192.168.123.11:30777/v1/plugins/keel-echo"
-func DeletePlugins(client k8s.Interface, pluginID string) error {
+func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 	rudder, err := AppPod(client, "rudder")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	res := rudder.App().Request(client.CoreV1().RESTClient().Delete()).
 		Suffix(fmt.Sprintf(`v1/plugins/%s`, pluginID))
 
 	ret := res.Do(context.TODO())
+	if ret.Error() != nil {
+		return nil, fmt.Errorf("k8s query ret err: %w", ret.Error())
+	}
 	raw, err := ret.Raw()
 	if err != nil {
-		return fmt.Errorf("k8s qeury err:%w", err)
+		return nil, fmt.Errorf("k8s qeury err: %w", err)
 	}
-	resp := PluginResponse{}
+	resp := DeleteResponse{}
 	err = json.Unmarshal(raw, &resp)
 	if err != nil {
-		return fmt.Errorf("unmarshal json to struct err:%w", err)
+		return nil, fmt.Errorf("unmarshal json to struct err:%w", err)
 	}
-	return nil
+	return resp.Plugin, nil
 }
 
 func GetTKeelNameSpace(client k8s.Interface) (string, error) {

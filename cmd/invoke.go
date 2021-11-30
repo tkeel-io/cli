@@ -18,13 +18,14 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"io/ioutil"
 	"net/http"
 	"os"
 
-	"github.com/dapr/cli/pkg/print"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
+
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/print"
 )
 
 const defaultHTTPVerb = http.MethodPost
@@ -77,7 +78,6 @@ tkeel invoke --plugin-id target --method v1/sample --verb GET
 		}
 
 		print.SuccessStatusEvent(os.Stdout, "Plugin invoked successfully")
-
 	},
 }
 

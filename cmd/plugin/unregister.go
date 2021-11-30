@@ -26,7 +26,7 @@ import (
 )
 
 var PluginRemoveCmd = &cobra.Command{
-	Use:   "remove",
+	Use:   "unregister",
 	Short: "Unregister plugins from tKeel. Supported platforms: Kubernetes",
 	Example: `
 # Manager plugins. in Kubernetes mode
@@ -41,11 +41,12 @@ tkeel plugin register -k pluginID
 		}
 		if kubernetesMode {
 			pluginID := args[0]
-			err := kubernetes.Remove(pluginID)
+			rmP, err := kubernetes.Unregister(pluginID)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
+			print.InfoStatusEvent(os.Stdout, fmt.Sprintf("Unregister plugin: %s", rmP))
 			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
 		}
 	},

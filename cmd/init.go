@@ -31,6 +31,7 @@ var (
 	wait           bool
 	timeout        uint
 	runtimeVersion string
+	secret         string
 	enableMTLS     bool
 	enableHA       bool
 	values         []string
@@ -60,6 +61,7 @@ tkeel init --wait --timeout 600
 				Wait:       wait,
 				Timeout:    timeout,
 				DebugMode:  debugMode,
+				Secret:     secret,
 			}
 			err := kubernetes.Init(config)
 			if err != nil {
@@ -77,6 +79,7 @@ tkeel init --wait --timeout 600
 func init() {
 	InitCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "Deploy tKeel to a Kubernetes cluster")
 	InitCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	InitCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	InitCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")

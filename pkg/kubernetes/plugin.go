@@ -3,12 +3,13 @@
 // Licensed under the Apache License.
 // ------------------------------------------------------------
 
-
-
 package kubernetes
 
 import (
+	"encoding/json"
 	"fmt"
+
+	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
 )
 
 // ListOutput represents the application ID, application port and creation time.
@@ -20,18 +21,38 @@ type ListOutput struct {
 	Status  string `json:"status"`
 }
 
-type Plugin struct {
-	PluginID     string `json:"plugin_id"`
-	Version      string `json:"version"`
-	Secret       string `json:"secret"`
-	RegisterTime int64  `json:"register_time"`
-	Status       string `json:"status"`
+type RegisterAddons struct {
+	Addons   string `json:"addons,omitempty"`   // addons name.
+	Upstream string `json:"upstream,omitempty"` // upstream path.
 }
 
-type PluginResponse struct {
-	Ret  int      `json:"ret"`
-	Msg  string   `json:"msg"`
-	Data []Plugin `json:"data"`
+type Plugin struct {
+	Id                string                  `json:"id,omitempty"`                 // plugin id.
+	PluginVersion     string                  `json:"plugin_version,omitempty"`     // plugin version.
+	TkeelVersion      string                  `json:"tkeel_version,omitempty"`      // plugin depend tkeel version.
+	AddonsPoint       []*v1.AddonsPoint       `json:"addons_point,omitempty"`       // plugin declares addons.
+	ImplementedPlugin []*v1.ImplementedPlugin `json:"implemented_plugin,omitempty"` // plugin implemented plugin list.
+	Secret            string                  `json:"secret,omitempty"`             // plugin registered secret.
+	RegisterTimestamp int64                   `json:"register_timestamp,omitempty"` // register timestamp.
+	ActiveTenantes    []string                `json:"active_tenantes,omitempty"`    // active tenant's id list.
+	RegisterAddons    []*RegisterAddons       `json:"register_addons,omitempty"`    // register addons router.
+	Status            v1.PluginStatus         `json:"status,omitempty"`             // register plugin status.
+}
+
+func (p *Plugin) String() string {
+	b, err := json.Marshal(p)
+	if err != nil {
+		return err.Error()
+	}
+	return string(b)
+}
+
+type ListResponse struct {
+	PluginList []*Plugin `json:"plugin_list"`
+}
+
+type DeleteResponse struct {
+	Plugin *Plugin `json:"plugin"`
 }
 
 func List() ([]StatusOutput, error) {
@@ -45,9 +66,9 @@ func List() ([]StatusOutput, error) {
 		return nil, err
 	}
 
-	pluginsMap := make(map[string]Plugin)
+	pluginsMap := make(map[string]*Plugin)
 	for _, plugin := range tKeelPlugins {
-		pluginsMap[plugin.PluginID] = plugin
+		pluginsMap[plugin.Id] = plugin
 	}
 
 	apps, err := ListPluginPods(client)
@@ -66,9 +87,12 @@ func List() ([]StatusOutput, error) {
 		replicas := len(lp)
 		info := firstPod.App()
 		status, healthy := GetStatusAndHealthyInPodList(lp)
-		pluginStatus := "UNKNOWN"
+		pluginStatus := "NOT_REGISTER"
 		if plugin, ok := pluginsMap[appID]; ok {
-			pluginStatus = plugin.Status
+			pluginStatus = plugin.Status.String()
+		}
+		if appID == "keel" || appID == "rudder" || appID == "core" {
+			continue
 		}
 		statuses = append(statuses, StatusOutput{
 			Name:         appID,
@@ -96,26 +120,25 @@ func Register(pluginID string) error {
 		return err
 	}
 
-	//check
+	// check
 	plugins, err := ListPlugins(clientset)
 	if err != nil {
 		return err
 	}
 
 	for _, plugin := range plugins {
-		if plugin.PluginID == pluginID && plugin.Status == "ACTIVE" {
+		if plugin.Id == pluginID && plugin.Status == v1.PluginStatus_RUNNING {
 			return nil
 		}
 	}
 	return fmt.Errorf("plugin<%s> not found", pluginID)
-
 }
 
-func Remove(pluginID string) error {
+func Unregister(pluginID string) (*Plugin, error) {
 	clientset, err := Client()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return DeletePlugins(clientset, pluginID)
+	return UnregisterPlugins(clientset, pluginID)
 }

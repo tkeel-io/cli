@@ -65,7 +65,7 @@ tkeel plugin register -k pluginID
 			os.Exit(1)
 		}
 		if len(status) == 0 {
-			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel initialized in your cluster?")
+			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel plugins not install in your cluster?")
 			os.Exit(1)
 		}
 		csv, err := gocsv.MarshalString(status)
