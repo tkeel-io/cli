@@ -90,7 +90,7 @@ func chartValues(config InitConfiguration) (map[string]interface{}, error) {
 }
 
 func installTkeel(config InitConfiguration) error {
-	coreComponentChartNames := []string{tkeelRudderHelmChart, tkeelCoreHelmChart} //, tkeelCoreHelmChart}
+	coreComponentChartNames := []string{tkeelRudderHelmChart, tkeelCoreHelmChart}
 	if err := createNamespace(config.Namespace); err != nil {
 		return err
 	}
@@ -117,12 +117,12 @@ func installTkeel(config InitConfiguration) error {
 	keelChart.AddDependency(middlewareChart)
 
 	for _, coreComponentName := range coreComponentChartNames {
-		coreChart, err := tKeelChart(config.Version, tKeelHelmRepo, coreComponentName, helmConf)
-		if err != nil {
-			return err
+		coreChart, err2 := tKeelChart(config.Version, tKeelHelmRepo, coreComponentName, helmConf)
+		if err2 != nil {
+			return err2
 		}
-		if err = addDaprComponentChartDependency(config, helmConf, coreChart,
-			coreComponentName); err != nil {
+		if err2 = addDaprComponentChartDependency(config, helmConf, coreChart,
+			coreComponentName); err2 != nil {
 			return err
 		}
 		keelChart.AddDependency(coreChart)
