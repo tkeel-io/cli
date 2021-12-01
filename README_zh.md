@@ -7,7 +7,7 @@
 [![GoDoc](https://godoc.org/github.com/tkeel-io/cli?status.png)](http://godoc.org/github.com/tkeel-io/cli)
 </div>
 
-🕹️ tKeel CLI 是您用于各种 tKeel 相关任务操作的简易使用工具。
+??? tKeel CLI 是您用于各种 tKeel 相关任务操作的简易使用工具。
 
 您可以使用它来 **安装 tKeel 平台**、**管理插件** 以及 **用户模块**。
 
@@ -15,14 +15,14 @@
 
 tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 
-> ⚠️ tKeel 现阶段依赖于 Dapr（Kubernetes mode）。
+> ?? tKeel 现阶段依赖于 Dapr（Kubernetes mode）。
 
 - 安装 [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - 安装 [Dapr on Kubernetes](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-deploy/)
 
 ### 安装
 
-🔧 我们提供了多种安装方式，您根据您的偏好选择您觉得最合适的安装方式进行安装。
+?? 我们提供了多种安装方式，您根据您的偏好选择您觉得最合适的安装方式进行安装。
 
 #### 使用脚本安装最新版本
 
@@ -69,17 +69,17 @@ $ tkeel init
 Output should look like so:
 
 ```
-⌛  Making the jump to hyperspace...
-ℹ️  Checking the Dapr runtime status...
+?  Making the jump to hyperspace...
+??  Checking the Dapr runtime status...
 ↑  Deploying the tKeel Platform to your cluster... 
-ℹ️  install plugins...                                                        
-ℹ️  install plugins done.                                                                                                        
-✅  Deploying the tKeel Platform to your cluster...
+??  install plugins...                                                        
+??  install plugins done.                                                                                                        
+?  Deploying the tKeel Platform to your cluster...
 ↖  Register the plugins ... 
-ℹ️  Plugin<plugins>  is registered.                                                                                          
-ℹ️  Plugin<keel>  is registered.                                                                                                                        
-ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+??  Plugin<plugins>  is registered.                                                                                          
+??  Plugin<keel>  is registered.                                                                                                                        
+??  Plugin<auth>  is registered.                                                                                                                        
+?  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### 卸载 tKeel 平台
@@ -120,7 +120,7 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 
 ```bash
 $ tkeel plugin register echo-demo
-✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+?  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
 使用` plugin list ` 可以查看插件状态
@@ -137,6 +137,6 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 #### 删除插件
 
 ```bash
-$ tkeel plugin delete echo-demo
-✅  Success! Plugin<echo-demo> has been deleted from tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+$ tkeel plugin uninstall echo-demo
+? Remove "echo-demo" success!
 ```
