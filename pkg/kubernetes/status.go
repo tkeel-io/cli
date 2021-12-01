@@ -31,5 +31,3 @@ func NewStatusClient() (*StatusClient, error) {
 		client: clientset,
 	}, nil
 }
-
-

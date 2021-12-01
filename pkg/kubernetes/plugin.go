@@ -27,7 +27,7 @@ type RegisterAddons struct {
 }
 
 type Plugin struct {
-	Id                string                  `json:"id,omitempty"`                 // plugin id.
+	ID                string                  `json:"id,omitempty"`                 // plugin id.
 	PluginVersion     string                  `json:"plugin_version,omitempty"`     // plugin version.
 	TkeelVersion      string                  `json:"tkeel_version,omitempty"`      // plugin depend tkeel version.
 	AddonsPoint       []*v1.AddonsPoint       `json:"addons_point,omitempty"`       // plugin declares addons.
@@ -68,7 +68,7 @@ func List() ([]StatusOutput, error) {
 
 	pluginsMap := make(map[string]*Plugin)
 	for _, plugin := range tKeelPlugins {
-		pluginsMap[plugin.Id] = plugin
+		pluginsMap[plugin.ID] = plugin
 	}
 
 	apps, err := ListPluginPods(client)
@@ -127,7 +127,7 @@ func Register(pluginID string) error {
 	}
 
 	for _, plugin := range plugins {
-		if plugin.Id == pluginID && plugin.Status == v1.PluginStatus_RUNNING {
+		if plugin.ID == pluginID && plugin.Status == v1.PluginStatus_RUNNING {
 			return nil
 		}
 	}

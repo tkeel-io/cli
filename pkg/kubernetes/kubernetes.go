@@ -39,7 +39,6 @@ const (
 	tkeelKeelHelmChart             = "keel"
 	tkeelRudderHelmChart           = "rudder"
 	tkeelCoreHelmChart             = "core"
-	latestVersion                  = "0.2.0"
 )
 
 var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")

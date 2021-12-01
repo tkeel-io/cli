@@ -61,10 +61,10 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 }
 
 type App struct {
-	AppID     string `csv:"APP ID"   json:"appId"   yaml:"appId"`
-	AppPort   string `csv:"APP PORT" json:"appPort" yaml:"appPort"`
-	PodName   string `csv:"POD NAME" json:"podName" yaml:"podName"`
-	NameSpace string `csv:"NAMESPACE" json:"nameSpace" yaml:"nameSpace"`
+	AppID     string `csv:"APP ID"   json:"app_id"   yaml:"app_id"`
+	AppPort   string `csv:"APP PORT" json:"app_port" yaml:"app_port"`
+	PodName   string `csv:"POD NAME" json:"pod_name" yaml:"pod_name"`
+	NameSpace string `csv:"NAMESPACE" json:"name_space" yaml:"name_space"`
 	Age       string `csv:"AGE"      json:"age"     yaml:"age"`
 	Created   string `csv:"CREATED"  json:"created" yaml:"created"`
 	Version   string `csv:"VERSION"  json:"version" yaml:"version"`
