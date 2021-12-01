@@ -32,26 +32,22 @@ import (
 )
 
 const (
-	tKeelReleaseName             = "tkeel-platform"
-	tKeelHelmRepo                = "https://tkeel-io.github.io/helm-charts/"
-	tKeelPluginConfigHelmRepo    = "tkeel-plugin-components"
-	tKeelPluginComponentHelmRepo = "tkeel-middleware"
-	latestVersion                = "latest"
+	tKeelReleaseName               = "tkeel-platform"
+	tKeelHelmRepo                  = "https://OdysseusC.github.io/helm-charts/"
+	tKeelPluginConfigHelmChart     = "tkeel-plugin-components"
+	tKeelPluginMiddlewareHelmChart = "tkeel-middleware"
+	tkeelKeelHelmChart             = "keel"
+	tkeelRudderHelmChart           = "rudder"
+	tkeelCoreHelmChart             = "core"
+	latestVersion                  = "0.2.0"
 )
-
-var controlPlanePlugins = []string{
-	"plugins",
-	"keel",
-	"auth",
-	"iothub",
-	"core",
-}
 
 var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
 
 type InitConfiguration struct {
 	Version    string
 	Namespace  string
+	Secret     string
 	EnableMTLS bool
 	EnableHA   bool
 	Args       []string
@@ -68,26 +64,26 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	err = deploy(config, controlPlanePlugins)
+	err = deploy(config)
 	if err != nil {
 		return err
 	}
 
-	err = registerPlugins(config)
-	if err != nil {
-		return err
-	}
+	// err = registerPlugins(config)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
 
-func deploy(config InitConfiguration, pluginNames []string) (err error) {
+func deploy(config InitConfiguration) (err error) {
 	msg := "Deploying the tKeel Platform to your cluster..."
 
 	stopSpinning := print.Spinner(os.Stdout, msg)
 	defer stopSpinning(print.Failure)
 
-	err = install(config, pluginNames)
+	err = installTkeel(config)
 	if err != nil {
 		return err
 	}
@@ -95,28 +91,28 @@ func deploy(config InitConfiguration, pluginNames []string) (err error) {
 	return err
 }
 
-func registerPlugins(config InitConfiguration) error {
-	msg := "Register the plugins ..."
+// func registerPlugins(config InitConfiguration) error {
+// 	msg := "Register the plugins ..."
 
-	stopSpinning := print.Spinner(os.Stdout, msg)
-	defer stopSpinning(print.Failure)
+// 	stopSpinning := print.Spinner(os.Stdout, msg)
+// 	defer stopSpinning(print.Failure)
 
-	clientset, err := Client()
-	if err != nil {
-		return err
-	}
+// 	clientset, err := Client()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	for _, pluginID := range controlPlanePlugins {
-		err = RegisterPlugins(clientset, pluginID)
-		if err != nil {
-			return err
-		}
-		print.InfoStatusEvent(os.Stdout, "Plugin<%s>  is registered.", pluginID)
-	}
+// 	for _, pluginID := range controlPlanePlugins {
+// 		err = RegisterPlugins(clientset, pluginID)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		print.InfoStatusEvent(os.Stdout, "Plugin<%s>  is registered.", pluginID)
+// 	}
 
-	stopSpinning(print.Success)
-	return err
-}
+// 	stopSpinning(print.Success)
+// 	return err
+// }
 
 func check(config InitConfiguration) error {
 	client, err := dapr.NewStatusClient()

@@ -26,11 +26,11 @@ tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 
 #### 使用脚本安装最新版本
 
-通过我们编写好的脚本自动为您安装整个 `tKeel` 平台所需组件。
+通过我们编写好的脚本自动为您安装 `tKeel Cli`。
 
 ##### Linux
 
-通过 tKeel CLI 将最新版 tKeel 平台安装至 Linux 系统的 `/usr/local/bin`
+通过 Bash 脚本将最新版 tKeel Cli 安装至 Linux 系统的 `/usr/local/bin`
 
 ```bash
 $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
@@ -38,7 +38,7 @@ $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.
 
 ##### MacOS
 
-通过 tKeel CLI 将最新版 tKeel 平台安装至 MacOS(darwin) 系统的 `/usr/local/bin`
+通过 Bash 脚本将最新版 tKeel Cli 安装至 MacOS(darwin) 系统的 `/usr/local/bin`
 
 ```bash
 $ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash

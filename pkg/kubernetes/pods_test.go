@@ -45,7 +45,7 @@ func ExampleRegisterAndRemovePluginPods() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = Remove("keel-echo")
+	_, err = Unregister("keel-echo")
 	if err != nil {
 		fmt.Println(err)
 	}
