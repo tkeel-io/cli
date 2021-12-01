@@ -63,7 +63,7 @@ tkeel plugin install https://tkeel-io.github.io/helm-charts/auth@v0.1.0 auth
 			Secret:    secret,
 		}
 
-		if err := kubernetes.InstallPlugin(config, repo, name, plugin, version); err != nil {
+		if err := kubernetes.InstallPlugin(config, repo, plugin, name, version); err != nil {
 			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
 			return
