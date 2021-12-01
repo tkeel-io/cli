@@ -39,9 +39,6 @@ limitations under the License.
 //           |            |       |       |           |         |      |          |
 //           +------------+       +       +-----------+         +      +----------+
 
-
-
-
 package plugin
 
 import (
