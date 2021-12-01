@@ -5,26 +5,27 @@
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tkeel-io/cli)
 ![GitHub](https://img.shields.io/github/license/tkeel-io/cli?style=plastic)
 [![GoDoc](https://godoc.org/github.com/tkeel-io/cli?status.png)](http://godoc.org/github.com/tkeel-io/cli)
+
 </div>
 
-??? tKeel CLI is your main tool for various tasks related to tKeel Platform.
+🕹️ tKeel CLI is your main tool for various tasks related to tKeel Platform.
 
 You can use it to **install** the tKeel platform, **manage plugins and users**.
 
-?? [中文文档](README_zh.md)
+👉 [中文文档](README_zh.md)
 
 ### Prerequisites
 
 tKeel CLI can help you install the tKeel platform and help you manage the platform.
 
-> ?? tKeel currently relies on Dapr (Kubernetes mode).
+> ⚠️ tKeel currently relies on Dapr (Kubernetes mode).
 
 * Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 * Install [Dapr on Kubernetes](https://docs.dapr.io/operations/hosting/kubernetes/kubernetes-deploy/)
 
 ### Install
 
-?? We offer a variety of installation options, you choose the one you feel most comfortable installing according to your
+🔧 We offer a variety of installation options, you choose the one you feel most comfortable installing according to your
 preference.
 
 #### Using script to install the latest release
@@ -56,9 +57,9 @@ installed.
 1. Download the [tKeel CLI](https://github.com/tkeel-io/cli/releases)
 2. Unpack it (e.g. tkeel_linux_amd64.tar.gz, tkeel_windows_amd64.zip)
 3. Move it to your desired location.
-    * For Linux/MacOS - `/usr/local/bin`
-    * For Windows, create a directory and add this to your System PATH. For example create a directory called `c:\tkeel`
-      and add this directory to your path, by editing your system environment variable.
+   * For Linux/MacOS - `/usr/local/bin`
+   * For Windows, create a directory and add this to your System PATH. For example create a directory called `c:\tkeel`
+     and add this directory to your path, by editing your system environment variable.
 
 ### Init tKeel Platform on Kubernetes
 
@@ -73,17 +74,17 @@ $ tkeel init
 Output should look like so:
 
 ```
-?  Making the jump to hyperspace...
-??  Checking the Dapr runtime status...
+⌛  Making the jump to hyperspace...
+ℹ️  Checking the Dapr runtime status...
 ↑  Deploying the tKeel Platform to your cluster... 
-??  install plugins...                                                        
-??  install plugins done.                                                                                                        
-?  Deploying the tKeel Platform to your cluster...
+ℹ️  install plugins...                                                        
+ℹ️  install plugins done.                                                                                                        
+✅  Deploying the tKeel Platform to your cluster...
 ↖  Register the plugins ... 
-??  Plugin<plugins>  is registered.                                                                                          
-??  Plugin<keel>  is registered.                                                                                                                        
-??  Plugin<auth>  is registered.                                                                                                                        
-?  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+ℹ️  Plugin<plugins>  is registered.                                                                                          
+ℹ️  Plugin<keel>  is registered.                                                                                                                        
+ℹ️  Plugin<auth>  is registered.                                                                                                                        
+✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### Uninstall tKeel on Kubernetes
@@ -118,7 +119,7 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 
 ```bash
 $ tkeel plugin register echo-demo
-?  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
 ```
 
 Check the status
@@ -136,5 +137,5 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 
 ```bash
 $ tkeel plugin uninstall echo-demo
-?  Remove "echo-demo" success!
+✅  Remove “echo-demo” success
 ```
