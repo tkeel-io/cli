@@ -1,23 +1,20 @@
 ---
-name: Feature Request
-
-about: Create a Feature Request for tKeel CLI
-
+name: Feature request
+about: Suggest an idea for this project
 title: ''
-
-labels: kind/enhancement assignees: ''
+labels: ''
+assignees: ''
 
 ---
 
-## Describe the feature
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Release Note
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-<!-- How should this new feature be announced in our release notes? It can be populated later. -->
-<!-- Keep it as a single line. Examples: -->
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-<!-- RELEASE NOTE: **ADD** New feature in tKeel . -->
-<!-- RELEASE NOTE: **FIX** Bug in runtime. -->
-<!-- RELEASE NOTE: **UPDATE** Runtime dependency. -->
-
-RELEASE NOTE:
+**Additional context**
+Add any other context or screenshots about the feature request here.

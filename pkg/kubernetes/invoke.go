@@ -19,6 +19,10 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
+
+	"k8s.io/client-go/rest"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
@@ -34,9 +38,12 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 	}
 
 	res := app.App().Request(client.CoreV1().RESTClient().Verb(verb))
-	res = res.Suffix(makeEndpoint(pluginID, method))
 	if data != nil {
 		res = res.Body(data)
+	}
+	res, err = makeEndpoint(res, pluginID, method)
+	if err != nil {
+		return "", err
 	}
 
 	result := res.Do(context.TODO())
@@ -52,6 +59,14 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 	return "", nil
 }
 
-func makeEndpoint(appID, method string) string {
-	return method
+func makeEndpoint(res *rest.Request, appID, method string) (*rest.Request, error) {
+	tempURL, err := url.Parse(fmt.Sprintf("http://127.0.0.1/%s", method))
+	if err != nil {
+		return nil, fmt.Errorf("error in make endpoint: %w", err)
+	}
+	res = res.Suffix(tempURL.Path)
+	for k, vs := range tempURL.Query() {
+		res = res.Param(k, strings.Join(vs, ","))
+	}
+	return res, nil
 }

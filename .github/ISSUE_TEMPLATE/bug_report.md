@@ -1,33 +1,38 @@
 ---
-name: Bug reports
-
-about: Report a bug in tKeel CLI
-
+name: Bug report
+about: Create a report to help us improve
 title: ''
-
-labels: kind/bug assignees: ''
+labels: ''
+assignees: ''
 
 ---
 
-## Expected Behavior
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-<!-- Briefly describe what you expect to happen -->
+**To Reproduce**
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-## Actual Behavior
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-<!-- Briefly describe what is actually happening -->
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-## Steps to Reproduce the Problem
+**Desktop (please complete the following information):**
+ - OS: [e.g. iOS]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
 
-<!-- How can a maintainer reproduce this issue (be detailed) -->
+**Smartphone (please complete the following information):**
+ - Device: [e.g. iPhone6]
+ - OS: [e.g. iOS8.1]
+ - Browser [e.g. stock browser, safari]
+ - Version [e.g. 22]
 
-## Release Note
-
-<!-- How should the fix for this issue be communicated in our release notes? It can be populated later. -->
-<!-- Keep it as a single line. Examples: -->
-
-<!-- RELEASE NOTE: **ADD** New feature in tKeel . -->
-<!-- RELEASE NOTE: **FIX** Bug in runtime. -->
-<!-- RELEASE NOTE: **UPDATE** Runtime dependency. -->
-
-RELEASE NOTE:
+**Additional context**
+Add any other context about the problem here.
