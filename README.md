@@ -135,6 +135,6 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 3. Delete plugin
 
 ```bash
-$ tkeel plugin delete echo-demo
-✅  Success! Plugin<echo-demo> has been deleted from tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+$ tkeel plugin uninstall echo-demo
+✅  Remove "echo-demo" success!
 ```

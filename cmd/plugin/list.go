@@ -41,8 +41,11 @@ var PluginStatusCmd = &cobra.Command{
 # Get status of tKeel plugins from Kubernetes
 tkeel plugin list -k
 tkeel plugin list --installable || -i
-tkeel plugin delete -k pluginID
-tkeel plugin register -k pluginID
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
+tkeel plugin uninstall -k <pluginID>
+tkeel plugin register -k <pluginID>
+tkeel plugin remove <pluginID>
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if installable {
