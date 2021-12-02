@@ -137,5 +137,5 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 
 ```bash
 $ tkeel plugin uninstall echo-demo
-✅  Remove “echo-demo” success
+✅  Remove "echo-demo" success!
 ```
