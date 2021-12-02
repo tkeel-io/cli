@@ -164,9 +164,17 @@ func addDaprComponentChartDependency(config InitConfiguration, helmConf *helm.Co
 }
 
 func InstallPlugin(config InitConfiguration, repo, chartName, releaseName, version string) error {
-	if err := createNamespace(config.Namespace); err != nil {
+	clientset, err := Client()
+	if err != nil {
 		return err
 	}
+
+	namespace, err := GetTKeelNameSpace(clientset)
+	if err != nil {
+		return err
+	}
+
+	config.Namespace = namespace
 	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
@@ -197,24 +205,3 @@ func InstallPlugin(config InitConfiguration, repo, chartName, releaseName, versi
 	print.InfoStatusEvent(os.Stdout, "install tKeel plugin<%s> done.", chartName)
 	return nil
 }
-
-// InstallPlugins deploys the tKeel plugin.
-// func InstallPlugins(config InitConfiguration, plugins []string) (err error) {
-// 	print.InfoStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
-// 	err = check(config)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = deploy(config, plugins)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = registerPlugins(config)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
