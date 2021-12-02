@@ -29,10 +29,14 @@ var PluginRegisterCmd = &cobra.Command{
 	Use:   "register",
 	Short: "Register plugins. Supported platforms: Kubernetes",
 	Example: `
-# Manager plugins. in Kubernetes mode
+# Get status of tKeel plugins from Kubernetes
 tkeel plugin list -k
-tkeel plugin delete -k pluginID
-tkeel plugin register -k pluginID
+tkeel plugin list --installable || -i
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
+tkeel plugin uninstall -k <pluginID>
+tkeel plugin register -k <pluginID>
+tkeel plugin remove <pluginID>
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {

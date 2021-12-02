@@ -25,10 +25,11 @@ var PluginInstallCmd = &cobra.Command{
 # Get status of tKeel plugins from Kubernetes
 tkeel plugin list -k
 tkeel plugin list --installable || -i
-tkeel plugin delete -k pluginID
-tkeel plugin register -k pluginID
-tkeel plugin install https://tkeel-io.github.io/helm-charts/auth auth
-tkeel plugin install https://tkeel-io.github.io/helm-charts/auth@v0.1.0 auth
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
+tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
+tkeel plugin uninstall -k <pluginID>
+tkeel plugin register -k <pluginID>
+tkeel plugin remove <pluginID>
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
@@ -49,13 +50,7 @@ tkeel plugin install https://tkeel-io.github.io/helm-charts/auth@v0.1.0 auth
 		repo := strings.Join(urls[:len(urls)-1], "/")
 		plugin = urls[len(urls)-1]
 
-		ns, err := cmd.Flags().GetString("namespace")
-		if err != nil {
-			log.Warn("can not read namespace,use default tkeel-platform")
-			ns = "tkeel-platform"
-		}
 		config := kubernetes.InitConfiguration{
-			Namespace: ns,
 			Version:   tkeelVersion,
 			Wait:      wait,
 			Timeout:   timeout,
