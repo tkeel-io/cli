@@ -33,7 +33,7 @@ import (
 
 const (
 	tKeelReleaseName               = "tkeel-platform"
-	tKeelHelmRepo                  = "https://OdysseusC.github.io/helm-charts/"
+	tKeelHelmRepo                  = "https://tkeel-io.github.io/helm-charts/"
 	tKeelPluginConfigHelmChart     = "tkeel-plugin-components"
 	tKeelPluginMiddlewareHelmChart = "tkeel-middleware"
 	tkeelKeelHelmChart             = "keel"
