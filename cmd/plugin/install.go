@@ -10,6 +10,8 @@ import (
 	"github.com/tkeel-io/kit/log"
 )
 
+const tkeelChartsRepo = "https://tkeel-io.github.io/helm-charts"
+
 var (
 	debugMode    bool
 	wait         bool
@@ -42,13 +44,15 @@ tkeel plugin remove <pluginID>
 		if sp := strings.Split(pluginFormInput, "@"); len(sp) == 2 {
 			plugin, version = sp[0], sp[1]
 		}
-		urls := strings.Split(plugin, "/")
-		if len(urls) < 2 {
-			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
-			return
+
+		spi := strings.LastIndex(plugin, "/")
+		repo := tkeelChartsRepo
+		if spi != -1 {
+			repo, plugin = plugin[:spi], plugin[spi+1:]
+			if repo == "" || strings.EqualFold(repo, "tkeel") {
+				repo = tkeelChartsRepo
+			}
 		}
-		repo := strings.Join(urls[:len(urls)-1], "/")
-		plugin = urls[len(urls)-1]
 
 		config := kubernetes.InitConfiguration{
 			Version:   tkeelVersion,
