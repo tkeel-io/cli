@@ -53,7 +53,7 @@ tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <plugin
 tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
 tkeel plugin uninstall -k <pluginID>
 tkeel plugin register -k <pluginID>
-tkeel plugin remove <pluginID>
+tkeel plugin unregister -k <pluginID>
 `
 
 var PluginCmd = &cobra.Command{
