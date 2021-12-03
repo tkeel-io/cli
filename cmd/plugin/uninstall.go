@@ -14,7 +14,7 @@ import (
 var PluginUninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "uninstall the plugin which you want",
-	Example: PluginCmd.Example,
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			print.PendingStatusEvent(os.Stdout, "please input the plugin name what you installed.")

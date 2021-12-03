@@ -28,7 +28,7 @@ import (
 var PluginRemoveCmd = &cobra.Command{
 	Use:   "unregister",
 	Short: "Unregister plugins from tKeel. Supported platforms: Kubernetes",
-	Example: PluginCmd.Example,
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register -k pluginID")
