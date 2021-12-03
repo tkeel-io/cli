@@ -70,6 +70,9 @@ func TenantList() ([]Tenant, error) {
 	}
 	resp := TenantListResponse{}
 	err = json.Unmarshal(raw, &resp)
+	if err != nil {
+		err = fmt.Errorf("unmarshal err :%w", err)
+	}
 	return resp.Data, err
 }
 
@@ -79,8 +82,8 @@ type TenantCreateIn struct {
 }
 
 type TenantAdmin struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
+	UserName string `json:"username"` //nolint
+	Password string `json:"password"` //nolint
 }
 
 type TenantCreateResponse struct {

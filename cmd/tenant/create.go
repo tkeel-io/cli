@@ -6,7 +6,6 @@
 package tenant
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,7 +39,7 @@ tKeel tenant list -k
 				os.Exit(1)
 			}
 
-			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! "))
+			print.SuccessStatusEvent(os.Stdout, "Success! ")
 		}
 	},
 }
