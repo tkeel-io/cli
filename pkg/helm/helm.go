@@ -7,14 +7,15 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/pkg/errutil"
-	"github.com/tkeel-io/kit/log"
 	"helm.sh/helm/v3/cmd/helm/search"
 	helmAction "helm.sh/helm/v3/pkg/action"
 	helmCLI "helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/helmpath"
 	"helm.sh/helm/v3/pkg/repo"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
+
+	"github.com/tkeel-io/cli/pkg/errutil"
+	"github.com/tkeel-io/kit/log"
 )
 
 const (

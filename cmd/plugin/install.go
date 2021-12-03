@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
@@ -19,8 +20,8 @@ var (
 )
 
 var PluginInstallCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Install the plugin which you want",
+	Use:     "install",
+	Short:   "Install the plugin which you want",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {

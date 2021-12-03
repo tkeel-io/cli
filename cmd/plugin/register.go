@@ -21,13 +21,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var PluginRegisterCmd = &cobra.Command{
-	Use:   "register",
-	Short: "Register plugins. Supported platforms: Kubernetes",
+	Use:     "register",
+	Short:   "Register plugins. Supported platforms: Kubernetes",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {

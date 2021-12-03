@@ -21,13 +21,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var PluginRemoveCmd = &cobra.Command{
-	Use:   "unregister",
-	Short: "Unregister plugins from tKeel. Supported platforms: Kubernetes",
+	Use:     "unregister",
+	Short:   "Unregister plugins from tKeel. Supported platforms: Kubernetes",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {

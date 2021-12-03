@@ -56,10 +56,9 @@ tkeel plugin register -k <pluginID>
 tkeel plugin remove <pluginID>
 `
 
-
 var PluginCmd = &cobra.Command{
-	Use:   "plugin",
-	Short: "Manager plugins. Supported platforms: Kubernetes",
+	Use:     "plugin",
+	Short:   "Manager plugins. Supported platforms: Kubernetes",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter

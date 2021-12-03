@@ -6,14 +6,15 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
 )
 
 var PluginUninstallCmd = &cobra.Command{
-	Use:   "uninstall",
-	Short: "uninstall the plugin which you want",
+	Use:     "uninstall",
+	Short:   "uninstall the plugin which you want",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {

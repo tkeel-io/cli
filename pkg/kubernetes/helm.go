@@ -22,13 +22,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tkeel-io/cli/pkg/print"
 	helm "helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/helm/pkg/strvals"
+
+	"github.com/tkeel-io/cli/pkg/print"
 )
 
 func helmConfig(namespace string, log helm.DebugLog) (*helm.Configuration, error) {
