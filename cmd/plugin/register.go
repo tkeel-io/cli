@@ -21,23 +21,15 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var PluginRegisterCmd = &cobra.Command{
-	Use:   "register",
-	Short: "Register plugins. Supported platforms: Kubernetes",
-	Example: `
-# Get status of tKeel plugins from Kubernetes
-tkeel plugin list -k
-tkeel plugin list --installable || -i
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
-tkeel plugin uninstall -k <pluginID>
-tkeel plugin register -k <pluginID>
-tkeel plugin remove <pluginID>
-`,
+	Use:     "register",
+	Short:   "Register plugins. Supported platforms: Kubernetes",
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register -k pluginID")

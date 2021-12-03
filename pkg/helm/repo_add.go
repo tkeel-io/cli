@@ -10,10 +10,11 @@ import (
 
 	"github.com/gofrs/flock"
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/kit/log"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/repo"
+
+	"github.com/tkeel-io/kit/log"
 )
 
 func addRepo(name, url string) error {

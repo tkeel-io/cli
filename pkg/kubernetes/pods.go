@@ -176,8 +176,6 @@ func RegisterPlugins(client k8s.Interface, pluginID string) error {
 	return nil
 }
 
-// UnregisterPlugins
-// curl -XDELETE "http://192.168.123.11:30777/v1/plugins/keel-echo"
 func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 	rudder, err := AppPod(client, "rudder")
 	if err != nil {

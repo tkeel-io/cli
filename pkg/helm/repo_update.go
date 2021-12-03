@@ -5,9 +5,10 @@ import (
 	"sync"
 
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/kit/log"
 	"helm.sh/helm/v3/pkg/getter"
 	"helm.sh/helm/v3/pkg/repo"
+
+	"github.com/tkeel-io/kit/log"
 )
 
 func RepoUpdate(names ...string) error {

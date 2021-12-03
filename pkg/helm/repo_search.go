@@ -6,8 +6,9 @@ import (
 
 	"github.com/gosuri/uitable"
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/pkg/output"
 	"helm.sh/helm/v3/cmd/helm/search"
+
+	"github.com/tkeel-io/cli/pkg/output"
 )
 
 func searchAll() (output.Writer, error) {
