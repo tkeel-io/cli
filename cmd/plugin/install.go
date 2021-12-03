@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
@@ -19,18 +20,9 @@ var (
 )
 
 var PluginInstallCmd = &cobra.Command{
-	Use:   "install",
-	Short: "Install the plugin which you want",
-	Example: `
-# Get status of tKeel plugins from Kubernetes
-tkeel plugin list -k
-tkeel plugin list --installable || -i
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
-tkeel plugin uninstall -k <pluginID>
-tkeel plugin register -k <pluginID>
-tkeel plugin remove <pluginID>
-`,
+	Use:     "install",
+	Short:   "Install the plugin which you want",
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")

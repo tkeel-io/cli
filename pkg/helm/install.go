@@ -2,13 +2,14 @@ package helm
 
 import (
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/kit/log"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/downloader"
 	"helm.sh/helm/v3/pkg/getter"
+
+	"github.com/tkeel-io/kit/log"
 )
 
 func installChart(name, chart, version string) error {

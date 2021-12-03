@@ -5,8 +5,9 @@ import (
 
 	"github.com/gosuri/uitable"
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/pkg/output"
 	"helm.sh/helm/v3/pkg/repo"
+
+	"github.com/tkeel-io/cli/pkg/output"
 )
 
 func listRepo() (*repoListWriter, error) {

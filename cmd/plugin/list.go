@@ -22,6 +22,7 @@ import (
 
 	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
+
 	"github.com/tkeel-io/cli/fmtutil"
 	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
@@ -35,18 +36,9 @@ var (
 )
 
 var PluginStatusCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
-	Example: `
-# Get status of tKeel plugins from Kubernetes
-tkeel plugin list -k
-tkeel plugin list --installable || -i
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
-tkeel plugin uninstall -k <pluginID>
-tkeel plugin register -k <pluginID>
-tkeel plugin remove <pluginID>
-`,
+	Use:     "list",
+	Short:   "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if installable {
 			if update {

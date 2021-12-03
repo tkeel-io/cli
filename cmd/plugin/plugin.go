@@ -45,10 +45,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var PluginCmd = &cobra.Command{
-	Use:   "plugin",
-	Short: "Manager plugins. Supported platforms: Kubernetes",
-	Example: `
+var PluginHelpExample = `
 # Get status of tKeel plugins from Kubernetes
 tkeel plugin list -k
 tkeel plugin list --installable || -i
@@ -57,7 +54,12 @@ tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 
 tkeel plugin uninstall -k <pluginID>
 tkeel plugin register -k <pluginID>
 tkeel plugin remove <pluginID>
-`,
+`
+
+var PluginCmd = &cobra.Command{
+	Use:     "plugin",
+	Short:   "Manager plugins. Supported platforms: Kubernetes",
+	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter
 		if len(args) == 0 {
