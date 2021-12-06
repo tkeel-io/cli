@@ -54,6 +54,8 @@ Things Keel Platform`,
 var (
 	logAsJSON bool
 	namespace string
+	gitCommit = ""
+	buildDate = ""
 )
 
 // Execute adds all child commands to the root command.
@@ -72,7 +74,7 @@ func Execute(version, apiVersion string) {
 }
 
 func setVersion() {
-	template := fmt.Sprintf("Keel CLI version: %s \n", RootCmd.Version)
+	template := fmt.Sprintf("Keel CLI version: %s (%s %s) \n", RootCmd.Version, gitCommit, buildDate)
 	RootCmd.SetVersionTemplate(template)
 }
 

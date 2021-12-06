@@ -80,8 +80,14 @@ endif
 BASE_PACKAGE_NAME := github.com/tkeel-io/cli
 OUT_DIR := ./dist
 
+GIT_COMMIT=$(shell git rev-parse HEAD)
+GIT_DIRTY=$(shell test -n "`git status --porcelain`" && echo "+CHANGES" || true)
+BUILD_DATE=$(shell date '+%Y-%m-%d-%H:%M:%S')
 BINS_OUT_DIR := $(OUT_DIR)/$(GOOS)_$(GOARCH)/$(BUILDTYPE_DIR)
-LDFLAGS := "-X main.version=$(CLI_VERSION) -X main.apiVersion=$(RUNTIME_API_VERSION)"
+LDFLAGS := "-X main.version=$(CLI_VERSION) -X main.apiVersion=$(RUNTIME_API_VERSION) -X github.com/tkeel-io/cli/cmd.gitCommit=${GIT_COMMIT}${GIT_DIRTY} -X github.com/tkeel-io/cli/cmd.buildDate=${BUILD_DATE}"
+
+
+
 
 ################################################################################
 # Target: build                                                                #
