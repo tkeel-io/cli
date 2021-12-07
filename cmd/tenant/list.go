@@ -31,7 +31,7 @@ tKeel tenant list -k
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			table, err := gocsv.MarshalString(data.TenantList)
+			table, err := gocsv.MarshalString(data)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)

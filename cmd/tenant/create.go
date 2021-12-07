@@ -8,10 +8,7 @@ package tenant
 import (
 	"os"
 
-	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
-
-	"github.com/tkeel-io/cli/fmtutil"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
@@ -26,24 +23,23 @@ tKeel tenant list -k
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle")
+			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
 			return
 		}
 		if kubernetesMode {
 			title := args[0]
-			data, err := kubernetes.TenantCreate(title)
-			if err != nil {
-				print.FailureStatusEvent(os.Stdout, err.Error())
-				os.Exit(1)
+			adminName, adminPw := "", ""
+			if len(args) == 3 {
+				adminName = args[1]
+				adminPw = args[2]
 			}
-			dataSlice := []kubernetes.TenantCreateResp{*data}
-			table, err := gocsv.MarshalString(dataSlice)
+			err := kubernetes.TenantCreate(title, adminName, adminPw)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
 
-			fmtutil.PrintTable(table)
+			print.SuccessStatusEvent(os.Stdout, "Success! ")
 		}
 	},
 }
