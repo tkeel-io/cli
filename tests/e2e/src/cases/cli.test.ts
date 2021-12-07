@@ -6,6 +6,6 @@ describe("tkeel cli", () => {
   });
 
   test("002", async () => {
-    expect(c2.actuality).toBe(c2.expectation);
+    expect(c2.actuality).toContain(c2.expectation);
   });
 });
