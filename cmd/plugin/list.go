@@ -20,10 +20,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
 
-	"github.com/tkeel-io/cli/fmtutil"
 	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
@@ -63,13 +61,8 @@ var PluginStatusCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel plugins not install in your cluster?")
 			os.Exit(1)
 		}
-		csv, err := gocsv.MarshalString(status)
-		if err != nil {
-			print.FailureStatusEvent(os.Stdout, err.Error())
-			os.Exit(1)
-		}
 
-		fmtutil.PrintTable(csv)
+		outputList(status, len(status))
 	},
 }
 

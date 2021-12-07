@@ -98,6 +98,10 @@ type TenantListResponse struct {
 	Data []Tenant `json:"data"`
 }
 
+type TenantListData struct {
+	TenantList []TenantCreateResp `json:"tenant_list"`
+}
+
 type TenantCreateResp struct {
 	TenantID int         `json:"tenant_id"`
 	Title    string      `json:"title"`
