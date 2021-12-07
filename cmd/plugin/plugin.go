@@ -43,11 +43,12 @@ package plugin
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/dapr/cli/utils"
 	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/print"
-	"os"
 )
 
 var PluginHelpExample = `
