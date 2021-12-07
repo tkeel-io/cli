@@ -42,7 +42,13 @@ limitations under the License.
 package plugin
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/dapr/cli/utils"
+	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var PluginHelpExample = `
@@ -70,6 +76,31 @@ var PluginCmd = &cobra.Command{
 }
 
 func init() {
-	PluginCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	PluginCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	PluginCmd.PersistentFlags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	PluginCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "", "The output format of the list. Valid values are: json, yaml, or table (default)")
+	PluginCmd.PersistentFlags().BoolP("help", "h", false, "Print this help message")
+}
+
+func outputList(list interface{}, length int) {
+	if outputFormat == "json" || outputFormat == "yaml" {
+		err := utils.PrintDetail(os.Stdout, outputFormat, list)
+		if err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		}
+	} else {
+		table, err := gocsv.MarshalString(list)
+		if err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		}
+
+		// Standalone mode displays a separate message when no instances are found.
+		if !kubernetesMode && length == 0 {
+			fmt.Println("No Dapr instances found.")
+			return
+		}
+
+		utils.PrintTable(table)
+	}
 }

@@ -78,7 +78,6 @@ func ListInstallable(format string, updateRepo bool) ([]byte, error) {
 }
 
 func ListInstalled() {
-
 }
 
 func Install(ctx context.Context, name, chart, version string) error {
