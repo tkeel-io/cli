@@ -79,6 +79,7 @@ type TenantCreateResponse struct {
 	Msg  string           `json:"msg"`
 	Data TenantCreateResp `json:"data"`
 }
+
 type TenantListResponse struct {
 	Ret  int            `json:"ret"`
 	Msg  string         `json:"msg"`
@@ -88,6 +89,7 @@ type TenantListResponse struct {
 type TenantListData struct {
 	TenantList []TenantCreateResp `json:"tenant_list"`
 }
+
 type TenantCreateResp struct {
 	TenantID    string `json:"tenant_id"`
 	Title       string `json:"title"`

@@ -16,6 +16,4 @@ limitations under the License.
 
 package tenant
 
-var (
-	kubernetesMode bool
-)
+var kubernetesMode bool
