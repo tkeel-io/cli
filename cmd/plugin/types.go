@@ -18,6 +18,7 @@ package plugin
 
 var (
 	kubernetesMode bool
+	outputFormat string
 
 	// Unused Declare Variables.
 	/*

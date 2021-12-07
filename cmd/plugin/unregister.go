@@ -49,7 +49,5 @@ var PluginRemoveCmd = &cobra.Command{
 }
 
 func init() {
-	PluginRemoveCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	PluginRemoveCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginCmd.AddCommand(PluginRemoveCmd)
 }

@@ -31,6 +31,5 @@ var PluginUninstallCmd = &cobra.Command{
 }
 
 func init() {
-	PluginUninstallCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginCmd.AddCommand(PluginUninstallCmd)
 }

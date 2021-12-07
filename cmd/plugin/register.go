@@ -48,7 +48,5 @@ var PluginRegisterCmd = &cobra.Command{
 }
 
 func init() {
-	PluginRegisterCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	PluginRegisterCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginCmd.AddCommand(PluginRegisterCmd)
 }
