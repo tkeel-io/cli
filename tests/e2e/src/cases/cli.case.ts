@@ -18,7 +18,7 @@ export const c2 = Case.init(
   "tkeel 版本",
   "输入 tkeel -v",
   "tkeel -v",
-  "Keel CLI version: edge \n",
+  "Keel CLI version: edge",
   (arg: string) => {
     // 处理逻辑
     const result = arg;
