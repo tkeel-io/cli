@@ -1,0 +1,38 @@
+{
+  "name": "testing",
+  "version": "1.0.0",
+  "description": "tkeel cli E2E tesing",
+  "main": "index.js",
+  "repository": "git@github.com:tkeel.io/cli.git",
+  "author": "lunz1207 <loop2542@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "jest": "^27.3.1",
+    "tslib": "^2.3.1"
+  },
+  "scripts": {
+    "test": "jest tests/e2e  --coverage"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.4",
+    "@babel/preset-typescript": "^7.16.0",
+    "@types/jest": "^27.0.2",
+    "babel-jest": "^27.3.1",
+    "jest-junit": "^13.0.0"
+  },
+  "jest": {
+    "verbose": true,
+    "testTimeout": 500000,
+    "reporters": [
+      "default",
+      [
+        "jest-junit",
+        {
+          "outputDirectory": "report",
+          "outputName": "e2e-test.xml"
+        }
+      ]
+    ]
+  }
+}
