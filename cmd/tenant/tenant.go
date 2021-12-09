@@ -27,8 +27,7 @@ tKeel tenant list -k
 }
 
 func init() {
-	TenantCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
-	TenantCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	// ListCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "Tenant ID")
-	// ListCmd.MarkFlagRequired("tenant")
+	TenantCmd.PersistentFlags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	TenantCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "", "The output format of the list. Valid values are: json, yaml, or table (default)")
+	TenantCmd.PersistentFlags().BoolP("help", "h", false, "Print this help message")
 }
