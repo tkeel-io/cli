@@ -17,12 +17,15 @@ limitations under the License.
 package plugin
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/fmtutil"
+	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
+	"github.com/tkeel-io/kit/log"
 )
 
 var (
@@ -35,19 +38,19 @@ var PluginStatusCmd = &cobra.Command{
 	Short:   "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
-		//if installable {
-		//	if update {
-		//		print.PendingStatusEvent(os.Stdout, "updating repo list")
-		//	}
-		//	list, err := helm.ListInstallable("table", update)
-		//	if err != nil {
-		//		log.Warn("list installable plugin failed.")
-		//		print.FailureStatusEvent(os.Stdout, "list installable plugin failed. Because: %s", err.Error())
-		//		return
-		//	}
-		//	fmt.Println(string(list))
-		//	return
-		//}
+		if installable {
+			if update {
+				print.PendingStatusEvent(os.Stdout, "updating repo list")
+			}
+			list, err := helm.ListInstallable("table", update)
+			if err != nil {
+				log.Warn("list installable plugin failed.")
+				print.FailureStatusEvent(os.Stdout, "list installable plugin failed. Because: %s", err.Error())
+				return
+			}
+			fmt.Println(string(list))
+			return
+		}
 
 		plugins, err := kubernetes.List()
 		if err != nil {
