@@ -5,6 +5,7 @@
 ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/tkeel-io/cli)
 ![GitHub](https://img.shields.io/github/license/tkeel-io/cli?style=plastic)
 [![GoDoc](https://godoc.org/github.com/tkeel-io/cli?status.png)](http://godoc.org/github.com/tkeel-io/cli)
+[![codecov](https://codecov.io/gh/tkeel-io/cli/branch/master/graph/badge.svg?token=nHbxE4pw6x)](https://codecov.io/gh/tkeel-io/cli)
 </div>
 
 🕹️ tKeel CLI is your main tool for various tasks related to tKeel Platform.
