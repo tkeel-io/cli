@@ -54,7 +54,7 @@ dapr uninstall -k
 
 		if uninstallKubernetes {
 			print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
-			err = kubernetes.Uninstall(namespace, timeout, debugMode)
+			err = kubernetes.UninstallPlatform(namespace, timeout, debugMode)
 		}
 
 		if err != nil {

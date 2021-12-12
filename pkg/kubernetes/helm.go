@@ -18,18 +18,19 @@ package kubernetes
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/tkeel-io/cli/pkg/print"
 	helm "helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/helm/pkg/strvals"
-
-	"github.com/tkeel-io/cli/pkg/print"
 )
 
 func helmConfig(namespace string, log helm.DebugLog) (*helm.Configuration, error) {
@@ -205,4 +206,34 @@ func InstallPlugin(config InitConfiguration, repo, chartName, releaseName, versi
 
 	print.InfoStatusEvent(os.Stdout, "install tKeel plugin<%s> done.", chartName)
 	return nil
+}
+
+func HelmList(namespace string) ([]*release.Release, error) {
+	settings := cli.New()
+	actionConfig := new(helm.Configuration)
+	// You can pass an empty string instead of settings.Namespace() to list
+	// all namespaces
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
+		return nil, err
+	}
+
+	client := helm.NewList(actionConfig)
+	// Only list deployed
+	client.Deployed = true
+	return client.Run()
+}
+
+func HelmUninstall(namespace, pluginName string) (*release.UninstallReleaseResponse, error) {
+	settings := cli.New()
+
+	actionConfig := new(helm.Configuration)
+	// You can pass an empty string instead of settings.Namespace() to list
+	// all namespaces
+	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
+		log.Printf("%+v", err)
+		os.Exit(1)
+	}
+
+	client := helm.NewUninstall(actionConfig)
+	return client.Run(pluginName)
 }

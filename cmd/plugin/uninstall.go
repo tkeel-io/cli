@@ -1,13 +1,11 @@
 package plugin
 
 import (
-	"context"
 	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"github.com/tkeel-io/cli/pkg/helm"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/log"
 )
@@ -21,7 +19,8 @@ var PluginUninstallCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "please input the plugin name what you installed.")
 			return
 		}
-		if err := helm.Uninstall(context.Background(), args...); err != nil {
+		pluginID := args[0]
+		if err := kubernetes.Uninstall(pluginID, debugMode); err != nil {
 			log.Warn("remove the plugin failed", err)
 			print.FailureStatusEvent(os.Stdout, "Try to remove installed plugin %q failed, Because: %s", strings.Join(args, ","), err.Error())
 			return
@@ -31,5 +30,6 @@ var PluginUninstallCmd = &cobra.Command{
 }
 
 func init() {
+	PluginUninstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginCmd.AddCommand(PluginUninstallCmd)
 }

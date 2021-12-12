@@ -27,7 +27,6 @@ import (
 	"github.com/tkeel-io/cli/cmd/plugin"
 	"github.com/tkeel-io/cli/cmd/tenant"
 	"github.com/tkeel-io/cli/pkg/api"
-	"github.com/tkeel-io/cli/pkg/helm"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
@@ -44,10 +43,6 @@ var RootCmd = &cobra.Command{
 ===============================
 Things Keel Platform`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		if err := helm.SetNamespace(namespace); err != nil {
-			fmt.Println("set helm namespace err")
-			os.Exit(-1)
-		}
 	},
 }
 
