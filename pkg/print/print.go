@@ -94,7 +94,7 @@ func InfoStatusEvent(w io.Writer, fmtstr string, a ...interface{}) {
 	}
 }
 
-func Spinner(w io.Writer, fmtstr string, a ...interface{}) func(result Result) {
+func Spinner(w io.Writer, fmtstr string, a ...interface{}) (func(msg string), func(result Result)) {
 	msg := fmt.Sprintf(fmtstr, a...)
 	var once sync.Once
 	var s *spinner.Spinner
@@ -103,8 +103,7 @@ func Spinner(w io.Writer, fmtstr string, a ...interface{}) func(result Result) {
 		logJSON(w, "pending", msg)
 	} else if runtime.GOOS == windowsOS {
 		fmt.Fprintf(w, "%s\n", msg)
-
-		return func(Result) {} // Return a dummy func
+		return func(string) {}, func(Result) {} // Return a dummy func
 	} else {
 		s = spinner.New(spinner.CharSets[0], 100*time.Millisecond)
 		s.Writer = w
@@ -113,18 +112,20 @@ func Spinner(w io.Writer, fmtstr string, a ...interface{}) func(result Result) {
 		s.Start()
 	}
 
-	return func(result Result) {
-		once.Do(func() {
-			if s != nil {
-				s.Stop()
-			}
-			if result {
-				SuccessStatusEvent(w, msg)
-			} else {
-				FailureStatusEvent(w, msg)
-			}
-		})
-	}
+	return func(msg string) {
+			s.Suffix = msg
+		}, func(result Result) {
+			once.Do(func() {
+				if s != nil {
+					s.Stop()
+				}
+				if result {
+					SuccessStatusEvent(w, msg)
+				} else {
+					FailureStatusEvent(w, msg)
+				}
+			})
+		}
 }
 
 func logJSON(w io.Writer, status, message string) {

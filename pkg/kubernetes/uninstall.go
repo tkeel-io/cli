@@ -7,8 +7,8 @@ import (
 	helm "helm.sh/helm/v3/pkg/action"
 )
 
-// Uninstall removes tKeel from a Kubernetes cluster.
-func Uninstall(namespace string, timeout uint, debugMode bool) error {
+// UninstallPlatform removes tKeel from a Kubernetes cluster.
+func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
 	config, err := helmConfig(namespace, getLog(debugMode))
 	if err != nil {
 		return err
@@ -21,4 +21,25 @@ func Uninstall(namespace string, timeout uint, debugMode bool) error {
 		return fmt.Errorf("helm uninstall err:%w", err)
 	}
 	return nil
+}
+
+// Uninstall removes tKeel's plugin from a Kubernetes cluster.
+func Uninstall(pluginID string, debugMode bool) error {
+	clientset, err := Client()
+	if err != nil {
+		return err
+	}
+
+	namespace, err := GetTKeelNameSpace(clientset)
+	if err != nil {
+		return err
+	}
+
+	_, err = Unregister(pluginID)
+	if err != nil {
+		return err
+	}
+
+	_, err = HelmUninstall(namespace, pluginID)
+	return err
 }
