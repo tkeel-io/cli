@@ -38,21 +38,9 @@ tkeel plugin remove <pluginID>
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
 			return
 		}
-		pluginFormInput, name := args[0], args[1]
-		plugin := pluginFormInput
-		version := "latest"
-		if sp := strings.Split(pluginFormInput, "@"); len(sp) == 2 {
-			plugin, version = sp[0], sp[1]
-		}
 
-		spi := strings.LastIndex(plugin, "/")
-		repo := tkeelChartsRepo
-		if spi != -1 {
-			repo, plugin = plugin[:spi], plugin[spi+1:]
-			if repo == "" || strings.EqualFold(repo, "tkeel") {
-				repo = tkeelChartsRepo
-			}
-		}
+		name := args[1]
+		repo, plugin, version := parseInstallArg(args[0])
 
 		config := kubernetes.InitConfiguration{
 			Version:   tkeelVersion,
@@ -80,4 +68,28 @@ func init() {
 	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
 	PluginInstallCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginCmd.AddCommand(PluginInstallCmd)
+}
+
+// parseInstallArg parse the first arg, get repo, plugin and version information.
+// More efficient and concise support for both formats：
+// url style install target plugin: https://tkeel-io.github.io/helm-charts/A@version
+// short style install official plugin： tkeel/B@version or C@version
+func parseInstallArg(arg string) (repo, plugin, version string) {
+	version = "latest"
+	if sp := strings.Split(arg, "@"); len(sp) == 2 {
+		plugin, version = sp[0], sp[1]
+	} else {
+		plugin = arg
+	}
+
+	repo = tkeelChartsRepo
+	spi := strings.LastIndex(plugin, "/")
+	if spi != -1 {
+		repo, plugin = plugin[:spi], plugin[spi+1:]
+		if repo == "" || strings.EqualFold(repo, "tkeel") {
+			repo = tkeelChartsRepo
+			return
+		}
+	}
+	return
 }
