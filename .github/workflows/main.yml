@@ -61,14 +61,10 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.target_os == 'linux'
-        uses: codecov/codecov-action@v1.0.2
+        uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: coverage.out
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-          verbose: true
 
   E2ETest:
     name: E2E Test
