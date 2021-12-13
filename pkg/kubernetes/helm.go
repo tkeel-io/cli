@@ -213,14 +213,19 @@ func HelmList(namespace string) ([]*release.Release, error) {
 	actionConfig := new(helm.Configuration)
 	// You can pass an empty string instead of settings.Namespace() to list
 	// all namespaces
-	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
-		return nil, err
+	err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf)
+	if err != nil {
+		return nil, fmt.Errorf("error init helm config: %w", err)
 	}
 
 	client := helm.NewList(actionConfig)
 	// Only list deployed
 	client.Deployed = true
-	return client.Run()
+	ret, err := client.Run()
+	if err != nil {
+		return nil, fmt.Errorf("error helm list: %w", err)
+	}
+	return ret, nil
 }
 
 func HelmUninstall(namespace, pluginName string) (*release.UninstallReleaseResponse, error) {
@@ -230,10 +235,13 @@ func HelmUninstall(namespace, pluginName string) (*release.UninstallReleaseRespo
 	// You can pass an empty string instead of settings.Namespace() to list
 	// all namespaces
 	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
-		log.Printf("%+v", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("error init helm config: %w", err)
 	}
 
 	client := helm.NewUninstall(actionConfig)
-	return client.Run(pluginName)
+	ret, err := client.Run(pluginName)
+	if err != nil {
+		return nil, fmt.Errorf("error helm uninstall: %w", err)
+	}
+	return ret, nil
 }
