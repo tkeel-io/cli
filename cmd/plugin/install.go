@@ -73,7 +73,7 @@ func init() {
 // parseInstallArg parse the first arg, get repo, plugin and version information.
 // More efficient and concise support for both formats：
 // url style install target plugin: https://tkeel-io.github.io/helm-charts/A@version
-// short style install official plugin： tkeel/B@version or C@version
+// short style install official plugin： tkeel/B@version or C@version.
 func parseInstallArg(arg string) (repo, plugin, version string) {
 	version = "latest"
 	if sp := strings.Split(arg, "@"); len(sp) == 2 {
