@@ -76,15 +76,14 @@ func init() {
 // short style install official plugin： tkeel/B@version or C@version.
 func parseInstallArg(arg string) (repo, plugin, version string) {
 	version = "latest"
+	plugin = arg
+
 	if sp := strings.Split(arg, "@"); len(sp) == 2 {
 		plugin, version = sp[0], sp[1]
-	} else {
-		plugin = arg
 	}
 
 	repo = tkeelChartsRepo
-	spi := strings.LastIndex(plugin, "/")
-	if spi != -1 {
+	if spi := strings.LastIndex(plugin, "/"); spi != -1 {
 		repo, plugin = plugin[:spi], plugin[spi+1:]
 		if repo == "" || strings.EqualFold(repo, "tkeel") {
 			repo = tkeelChartsRepo
