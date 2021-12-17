@@ -33,7 +33,7 @@ tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 通过 Bash 脚本将最新版 tKeel Cli 安装至 Linux 系统的 `/usr/local/bin`
 
 ```bash
-$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
+wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
 ##### MacOS
@@ -41,7 +41,7 @@ $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.
 通过 Bash 脚本将最新版 tKeel Cli 安装至 MacOS(darwin) 系统的 `/usr/local/bin`
 
 ```bash
-$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
 ```
 
 #### 通过发行的二进制程序
@@ -61,7 +61,7 @@ $ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/insta
 使用命令行初始 `tKeel`
 
 ```bash
-$ tkeel init
+tkeel init
 ```
 
 > 注意：Linux 用户请注意，如果你的 docker 需要使用 sudo 权限才能使用，那么请你使用 `sudo tkeel init`
@@ -71,14 +71,10 @@ Output should look like so:
 ```
 ⌛  Making the jump to hyperspace...
 ℹ️  Checking the Dapr runtime status...
-↑  Deploying the tKeel Platform to your cluster... 
+ℹ️  Deploying the tKeel Platform to your cluster... 
 ℹ️  install plugins...                                                        
-ℹ️  install plugins done.                                                                                                        
-✅  Deploying the tKeel Platform to your cluster...
-↖  Register the plugins ... 
-ℹ️  Plugin<plugins>  is registered.                                                                                          
-ℹ️  Plugin<keel>  is registered.                                                                                                                        
-ℹ️  Plugin<auth>  is registered.                                                                                                                        
+ℹ️  install plugins done.                                                                                 
+✅  Deploying the tKeel Platform to your cluster...                          
 ✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
@@ -94,6 +90,28 @@ $ tkeel uninstall
 
 你能通过 Dapr 部署 tKeel 的插件，
 详细请见 [deploy-the-plugin-app 文档](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
+
+更多详细的使用文档请参照 [如何使用插件功能](https://tkeel-io.github.io/docs/getting_started/how-to-use-plugin)
+
+### 安装插件
+
+使用 tkeel CLI 工具 安装 指定源的插件。
+
+```bash
+tkeel plugin install https://tkeel-io.github.io/helm-charts/keel-echo@v0.2.0 tkeel-echo
+```
+
+> 备注：
+> 示例中所安装的插件为 keel-echo 为平台官方提供的一个演示插件，源地址为 https://tkeel-io.github.io/helm-charts/ 插件 chart 版本为 v0.2.0，如果不指定版本信息将会默认安装发行的最新版本。最后一个参数 「tkeel-echo」是为该插件创建的实体名称，最后对应为部署在 Kubernetes 中的部署实例。
+>
+> 如果您有自己想要安装的插件，请将对应信息进行替换并执行命令。
+
+执行后输出应该如下：
+
+```bash
+ℹ️  install tKeel plugin<keel-echo> done.
+✅  Install "keel-echo" success! It's named "tkeel-echo" in k8s
+```
 
 ### 管理插件
 
