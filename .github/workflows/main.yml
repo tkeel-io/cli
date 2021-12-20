@@ -69,8 +69,8 @@ jobs:
   E2ETest:
     name: E2E Test
     runs-on: ubuntu-latest
-    needs:
-      - unittest
+    # needs:
+    #   - unittest
     steps:
       - name: Set up Go
         uses: actions/setup-go@v2.1.4
