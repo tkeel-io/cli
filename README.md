@@ -38,7 +38,7 @@ written.
 Install the latest linux tKeel CLI to `/usr/local/bin`
 
 ```bash
-$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
+wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
 ##### MacOS
@@ -46,10 +46,10 @@ $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.
 Install the latest darwin tKeel CLI to `/usr/local/bin`
 
 ```bash
-$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
 ```
 
-#### From the Binary Releases
+#### Releases Binary
 
 Each release of tKeel CLI includes various OSes and architectures. These binary versions can be manually downloaded and
 installed.
@@ -66,7 +66,7 @@ installed.
 Use the init command to initialize tKeel.
 
 ```bash
-$ tkeel init
+tkeel init --debug --wait --timeout 600
 ```
 
 > For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tkeel init**"
@@ -76,14 +76,10 @@ Output should look like so:
 ```
 ⌛  Making the jump to hyperspace...
 ℹ️  Checking the Dapr runtime status...
-↑  Deploying the tKeel Platform to your cluster... 
+ℹ️  Deploying the tKeel Platform to your cluster... 
 ℹ️  install plugins...                                                        
-ℹ️  install plugins done.                                                                                                        
-✅  Deploying the tKeel Platform to your cluster...
-↖  Register the plugins ... 
-ℹ️  Plugin<plugins>  is registered.                                                                                          
-ℹ️  Plugin<keel>  is registered.                                                                                                                        
-ℹ️  Plugin<auth>  is registered.                                                                                                                        
+ℹ️  install plugins done.                                                                                 
+✅  Deploying the tKeel Platform to your cluster...                          
 ✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
@@ -92,13 +88,28 @@ Output should look like so:
 To remove tKeel from your Kubernetes cluster, use the `uninstall` command.
 
 ```
-$ tkeel uninstall
+tkeel uninstall
 ```
 
 ### Deploy plugin
 
 You can deploy the plugin app with the Dapr. There
 is [deploy-the-plugin-app Doc](https://github.com/dapr/quickstarts/tree/v1.0.0/hello-kubernetes#step-3---deploy-the-nodejs-app-with-the-dapr-sidecar)
+
+### Install plugin
+
+Install the plugin which you want like following:
+
+```bash
+tkeel plugin install https://tkeel-io.github.io/helm-charts/keel-echo@v0.2.0 tkeel-echo
+```
+
+Output should look like so:
+
+```bash
+ℹ️  install tKeel plugin<keel-echo> done.
+✅  Install "keel-echo" success! It's named "tkeel-echo" in k8s
+```
 
 ### Manage plugins
 
