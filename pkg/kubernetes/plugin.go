@@ -96,7 +96,7 @@ func List() ([]StatusOutput, error) {
 		}
 		statuses = append(statuses, StatusOutput{
 			Name:         appID,
-			Namespace:    info.NameSpace,
+			Namespace:    info.Namespace,
 			Created:      info.Created,
 			Age:          info.Age,
 			Status:       status,

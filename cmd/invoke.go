@@ -67,7 +67,7 @@ tkeel invoke --plugin-id target --method v1/sample --verb GET
 			bytePayload = []byte(invokeData)
 		}
 
-		response, err := kubernetes.Invoke(invokeAppID, invokeAppMethod, bytePayload, invokeVerb)
+		response, err := kubernetes.InvokeByPortForward(invokeAppID, invokeAppMethod, bytePayload, invokeVerb)
 		if err != nil {
 			err = fmt.Errorf("error invoking plugin %s: %w", invokeAppID, err)
 			print.FailureStatusEvent(os.Stdout, err.Error())
