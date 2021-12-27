@@ -46,7 +46,7 @@ type PortForward struct {
 // specified by namespace and deployName.
 func NewPortForward(
 	config *rest.Config,
-	NameSpace, PodName string,
+	namespace, podName string,
 	host string, localPort, remotePort int,
 	emitLogs bool,
 ) (*PortForward, error) {
@@ -57,8 +57,8 @@ func NewPortForward(
 
 	req := client.CoreV1().RESTClient().Post().
 		Resource("pods").
-		Namespace(NameSpace).
-		Name(PodName).
+		Namespace(namespace).
+		Name(podName).
 		SubResource("portforward")
 
 	return &PortForward{

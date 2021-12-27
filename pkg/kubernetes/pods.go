@@ -219,7 +219,7 @@ func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 	return resp.Plugin, nil
 }
 
-func GetTKeelNameSpace(client k8s.Interface) (string, error) {
+func GetTKeelNamespace(client k8s.Interface) (string, error) {
 	pods, err := ListPluginPods(client, "keel")
 	if err != nil {
 		return "", err
