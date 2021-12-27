@@ -9,7 +9,7 @@
 
 🕹️ tKeel CLI 是您用于各种 tKeel 相关任务操作的简易使用工具。
 
-您可以使用它来 **安装 tKeel 平台**、**管理插件** 以及 **用户模块**。
+您可以使用它来 **安装和管理 tKeel 平台**，比如说 **插件的安装和管理** 以及一些 **用户模块** 相关的功能。
 
 ### 安装须知
 
@@ -26,11 +26,11 @@ tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 
 #### 使用脚本安装最新版本
 
-通过我们编写好的脚本自动为您安装 `tKeel Cli`。
+通过我们编写好的脚本自动为您安装 `tKeel CLI`。
 
 ##### Linux
 
-通过 Bash 脚本将最新版 tKeel Cli 安装至 Linux 系统的 `/usr/local/bin`
+通过 Bash 脚本将最新版 tKeel CLI 安装至 Linux 系统的 `/usr/local/bin`
 
 ```bash
 wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
@@ -38,7 +38,7 @@ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh
 
 ##### MacOS
 
-通过 Bash 脚本将最新版 tKeel Cli 安装至 MacOS(darwin) 系统的 `/usr/local/bin`
+通过 Bash 脚本将最新版 tKeel CLI 安装至 MacOS(darwin) 系统的 `/usr/local/bin`
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
