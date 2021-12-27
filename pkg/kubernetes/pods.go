@@ -4,44 +4,60 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
-
 	"github.com/dapr/cli/pkg/age"
 	core_v1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/net"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 type DaprPod core_v1.Pod
 
 func (p *DaprPod) App() App {
-	ap := App{
+	a := App{
 		PodName:   p.Name,
-		NameSpace: p.Namespace,
+		Namespace: p.Namespace,
 	}
 	for _, c := range p.Spec.Containers {
 		if c.Name == "daprd" {
-			for i, a := range c.Args {
-				if a == "--app-port" {
-					port := c.Args[i+1]
-					ap.AppPort = port
-				} else if a == "--app-id" {
+			for i, arg := range c.Args {
+				if arg == "--app-port" {
+					port, err := strconv.Atoi(c.Args[i+1])
+					if err != nil {
+						continue
+					}
+					a.AppPort = port
+				} else if arg == "--dapr-http-port" {
+					port, err := strconv.Atoi(c.Args[i+1])
+					if err != nil {
+						continue
+					}
+					a.HTTPPort = port
+				} else if arg == "--dapr-grpc-port" {
+					port, err := strconv.Atoi(c.Args[i+1])
+					if err != nil {
+						continue
+					}
+					a.GRPCPort = port
+				} else if arg == "--app-id" {
 					id := c.Args[i+1]
-					ap.AppID = id
+					a.AppID = id
 				}
 			}
-			ap.Created = p.CreationTimestamp.Format("2006-01-02 15:04.05")
-			ap.Age = age.GetAge(p.CreationTimestamp.Time)
+			a.Created = p.CreationTimestamp.Format("2006-01-02 15:04.05")
+			a.Age = age.GetAge(p.CreationTimestamp.Time)
 
 			image := p.Spec.Containers[0].Image
-			ap.Version = image[strings.IndexAny(image, ":")+1:]
+			a.Version = image[strings.IndexAny(image, ":")+1:]
+
 		}
 	}
 
-	return ap
+	return a
 }
 
 type DaprPodList []DaprPod
@@ -61,21 +77,23 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 }
 
 type App struct {
-	AppID     string `csv:"APP ID"   json:"app_id"   yaml:"app_id"`
-	AppPort   string `csv:"APP PORT" json:"app_port" yaml:"app_port"`
-	PodName   string `csv:"POD NAME" json:"pod_name" yaml:"pod_name"`
-	NameSpace string `csv:"NAMESPACE" json:"name_space" yaml:"name_space"`
+	AppID     string `csv:"APP ID"      json:"app_id"        yaml:"appId"`
+	HTTPPort  int    `csv:"HTTP PORT"   json:"http_port"     yaml:"httpPort"`
+	GRPCPort  int    `csv:"GRPC PORT"   json:"grpc_port"     yaml:"grpcPort"`
+	AppPort   int    `csv:"APP PORT"    json:"app_port"      yaml:"appPort"`
+	PodName   string `csv:"POD NAME"    json:"pod_name"      yaml:"podName"`
+	Namespace string `csv:"NAMESPACE"   json:"namespace"    yaml:"namespace"`
 	Age       string `csv:"AGE"      json:"age"     yaml:"age"`
 	Created   string `csv:"CREATED"  json:"created" yaml:"created"`
 	Version   string `csv:"VERSION"  json:"version" yaml:"version"`
 }
 
 func (a App) Request(r *rest.Request) *rest.Request {
-	r.Namespace(a.NameSpace).
+	r.Namespace(a.Namespace).
 		Resource("pods").
 		SubResource("proxy").
 		SetHeader("Content-Type", "application/json").
-		Name(net.JoinSchemeNamePort("", a.PodName, a.AppPort))
+		Name(net.JoinSchemeNamePort("", a.PodName, fmt.Sprintf("%d", a.AppPort)))
 	return r
 }
 
@@ -201,7 +219,7 @@ func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 	return resp.Plugin, nil
 }
 
-func GetTKeelNameSpace(client k8s.Interface) (string, error) {
+func GetTKeelNamespace(client k8s.Interface) (string, error) {
 	pods, err := ListPluginPods(client, "keel")
 	if err != nil {
 		return "", err

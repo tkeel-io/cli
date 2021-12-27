@@ -30,7 +30,7 @@ func Uninstall(pluginID string, debugMode bool) error {
 		return err
 	}
 
-	namespace, err := GetTKeelNameSpace(clientset)
+	namespace, err := GetTKeelNamespace(clientset)
 	if err != nil {
 		return err
 	}

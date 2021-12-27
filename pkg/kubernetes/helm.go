@@ -171,7 +171,7 @@ func InstallPlugin(config InitConfiguration, repo, chartName, releaseName, versi
 		return err
 	}
 
-	namespace, err := GetTKeelNameSpace(clientset)
+	namespace, err := GetTKeelNamespace(clientset)
 	if err != nil {
 		return err
 	}

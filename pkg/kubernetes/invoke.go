@@ -17,12 +17,18 @@ limitations under the License.
 package kubernetes
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"net/url"
-	"strings"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/signal"
 
-	"k8s.io/client-go/rest"
+	"github.com/dapr/cli/pkg/api"
+	"github.com/dapr/cli/pkg/kubernetes"
+
+	core_v1 "k8s.io/api/core/v1"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
@@ -41,15 +47,12 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 	if data != nil {
 		res = res.Body(data)
 	}
-	res, err = makeEndpoint(res, pluginID, method)
-	if err != nil {
-		return "", err
-	}
+	res = res.RequestURI(method)
 
 	result := res.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
-		return "", fmt.Errorf("error get raw: %w", err)
+		return "", fmt.Errorf("error on Invoke: %w", err)
 	}
 
 	if len(rawbody) > 0 {
@@ -59,14 +62,77 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 	return "", nil
 }
 
-func makeEndpoint(res *rest.Request, appID, method string) (*rest.Request, error) {
-	tempURL, err := url.Parse(fmt.Sprintf("http://127.0.0.1/%s", method))
+// Invoke is a command to invoke a remote or local dapr instance.
+func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
+	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
-		return nil, fmt.Errorf("error in make endpoint: %w", err)
+		return "", err
 	}
-	res = res.Suffix(tempURL.Path)
-	for k, vs := range tempURL.Query() {
-		res = res.Param(k, strings.Join(vs, ","))
+
+	// manage termination of port forwarding connection on interrupt
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	defer signal.Stop(signals)
+
+	pod, err := AppPod(client, pluginID)
+	if err != nil {
+		return "", err
 	}
-	return res, nil
+
+	if pod.Status.Phase != core_v1.PodRunning {
+		return "", fmt.Errorf("no running pods found for %s", pluginID)
+	}
+
+	a := pod.App()
+	portForward, err := NewPortForward(
+		config,
+		a.Namespace, a.PodName,
+		"127.0.0.1",
+		0,
+		a.HTTPPort,
+		false,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// initialize port forwarding
+	if err = portForward.Init(); err == nil {
+		url := makeEndpoint(a, portForward, method)
+		fmt.Println(url)
+		req, err := http.NewRequest(verb, url, bytes.NewBuffer(data))
+		if err != nil {
+			return "", err
+		}
+		req.Header.Set("Content-Type", "application/json")
+
+		var httpc http.Client
+
+		r, err := httpc.Do(req)
+		if err != nil {
+			return "", err
+		}
+		defer r.Body.Close()
+		return handleResponse(r)
+	}
+
+	portForward.Stop()
+	return "", nil
+}
+
+func makeEndpoint(app App, pf *PortForward, method string) string {
+	return fmt.Sprintf("http://127.0.0.1:%s/v%s/invoke/%s/method/%s", fmt.Sprintf("%v", pf.LocalPort), api.RuntimeAPIVersion, app.AppID, method)
+}
+
+func handleResponse(response *http.Response) (string, error) {
+	rb, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if len(rb) > 0 {
+		return string(rb), nil
+	}
+
+	return "", nil
 }
