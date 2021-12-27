@@ -20,13 +20,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/dapr/cli/pkg/api"
-	"github.com/dapr/cli/pkg/kubernetes"
 	"io/ioutil"
-	core_v1 "k8s.io/api/core/v1"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/dapr/cli/pkg/api"
+	"github.com/dapr/cli/pkg/kubernetes"
+
+	core_v1 "k8s.io/api/core/v1"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
