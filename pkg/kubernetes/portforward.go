@@ -53,7 +53,7 @@ func NewPortForward(
 ) (*PortForward, error) {
 	client, err := k8s.NewForConfig(config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error get k8s client: %w", err)
 	}
 
 	req := client.CoreV1().RESTClient().Post().
@@ -81,7 +81,7 @@ func NewPortForward(
 func (pf *PortForward) Init() error {
 	transport, upgrader, err := spdy.RoundTripperFor(pf.Config)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creat spdy round tripper: %w", err)
 	}
 
 	out := ioutil.Discard
@@ -96,7 +96,7 @@ func (pf *PortForward) Init() error {
 
 	fw, err := portforward.NewOnAddresses(dialer, []string{pf.Host}, ports, pf.StopCh, pf.ReadyCh, out, errOut)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creat portforward: %w", err)
 	}
 
 	failure := make(chan error)
