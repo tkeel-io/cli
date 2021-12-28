@@ -66,7 +66,7 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
 	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("get kube config error: %w",err)
 	}
 
 	// manage termination of port forwarding connection on interrupt
