@@ -19,13 +19,14 @@ package kubernetes
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"net/http"
-	"net/url"
-	"os"
 )
 
 // PortForward provides a port-forward connection in a kubernetes cluster.
@@ -78,7 +79,6 @@ func NewPortForward(
 // This function blocks until connection is established.
 // Note: Caller should call Stop() to finish the connection.
 func (pf *PortForward) Init() error {
-
 	transport, upgrader, err := spdy.RoundTripperFor(pf.Config)
 	if err != nil {
 		return err
