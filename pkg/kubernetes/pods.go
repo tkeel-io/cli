@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+
 	"github.com/dapr/cli/pkg/age"
 	core_v1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/net"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"net/http"
-	"strconv"
-	"strings"
 )
 
 type DaprPod core_v1.Pod
@@ -53,7 +54,6 @@ func (p *DaprPod) App() App {
 
 			image := p.Spec.Containers[0].Image
 			a.Version = image[strings.IndexAny(image, ":")+1:]
-
 		}
 	}
 
@@ -77,11 +77,11 @@ func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
 }
 
 type App struct {
-	AppID     string `csv:"APP ID"      json:"app_id"        yaml:"appId"`
-	HTTPPort  int    `csv:"HTTP PORT"   json:"http_port"     yaml:"httpPort"`
-	GRPCPort  int    `csv:"GRPC PORT"   json:"grpc_port"     yaml:"grpcPort"`
-	AppPort   int    `csv:"APP PORT"    json:"app_port"      yaml:"appPort"`
-	PodName   string `csv:"POD NAME"    json:"pod_name"      yaml:"podName"`
+	AppID     string `csv:"APP ID"      json:"app_id"        yaml:"app_id"`
+	HTTPPort  int    `csv:"HTTP PORT"   json:"http_port"     yaml:"http_port"`
+	GRPCPort  int    `csv:"GRPC PORT"   json:"grpc_port"     yaml:"grpc_port"`
+	AppPort   int    `csv:"APP PORT"    json:"app_port"      yaml:"app_port"`
+	PodName   string `csv:"POD NAME"    json:"pod_name"      yaml:"pod_name"`
 	Namespace string `csv:"NAMESPACE"   json:"namespace"    yaml:"namespace"`
 	Age       string `csv:"AGE"      json:"age"     yaml:"age"`
 	Created   string `csv:"CREATED"  json:"created" yaml:"created"`

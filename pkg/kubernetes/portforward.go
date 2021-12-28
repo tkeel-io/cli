@@ -19,13 +19,14 @@ package kubernetes
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
+	"os"
+
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
-	"net/http"
-	"net/url"
-	"os"
 )
 
 // PortForward provides a port-forward connection in a kubernetes cluster.
@@ -52,7 +53,7 @@ func NewPortForward(
 ) (*PortForward, error) {
 	client, err := k8s.NewForConfig(config)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error get k8s client: %w", err)
 	}
 
 	req := client.CoreV1().RESTClient().Post().
@@ -78,10 +79,9 @@ func NewPortForward(
 // This function blocks until connection is established.
 // Note: Caller should call Stop() to finish the connection.
 func (pf *PortForward) Init() error {
-
 	transport, upgrader, err := spdy.RoundTripperFor(pf.Config)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creat spdy round tripper: %w", err)
 	}
 
 	out := ioutil.Discard
@@ -96,7 +96,7 @@ func (pf *PortForward) Init() error {
 
 	fw, err := portforward.NewOnAddresses(dialer, []string{pf.Host}, ports, pf.StopCh, pf.ReadyCh, out, errOut)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creat portforward: %w", err)
 	}
 
 	failure := make(chan error)
