@@ -54,7 +54,6 @@ func (p *DaprPod) App() App {
 
 			image := p.Spec.Containers[0].Image
 			a.Version = image[strings.IndexAny(image, ":")+1:]
-
 		}
 	}
 

@@ -66,7 +66,7 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
 	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
-		return "", fmt.Errorf("get kube config error: %w",err)
+		return "", fmt.Errorf("get kube config error: %w", err)
 	}
 
 	// manage termination of port forwarding connection on interrupt
@@ -102,7 +102,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 		fmt.Println(url)
 		req, err := http.NewRequest(verb, url, bytes.NewBuffer(data))
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("error creat http request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
 
@@ -110,7 +110,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 
 		r, err := httpc.Do(req)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("error do http request: %w", err)
 		}
 		defer r.Body.Close()
 		return handleResponse(r)
@@ -127,7 +127,7 @@ func makeEndpoint(app App, pf *PortForward, method string) string {
 func handleResponse(response *http.Response) (string, error) {
 	rb, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("error read http response: %w", err)
 	}
 
 	if len(rb) > 0 {
