@@ -10,6 +10,8 @@ import (
 	"github.com/tkeel-io/kit/log"
 )
 
+const tkeelChartsRepo = "https://tkeel-io.github.io/helm-charts"
+
 var (
 	debugMode    bool
 	wait         bool
@@ -28,19 +30,9 @@ var PluginInstallCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
 			return
 		}
-		pluginFormInput, name := args[0], args[1]
-		plugin := pluginFormInput
-		version := "latest"
-		if sp := strings.Split(pluginFormInput, "@"); len(sp) == 2 {
-			plugin, version = sp[0], sp[1]
-		}
-		urls := strings.Split(plugin, "/")
-		if len(urls) < 2 {
-			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
-			return
-		}
-		repo := strings.Join(urls[:len(urls)-1], "/")
-		plugin = urls[len(urls)-1]
+
+		name := args[1]
+		repo, plugin, version := parseInstallArg(args[0])
 
 		config := kubernetes.InitConfiguration{
 			Version:   tkeelVersion,
@@ -66,4 +58,27 @@ func init() {
 	PluginInstallCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
 	PluginCmd.AddCommand(PluginInstallCmd)
+}
+
+// parseInstallArg parse the first arg, get repo, plugin and version information.
+// More efficient and concise support for both formats：
+// url style install target plugin: https://tkeel-io.github.io/helm-charts/A@version
+// short style install official plugin： tkeel/B@version or C@version.
+func parseInstallArg(arg string) (repo, plugin, version string) {
+	version = "latest"
+	plugin = arg
+
+	if sp := strings.Split(arg, "@"); len(sp) == 2 {
+		plugin, version = sp[0], sp[1]
+	}
+
+	repo = tkeelChartsRepo
+	if spi := strings.LastIndex(plugin, "/"); spi != -1 {
+		repo, plugin = plugin[:spi], plugin[spi+1:]
+		if repo == "" || strings.EqualFold(repo, "tkeel") {
+			repo = tkeelChartsRepo
+			return
+		}
+	}
+	return
 }
