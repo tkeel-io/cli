@@ -55,7 +55,7 @@ jobs:
       - name: upload artifacts
         uses: actions/upload-artifact@master
         with:
-          name: tkeel
+          name: tk
           path: ${{ env.ARCHIVE_OUTDIR }}
   release:
     name: Create Release Notes
@@ -103,7 +103,7 @@ jobs:
         id: download
         uses: actions/download-artifact@v2
         with:
-          name: tkeel
+          name: tk
           path: dist/archivers
 
       - name: Upload release binaries

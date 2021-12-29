@@ -45,10 +45,10 @@ var InitCmd = &cobra.Command{
 	},
 	Example: `
 # Initialize Keel in Kubernetes
-tkeel init 
+tk init 
 
 # Initialize Keel in Kubernetes and wait for the installation to complete (default timeout is 300s/5m)
-tkeel init --wait --timeout 600
+tk init --wait --timeout 600
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
@@ -69,7 +69,7 @@ tkeel init --wait --timeout 600
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			successEvent := fmt.Sprintf("Success! tKeel Platform has been installed to namespace %s. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace)
+			successEvent := fmt.Sprintf("Success! tKeel Platform has been installed to namespace %s. To verify, run `tk plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace)
 			print.SuccessStatusEvent(os.Stdout, successEvent)
 			return
 		}

@@ -14,7 +14,7 @@ $ErrorActionPreference = 'stop'
 $TKeelRoot = $TKeelRoot -replace ' ', '` '
 
 # Constants
-$TKeelCliFileName = "tkeel.exe"
+$TKeelCliFileName = "tk.exe"
 $TKeelCliFilePath = "${TKeelRoot}\${TKeelCliFileName}"
 
 # GitHub Org and repo hosting tKeel CLI

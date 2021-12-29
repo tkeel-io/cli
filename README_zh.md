@@ -33,7 +33,7 @@ tKeel CLI 可以帮助您安装 tKeel 平台并且帮助您管理平台。
 通过 Bash 脚本将最新版 tKeel Cli 安装至 Linux 系统的 `/usr/local/bin`
 
 ```bash
-$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
+wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
 ##### MacOS
@@ -41,7 +41,7 @@ $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.
 通过 Bash 脚本将最新版 tKeel Cli 安装至 MacOS(darwin) 系统的 `/usr/local/bin`
 
 ```bash
-$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
 ```
 
 #### 通过发行的二进制程序
@@ -58,13 +58,13 @@ $ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/insta
 
 > 请注意 [安装须知](#安装须知) 确保你的系统中有所有环境。
 
-使用命令行初始 `tKeel`
+使用命令行初始 `tk`
 
 ```bash
-$ tkeel init
+tk init
 ```
 
-> 注意：Linux 用户请注意，如果你的 docker 需要使用 sudo 权限才能使用，那么请你使用 `sudo tkeel init`
+> 注意：Linux 用户请注意，如果你的 docker 需要使用 sudo 权限才能使用，那么请你使用 `sudo tk init`
 
 Output should look like so:
 
@@ -79,7 +79,7 @@ Output should look like so:
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tk plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### 卸载 tKeel 平台
@@ -87,7 +87,7 @@ Output should look like so:
 要从你的 Kubernetes 集群中移除 `tKeel`，请使用 `uninstall`命令。
 
 ```bash
-$ tkeel uninstall
+tk uninstall
 ```
 
 ### 部署插件
@@ -102,13 +102,13 @@ $ tkeel uninstall
 #### 展示所有插件
 
 ```bash
-$ tkeel plugin list
+tk plugin list
 ```
 
 您会得到像是这样的一串输出:
 
 ```bash
-$ plugin list              
+tk plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -119,14 +119,14 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 #### 注册插件
 
 ```bash
-$ tkeel plugin register echo-demo
-✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+tk plugin register echo-demo
+✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tk plugin list -k' in your terminal.
 ```
 
 使用` plugin list ` 可以查看插件状态
 
 ```bash
-$ tkeel plugin list              
+tk plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -137,6 +137,6 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 #### 删除插件
 
 ```bash
-$ tkeel plugin uninstall echo-demo
+tk plugin uninstall echo-demo
 ✅  Remove "echo-demo" success!
 ```

@@ -53,13 +53,13 @@ import (
 
 var PluginHelpExample = `
 # Get status of tKeel plugins from Kubernetes
-tkeel plugin list
-tkeel plugin list --installable || -i
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
-tkeel plugin uninstall <pluginID>
-tkeel plugin register <pluginID>
-tkeel plugin unregister <pluginID>
+tk plugin list
+tk plugin list --installable || -i
+tk plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
+tk plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
+tk plugin uninstall <pluginID>
+tk plugin register <pluginID>
+tk plugin unregister <pluginID>
 `
 
 var PluginCmd = &cobra.Command{

@@ -29,16 +29,16 @@ var completionExample = `
 	## or, if running Bash 4.1+
 	brew install bash-completion@2
 	## Add the completion to your completion directory
-	tkeel completion bash > $(brew --prefix)/etc/bash_completion.d/tkeel
+	tk completion bash > $(brew --prefix)/etc/bash_completion.d/tkeel
 	source ~/.bash_profile
 
 	# Installing bash completion on Linux
 	## If bash-completion is not installed on Linux, please install the 'bash-completion' package
 	## via your distribution's package manager.
 	## Load the tkeel completion code for bash into the current shell
-	source <(tkeel completion bash)
+	source <(tk completion bash)
 	## Write bash completion code to a file and source if from .bash_profile
-	tkeel completion bash > ~/.tkeel/completion.bash.inc
+	tk completion bash > ~/.tkeel/completion.bash.inc
 	printf "
 	## tkeel shell completion
 	source '$HOME/.tkeel/completion.bash.inc'
@@ -49,22 +49,22 @@ var completionExample = `
 	## If zsh-completion is not installed on macOS, please install the 'zsh-completion' package
 	brew install zsh-completions
 	## Set the tkeel completion code for zsh[1] to autoload on startup
-	tkeel completion zsh > "${fpath[1]}/_tkeel"
+	tk completion zsh > "${fpath[1]}/_tkeel"
 	source ~/.zshrc
 
 	# Installing zsh completion on Linux
 	## If zsh-completion is not installed on Linux, please install the 'zsh-completion' package
 	## via your distribution's package manager.
 	## Load the tkeel completion code for zsh into the current shell
-	source <(tkeel completion zsh)
+	source <(tk completion zsh)
 	# Set the tkeel completion code for zsh[1] to autoload on startup
-	tkeel completion zsh > "${fpath[1]}/_tkeel"
+	tk completion zsh > "${fpath[1]}/_tkeel"
 
 	# Installing powershell completion on Windows
 	## Create $PROFILE if it not exists
 	if (!(Test-Path -Path $PROFILE )){ New-Item -Type File -Path $PROFILE -Force }
 	## Add the completion to your profile
-	tkeel completion powershell >> $PROFILE
+	tk completion powershell >> $PROFILE
 `
 
 func newCompletionCmd() *cobra.Command {

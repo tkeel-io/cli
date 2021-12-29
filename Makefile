@@ -13,7 +13,7 @@ export GOSUMDB ?= sum.golang.org
 GIT_COMMIT  = $(shell git rev-list -1 HEAD)
 GIT_VERSION = $(shell git describe --always --abbrev=7 --dirty)
 CGO			?= 0
-CLI_BINARY  = tkeel
+CLI_BINARY  = tk
 
 ifdef REL_VERSION
 	CLI_VERSION := $(REL_VERSION)

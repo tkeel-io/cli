@@ -37,7 +37,7 @@ var UninstallCmd = &cobra.Command{
 	Short: "Uninstall tKeel Platform. Supported platforms: Kubernetes",
 	Example: `
 # Uninstall from self-hosted mode
-tkeel uninstall
+tk uninstall
 
 @TODO
 

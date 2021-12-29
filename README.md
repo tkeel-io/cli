@@ -38,7 +38,7 @@ written.
 Install the latest linux tKeel CLI to `/usr/local/bin`
 
 ```bash
-$ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
+wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh -O - | /bin/bash
 ```
 
 ##### MacOS
@@ -46,7 +46,7 @@ $ wget -q https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.
 Install the latest darwin tKeel CLI to `/usr/local/bin`
 
 ```bash
-$ curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/tkeel-io/cli/master/install/install.sh | /bin/bash
 ```
 
 #### From the Binary Releases
@@ -66,10 +66,10 @@ installed.
 Use the init command to initialize tKeel.
 
 ```bash
-$ tkeel init
+tk init
 ```
 
-> For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tkeel init**"
+> For Linux users, if you run your docker cmds with sudo, you need to use "**sudo tk init**"
 
 Output should look like so:
 
@@ -84,7 +84,7 @@ Output should look like so:
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tk plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### Uninstall tKeel on Kubernetes
@@ -92,7 +92,7 @@ Output should look like so:
 To remove tKeel from your Kubernetes cluster, use the `uninstall` command.
 
 ```
-$ tkeel uninstall
+tk uninstall
 ```
 
 ### Deploy plugin
@@ -107,7 +107,7 @@ Use the plugin command to manage plugins.
 1. List plugin
 
 ```bash
-$ tkeel plugin list      
+tk plugin list      
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -118,14 +118,14 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 2. Register plugin
 
 ```bash
-$ tkeel plugin register echo-demo
-✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+tk plugin register echo-demo
+✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tk plugin list -k' in your terminal.
 ```
 
 Check the status
 
 ```bash
-$ tkeel plugin list              
+tk plugin list              
 NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
 auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
 plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
@@ -136,6 +136,6 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 3. Delete plugin
 
 ```bash
-$ tkeel plugin uninstall echo-demo
+tk plugin uninstall echo-demo
 ✅  Remove "echo-demo" success!
 ```

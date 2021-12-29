@@ -19,9 +19,9 @@ var TenantListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list tenant . Supported platforms: Kubernetes",
 	Example: `
-# Manager plugins. in Kubernetes mode
-tKeel tenant create -k tenantTitle
-tKeel tenant list -k
+# Manager tenant. in Kubernetes mode
+tk tenant create -k tenantTitle
+tk tenant list -k
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if kubernetesMode {

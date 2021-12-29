@@ -31,7 +31,7 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "tkeel",
+	Use:   "tk",
 	Short: "Keel CLI",
 	Long: `
       __             __

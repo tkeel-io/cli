@@ -44,10 +44,10 @@ var InvokeCmd = &cobra.Command{
 	Short: "Invoke a method on a given tKeel plugin(application). Supported platforms: kubernetes",
 	Example: `
 # Invoke a sample method on target app with POST Verb
-tkeel invoke --plugin-id target --method v1/sample --dao '{"key":"value"}
+tk invoke --plugin-id target --method v1/sample --dao '{"key":"value"}
 
 # Invoke a sample method on target app with GET Verb
-tkeel invoke --plugin-id target --method v1/sample --verb GET
+tk invoke --plugin-id target --method v1/sample --verb GET
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		bytePayload := []byte{}
