@@ -27,6 +27,8 @@ import (
 
 	"github.com/dapr/cli/pkg/api"
 	"github.com/dapr/cli/pkg/kubernetes"
+	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 
 	core_v1 "k8s.io/api/core/v1"
 )
@@ -96,7 +98,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 		return "", err
 	}
 
-	// initialize port forwarding
+	// initialize port forwarding.
 	if err = portForward.Init(); err == nil {
 		url := makeEndpoint(a, portForward, method)
 		fmt.Println(url)
@@ -124,6 +126,11 @@ func makeEndpoint(app App, pf *PortForward, method string) string {
 	return fmt.Sprintf("http://127.0.0.1:%s/v%s/invoke/%s/method/%s", fmt.Sprintf("%v", pf.LocalPort), api.RuntimeAPIVersion, app.AppID, method)
 }
 
+// not use dapr api.
+func makeWsEndpoint(pf *PortForward, method string) string {
+	return fmt.Sprintf("ws://127.0.0.1:%s/%s", fmt.Sprintf("%v", pf.LocalPort), method)
+}
+
 func handleResponse(response *http.Response) (string, error) {
 	rb, err := ioutil.ReadAll(response.Body)
 	if err != nil {
@@ -134,5 +141,99 @@ func handleResponse(response *http.Response) (string, error) {
 		return string(rb), nil
 	}
 
+	return "", nil
+}
+
+// get portforward.
+func getPortforward(pluginID string) (*PortForward, error) {
+	config, client, err := kubernetes.GetKubeConfigClient()
+	if err != nil {
+		return nil, fmt.Errorf("get kube config error: %w", err)
+	}
+
+	// manage termination of port forwarding connection on interrupt
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	defer signal.Stop(signals)
+	go func() {
+		<-signals
+		os.Exit(0)
+	}()
+
+	pod, err := AppPod(client, pluginID)
+	if err != nil {
+		return nil, err
+	}
+
+	if pod.Status.Phase != core_v1.PodRunning {
+		return nil, fmt.Errorf("no running pods found for %s", pluginID)
+	}
+
+	a := pod.App()
+	portForward, err := NewPortForward(
+		config,
+		a.Namespace, a.PodName,
+		"127.0.0.1",
+		0,
+		a.AppPort,
+		false,
+	)
+	return portForward, err
+}
+
+// websocket request to the k8s pod.
+func WebsocketByPortForward(pluginID, method string, data []byte) (string, error) {
+	portForward, err := getPortforward(pluginID)
+	if err != nil {
+		return "", err
+	}
+
+	// manage termination of port forwarding connection on interrupt
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	defer signal.Stop(signals)
+	go func() {
+		<-signals
+		os.Exit(0)
+	}()
+
+	// initialize port forwarding
+	if err = portForward.Init(); err == nil {
+		defer portForward.Stop()
+		url := makeWsEndpoint(portForward, method)
+		fmt.Println(url)
+
+		dialer := websocket.Dialer{}
+		connect, resp, err := dialer.Dial(url, nil)
+		if nil != err {
+			fmt.Println(err)
+			return "", errors.Wrap(err, "connect error")
+		}
+		defer resp.Body.Close()
+		defer connect.Close()
+
+		err = connect.WriteMessage(websocket.TextMessage, data)
+		if nil != err {
+			fmt.Println(err)
+			return "", errors.Wrap(err, "websocket write error")
+		}
+
+		for {
+			messageType, messageData, err := connect.ReadMessage()
+			if nil != err {
+				return "", errors.Wrap(err, "websocket read error")
+			}
+			switch messageType {
+			case websocket.TextMessage:
+				fmt.Println(string(messageData))
+			case websocket.BinaryMessage:
+				fmt.Println(messageData)
+			case websocket.CloseMessage:
+			case websocket.PingMessage:
+			case websocket.PongMessage:
+			default:
+			}
+		}
+	}
 	return "", nil
 }

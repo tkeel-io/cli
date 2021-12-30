@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/gocarina/gocsv v0.0.0-20210516172204-ca9e8a8ddea8
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/gosuri/uitable v0.0.4
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/lib/pq v1.10.3 // indirect

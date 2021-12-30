@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/tkeel-io/cli/cmd/core"
 	"github.com/tkeel-io/cli/cmd/plugin"
 	"github.com/tkeel-io/cli/cmd/tenant"
 	"github.com/tkeel-io/cli/pkg/api"
@@ -88,4 +89,5 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "tkeel-platform", "The Kubernetes namespace to install tKeel in")
 	RootCmd.AddCommand(plugin.PluginCmd)
 	RootCmd.AddCommand(tenant.TenantCmd)
+	RootCmd.AddCommand(core.CoreCmd)
 }
