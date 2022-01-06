@@ -64,7 +64,7 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 	return "", nil
 }
 
-// Invoke is a command to invoke a remote or local dapr instance.
+// InvokeByPortForward is a command to invoke a remote or local dapr instance.
 func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
 	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
