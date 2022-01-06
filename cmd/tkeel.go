@@ -49,9 +49,8 @@ Things Keel Platform`,
 }
 
 var (
-	logAsJSON  bool
-	namespace  string
-	kubeconfig string
+	logAsJSON bool
+	namespace string
 
 	gitCommit = ""
 	buildDate = ""
