@@ -15,7 +15,7 @@ import (
 
 const (
 	_pluginRudder     = "rudder"
-	_adminLoginMethod = "apis/rudder/v1/oauth2/admin"
+	_adminLoginMethod = "v1/oauth2/admin"
 	_TokenFile        = ".token"
 	_tkeelRudderDir   = ".tkeel/rudder"
 )
@@ -29,7 +29,7 @@ func AdminLogin(password string) (token string, err error) {
 	val.Set("password", password)
 	u.RawQuery = val.Encode()
 
-	resp, err := Invoke(_pluginRudder, u.String(), nil, http.MethodGet)
+	resp, err := InvokeByPortForward(_pluginRudder, u.String(), nil, http.MethodGet)
 	if err != nil {
 		return "", errors.Wrap(err, "invoking admin login err")
 	}
