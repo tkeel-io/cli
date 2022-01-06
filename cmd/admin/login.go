@@ -26,14 +26,15 @@ var adminLoginCmd = &cobra.Command{
 		var (
 			token string
 			err   error
+			bytes []byte
 		)
 		if len(args) == 0 && password == "" {
-			if bytes, err := term.ReadPassword(syscall.Stdin); err != nil {
+			bytes, err = term.ReadPassword(syscall.Stdin)
+			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read password from stdin")
 				return
-			} else {
-				password = string(bytes)
 			}
+			password = string(bytes)
 		}
 
 		token, err = kubernetes.AdminLogin(password)
