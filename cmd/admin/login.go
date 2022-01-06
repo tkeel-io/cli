@@ -19,8 +19,8 @@ var adminLoginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "login admin with password",
 	Example: `tkeel admin login -p
-	tkeel admin login -p password
-	tkeel admin login -p --print
+	tkeel admin login
+	tkeel admin login -p your_password --print
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (

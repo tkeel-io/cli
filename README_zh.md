@@ -140,3 +140,12 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 $ tkeel plugin uninstall echo-demo
 ✅  Remove "echo-demo" success!
 ```
+
+### 管理员登录
+
+使用接下来的命令可以直接登录，获取管理员 token
+> 采用不可见方式输入密码
+
+```shell
+tkeel admin login
+```

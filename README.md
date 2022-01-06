@@ -139,3 +139,12 @@ echo-demo  keel-system  False    Running   ACTIVE        1         0.0.1    2m  
 $ tkeel plugin uninstall echo-demo
 ✅  Remove "echo-demo" success!
 ```
+
+### Admin Login
+
+Use this command to login your admin account of rudder.
+> input password with invisible
+
+```shell
+tkeel admin login
+```

@@ -1,13 +1,14 @@
 package kubernetes
 
 import (
+	"encoding/base64"
+	"fmt"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/kit/result"
 	oauth2 "github.com/tkeel-io/tkeel/api/oauth2/v1"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -21,6 +22,7 @@ const (
 )
 
 func AdminLogin(password string) (token string, err error) {
+	password = base64.StdEncoding.EncodeToString([]byte(password))
 	u, err := url.Parse(_adminLoginMethod)
 	if err != nil {
 		return "", errors.Wrap(err, "parse admin login method error")
@@ -33,9 +35,9 @@ func AdminLogin(password string) (token string, err error) {
 	if err != nil {
 		return "", errors.Wrap(err, "invoking admin login err")
 	}
-	token, err = parseToken(resp)
+	token, err = getToken(resp)
 	if err != nil {
-		return "", errors.Wrap(err, "parse token err")
+		return "", errors.Wrap(err, "get token err")
 	}
 
 	f, err := openRudderTokenFile()
@@ -52,7 +54,6 @@ func AdminLogin(password string) (token string, err error) {
 func openRudderTokenFile() (*os.File, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
-		print.FailureStatusEvent(os.Stdout, "create tkeel rudder token file, get user homedir failed")
 		return nil, errors.Wrap(err, "get user home dir failed")
 	}
 	rudderTokenFile := path.Join(homedir, _tkeelRudderDir, _TokenFile)
@@ -72,7 +73,7 @@ func openRudderTokenFile() (*os.File, error) {
 	return f, nil
 }
 
-func parseToken(body string) (string, error) {
+func getToken(body string) (string, error) {
 	tokenResponse := oauth2.IssueTokenResponse{}
 
 	var r = &result.Http{}
@@ -80,10 +81,12 @@ func parseToken(body string) (string, error) {
 		return "", errors.Wrap(err, "unmarshal response context error")
 	}
 
+	if r.Code == http.StatusBadRequest && r.Msg == "OAUTH2_ERR_PASSWORD_NOT_MATCH" {
+		return "", errors.New("invalid password")
+	}
+
 	if r.Code != http.StatusOK {
-		print.FailureStatusEvent(os.Stdout, "invalid response code")
-		print.FailureStatusEvent(os.Stdout, "response context: %s", body)
-		return "", errors.New("invalid response")
+		return "", errors.New(fmt.Sprintf("invalid response: %s", r.Msg))
 	}
 
 	if err := r.Data.UnmarshalTo(&tokenResponse); err != nil {
