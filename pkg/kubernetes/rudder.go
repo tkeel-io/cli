@@ -86,7 +86,7 @@ func getToken(body string) (string, error) {
 	}
 
 	if r.Code != http.StatusOK {
-		return "", errors.New(fmt.Sprintf("invalid response: %s", r.Msg))
+		return "", fmt.Errorf("invalid response: %s", r.Msg)
 	}
 
 	if err := r.Data.UnmarshalTo(&tokenResponse); err != nil {
