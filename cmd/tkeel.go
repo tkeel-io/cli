@@ -48,8 +48,10 @@ Things Keel Platform`,
 }
 
 var (
-	logAsJSON bool
-	namespace string
+	logAsJSON  bool
+	namespace  string
+	kubeconfig string
+
 	gitCommit = ""
 	buildDate = ""
 )
@@ -87,7 +89,16 @@ func initConfig() {
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
 	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "tkeel-platform", "The Kubernetes namespace to install tKeel in")
+	RootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "c", "", "The Kubernetes cluster which you want")
+
 	RootCmd.AddCommand(plugin.PluginCmd)
 	RootCmd.AddCommand(tenant.TenantCmd)
 	RootCmd.AddCommand(core.CoreCmd)
+
+	if kubeconfig != "" {
+		err := os.Setenv("KUBECONFIG", kubeconfig)
+		if err != nil {
+			print.WarningStatusEvent(os.Stdout, "set kubeconfig environment variable failed")
+		}
+	}
 }
