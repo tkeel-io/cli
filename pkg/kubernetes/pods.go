@@ -97,7 +97,7 @@ func (a App) Request(r *rest.Request) *rest.Request {
 	return r
 }
 
-// List outputs plugins.
+// ListPluginPods outputs plugins list.
 func ListPluginPods(client k8s.Interface, appIDs ...string) (DaprPodList, error) {
 	opts := v1.ListOptions{}
 	podList, err := client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
@@ -119,7 +119,7 @@ func ListPluginPods(client k8s.Interface, appIDs ...string) (DaprPodList, error)
 		}
 	}
 
-	l := []DaprPod{}
+	var l []DaprPod
 	for _, p := range podList.Items {
 		p := DaprPod(p)
 	FindLoop:
