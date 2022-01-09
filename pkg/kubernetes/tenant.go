@@ -28,13 +28,16 @@ func TenantCreate(title, adminName, adminPW string) error {
 }
 
 func CreateTenant(client k8s.Interface, tenant *TenantCreateIn) error {
-	rudder, err := AppPod(client, "rudder")
+	rudder, err := GetAppPod(client, "rudder")
 	if err != nil {
 		return err
 	}
+
 	body, _ := json.Marshal(tenant)
-	res := rudder.App().Request(client.CoreV1().RESTClient().Post()).
-		Suffix("v1/tenants").Body(body)
+	res, err := rudder.Request(client.CoreV1().RESTClient().Post(), "v1/tenants", body)
+	if err != nil {
+		return err
+	}
 
 	ret := res.Do(context.TODO())
 	if ret.Error() != nil {
@@ -53,12 +56,16 @@ func TenantList() ([]Tenant, error) {
 	if err != nil {
 		return nil, err
 	}
-	rudder, err := AppPod(client, "rudder")
+
+	rudder, err := GetAppPod(client, "rudder")
 	if err != nil {
 		return nil, err
 	}
-	res := rudder.App().Request(client.CoreV1().RESTClient().Get()).
-		Suffix("v1/tenants")
+
+	res, err := rudder.Request(client.CoreV1().RESTClient().Get(), "v1/tenants", nil)
+	if err != nil {
+		return nil, err
+	}
 
 	ret := res.Do(context.TODO())
 	if ret.Error() != nil {

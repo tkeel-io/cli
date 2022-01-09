@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/dapr/cli/pkg/age"
 	core_v1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/net"
@@ -16,67 +16,12 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-type DaprPod core_v1.Pod
-
-func (p *DaprPod) App() App {
-	a := App{
-		PodName:   p.Name,
-		Namespace: p.Namespace,
-	}
-	for _, c := range p.Spec.Containers {
-		if c.Name == "daprd" {
-			for i, arg := range c.Args {
-				if arg == "--app-port" {
-					port, err := strconv.Atoi(c.Args[i+1])
-					if err != nil {
-						continue
-					}
-					a.AppPort = port
-				} else if arg == "--dapr-http-port" {
-					port, err := strconv.Atoi(c.Args[i+1])
-					if err != nil {
-						continue
-					}
-					a.HTTPPort = port
-				} else if arg == "--dapr-grpc-port" {
-					port, err := strconv.Atoi(c.Args[i+1])
-					if err != nil {
-						continue
-					}
-					a.GRPCPort = port
-				} else if arg == "--app-id" {
-					id := c.Args[i+1]
-					a.AppID = id
-				}
-			}
-			a.Created = p.CreationTimestamp.Format("2006-01-02 15:04.05")
-			a.Age = age.GetAge(p.CreationTimestamp.Time)
-
-			image := p.Spec.Containers[0].Image
-			a.Version = image[strings.IndexAny(image, ":")+1:]
-		}
-	}
-
-	return a
+type AppPod struct {
+	AppInfo
+	pod *DaprPod
 }
 
-type DaprPodList []DaprPod
-
-func (l DaprPodList) GroupByAppID() map[string]DaprPodList {
-	ret := make(map[string]DaprPodList)
-	for _, c := range l {
-		id := c.App().AppID
-		g, ok := ret[id]
-		if !ok {
-			g = DaprPodList{}
-		}
-		g = append(g, c)
-		ret[id] = g
-	}
-	return ret
-}
-
-type App struct {
+type AppInfo struct {
 	AppID     string `csv:"APP ID"      json:"app_id"        yaml:"app_id"`
 	HTTPPort  int    `csv:"HTTP PORT"   json:"http_port"     yaml:"http_port"`
 	GRPCPort  int    `csv:"GRPC PORT"   json:"grpc_port"     yaml:"grpc_port"`
@@ -88,30 +33,38 @@ type App struct {
 	Version   string `csv:"VERSION"  json:"version" yaml:"version"`
 }
 
-func (a App) Request(r *rest.Request) *rest.Request {
-	r.Namespace(a.Namespace).
-		Resource("pods").
-		SubResource("proxy").
-		SetHeader("Content-Type", "application/json").
-		Name(net.JoinSchemeNamePort("", a.PodName, fmt.Sprintf("%d", a.AppPort)))
-	return r
+type (
+	DaprPod     core_v1.Pod
+	DaprAppList []*AppPod
+)
+
+func GetAppPod(client k8s.Interface, appID string) (*AppPod, error) {
+	list, err := ListAppInfos(client, appID)
+	if err != nil {
+		return nil, err
+	}
+	if len(list) == 0 {
+		return nil, fmt.Errorf("%s not found", appID)
+	}
+	app := list[0]
+	return app, nil
 }
 
 // List outputs plugins.
-func ListPluginPods(client k8s.Interface, appIDs ...string) (DaprPodList, error) {
+func ListAppInfos(client k8s.Interface, appIDs ...string) (DaprAppList, error) {
 	opts := v1.ListOptions{}
 	podList, err := client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
 	if err != nil {
 		return nil, fmt.Errorf("err get pods list:%w", err)
 	}
 
-	fn := func(dp DaprPod) bool {
+	fn := func(*AppPod) bool {
 		return true
 	}
 	if len(appIDs) > 0 {
-		fn = func(dp DaprPod) bool {
+		fn = func(a *AppPod) bool {
 			for _, id := range appIDs {
-				if dp.App().AppID == id {
+				if id != "" && a.AppID == id {
 					return true
 				}
 			}
@@ -119,16 +72,15 @@ func ListPluginPods(client k8s.Interface, appIDs ...string) (DaprPodList, error)
 		}
 	}
 
-	l := []DaprPod{}
+	l := make(DaprAppList, 0)
 	for _, p := range podList.Items {
 		p := DaprPod(p)
-	FindLoop:
 		for _, c := range p.Spec.Containers {
 			if c.Name == "daprd" {
-				if fn(p) {
-					l = append(l, p)
+				app := getAppInfoFromPod(&p)
+				if fn(app) {
+					l = append(l, app)
 				}
-				break FindLoop
 			}
 		}
 	}
@@ -136,26 +88,80 @@ func ListPluginPods(client k8s.Interface, appIDs ...string) (DaprPodList, error)
 	return l, nil
 }
 
-func AppPod(client k8s.Interface, appID string) (*DaprPod, error) {
-	pods, err := ListPluginPods(client, appID)
+func getAppInfoFromPod(p *DaprPod) (a *AppPod) {
+	for _, c := range p.Spec.Containers {
+		if c.Name == "daprd" {
+			a = &AppPod{
+				AppInfo: AppInfo{
+					PodName:   p.Name,
+					Namespace: p.Namespace,
+				},
+				pod: p,
+			}
+			for i, arg := range c.Args {
+				if arg == "--app-port" {
+					if port, err := strconv.Atoi(c.Args[i+1]); err != nil {
+						continue
+					} else {
+						a.AppPort = port
+					}
+				} else if arg == "--dapr-http-port" {
+					if port, err := strconv.Atoi(c.Args[i+1]); err != nil {
+						continue
+					} else {
+						a.HTTPPort = port
+					}
+				} else if arg == "--dapr-grpc-port" {
+					if port, err := strconv.Atoi(c.Args[i+1]); err != nil {
+						continue
+					} else {
+						a.GRPCPort = port
+					}
+				} else if arg == "--app-id" {
+					id := c.Args[i+1]
+					a.AppID = id
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (a *AppInfo) Request(r *rest.Request, method string, data []byte) (*rest.Request, error) {
+	r = r.Namespace(a.Namespace).
+		Resource("pods").
+		SubResource("proxy").
+		SetHeader("Content-Type", "application/json").
+		Name(net.JoinSchemeNamePort("", a.PodName, fmt.Sprintf("%d", a.AppPort)))
+	if data != nil {
+		r = r.Body(data)
+	}
+
+	u, err := url.Parse(method)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error parse method %s: %w", method, err)
 	}
-	if len(pods) == 0 {
-		return nil, fmt.Errorf("%s not found", appID)
+
+	r = r.Suffix(u.Path)
+
+	for k, vs := range u.Query() {
+		r = r.Param(k, strings.Join(vs, ","))
 	}
-	appPod := pods[0]
-	return &appPod, nil
+
+	return r, nil
 }
 
 func ListPlugins(client k8s.Interface) ([]*Plugin, error) {
-	rudder, err := AppPod(client, "rudder")
+	rudder, err := GetAppPod(client, "rudder")
 	if err != nil {
 		return nil, err
 	}
 
-	res := rudder.App().Request(client.CoreV1().RESTClient().Get()).
-		Suffix("v1/plugins")
+	res, err := rudder.Request(client.CoreV1().RESTClient().Get(), "v1/plugins", nil)
+	if err != nil {
+		return nil, err
+	}
+
 	result := res.Do(context.TODO())
 	if result.Error() != nil {
 		return nil, fmt.Errorf("k8s query resutl err: %w", err)
@@ -173,14 +179,16 @@ func ListPlugins(client k8s.Interface) ([]*Plugin, error) {
 }
 
 func RegisterPlugins(client k8s.Interface, pluginID string) error {
-	rudder, err := AppPod(client, "rudder")
+	rudder, err := GetAppPod(client, "rudder")
 	if err != nil {
 		return err
 	}
 
-	res := rudder.App().Request(client.CoreV1().RESTClient().Post()).
-		Suffix("v1/plugins").
-		Body([]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
+	res, err := rudder.Request(client.CoreV1().RESTClient().Post(), "v1/plugins",
+		[]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
+	if err != nil {
+		return err
+	}
 
 	ret := res.Do(context.TODO())
 	if ret.Error() != nil {
@@ -195,13 +203,16 @@ func RegisterPlugins(client k8s.Interface, pluginID string) error {
 }
 
 func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
-	rudder, err := AppPod(client, "rudder")
+	rudder, err := GetAppPod(client, "rudder")
 	if err != nil {
 		return nil, err
 	}
 
-	res := rudder.App().Request(client.CoreV1().RESTClient().Delete()).
-		Suffix(fmt.Sprintf(`v1/plugins/%s`, pluginID))
+	res, err := rudder.Request(client.CoreV1().RESTClient().Delete(), fmt.Sprintf(`v1/plugins/%s`, pluginID),
+		[]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
+	if err != nil {
+		return nil, err
+	}
 
 	ret := res.Do(context.TODO())
 	if ret.Error() != nil {
@@ -220,30 +231,28 @@ func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 }
 
 func GetTKeelNamespace(client k8s.Interface) (string, error) {
-	pods, err := ListPluginPods(client, "keel")
+	keel, err := GetAppPod(client, "keel")
 	if err != nil {
 		return "", err
 	}
-	if len(pods) == 0 {
-		return "", fmt.Errorf("tKeel not initialized")
-	}
-	return pods[0].Namespace, nil
+	return keel.Namespace, nil
 }
 
 // GetStatusAndHealthyInPodList loop through all replicas and update to Running/Healthy status only if all instances are Running and Healthy.
-func GetStatusAndHealthyInPodList(podList DaprPodList) (status string, healthy string) {
+func GetStatusAndHealthyInPodList(appList DaprAppList) (status string, healthy string) {
 	healthy = "False"
 	running := true
-	if len(podList) == 0 {
+	if len(appList) == 0 {
 		return status, healthy
 	}
-	firstPod := podList[0]
-	for _, pod := range podList {
+	firstApp := appList[0]
+	for _, app := range appList {
+		pod := app.pod
 		if len(pod.Status.ContainerStatuses) == 0 {
 			status = string(pod.Status.Phase)
 		} else if pod.Status.ContainerStatuses[0].State.Waiting != nil {
 			status = fmt.Sprintf("Waiting (%s)", pod.Status.ContainerStatuses[0].State.Waiting.Reason)
-		} else if firstPod.Status.ContainerStatuses[0].State.Terminated != nil {
+		} else if firstApp.pod.Status.ContainerStatuses[0].State.Terminated != nil {
 			status = "Terminated"
 		}
 
@@ -261,4 +270,18 @@ func GetStatusAndHealthyInPodList(podList DaprPodList) (status string, healthy s
 		status = "Running"
 	}
 	return status, healthy
+}
+
+func GroupByAppID(l DaprAppList) map[string]DaprAppList {
+	ret := make(map[string]DaprAppList)
+	for _, c := range l {
+		id := c.AppID
+		g, ok := ret[id]
+		if !ok {
+			g = DaprAppList{}
+		}
+		g = append(g, c)
+		ret[id] = g
+	}
+	return ret
 }
