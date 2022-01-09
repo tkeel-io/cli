@@ -34,7 +34,7 @@ func CreateTenant(client k8s.Interface, tenant *TenantCreateIn) error {
 	}
 
 	body, _ := json.Marshal(tenant)
-	res, err := rudder.RequestInvoke(client.CoreV1().RESTClient().Post(), "v1/tenants", body)
+	res, err := rudder.Request(client.CoreV1().RESTClient().Post(), "v1/tenants", body)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func TenantList() ([]Tenant, error) {
 		return nil, err
 	}
 
-	res, err := rudder.RequestInvoke(client.CoreV1().RESTClient().Get(), "v1/tenants", nil)
+	res, err := rudder.Request(client.CoreV1().RESTClient().Get(), "v1/tenants", nil)
 	if err != nil {
 		return nil, err
 	}

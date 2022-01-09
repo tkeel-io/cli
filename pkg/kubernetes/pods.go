@@ -127,7 +127,7 @@ func getAppInfoFromPod(p *DaprPod) (a *AppPod) {
 	return nil
 }
 
-func (a *AppInfo) RequestInvoke(r *rest.Request, method string, data []byte) (*rest.Request, error) {
+func (a *AppInfo) Request(r *rest.Request, method string, data []byte) (*rest.Request, error) {
 	r = r.Namespace(a.Namespace).
 		Resource("pods").
 		SubResource("proxy").
@@ -157,7 +157,7 @@ func ListPlugins(client k8s.Interface) ([]*Plugin, error) {
 		return nil, err
 	}
 
-	res, err := rudder.RequestInvoke(client.CoreV1().RESTClient().Get(), "v1/plugins", nil)
+	res, err := rudder.Request(client.CoreV1().RESTClient().Get(), "v1/plugins", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func RegisterPlugins(client k8s.Interface, pluginID string) error {
 		return err
 	}
 
-	res, err := rudder.RequestInvoke(client.CoreV1().RESTClient().Post(), "v1/plugins",
+	res, err := rudder.Request(client.CoreV1().RESTClient().Post(), "v1/plugins",
 		[]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
 	if err != nil {
 		return err
@@ -208,7 +208,7 @@ func UnregisterPlugins(client k8s.Interface, pluginID string) (*Plugin, error) {
 		return nil, err
 	}
 
-	res, err := rudder.RequestInvoke(client.CoreV1().RESTClient().Delete(), fmt.Sprintf(`v1/plugins/%s`, pluginID),
+	res, err := rudder.Request(client.CoreV1().RESTClient().Delete(), fmt.Sprintf(`v1/plugins/%s`, pluginID),
 		[]byte(fmt.Sprintf(`{"id":"%s","secret":"changeme"}`, pluginID)))
 	if err != nil {
 		return nil, err

@@ -51,7 +51,7 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 }
 
 func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string) (string, error) {
-	res, err := app.RequestInvoke(client.Verb(verb), method, data)
+	res, err := app.Request(client.Verb(verb), method, data)
 	if err != nil {
 		return "", fmt.Errorf("error get request: %w", err)
 	}
