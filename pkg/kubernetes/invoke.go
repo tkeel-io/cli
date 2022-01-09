@@ -27,6 +27,8 @@ import (
 
 	"github.com/dapr/cli/pkg/api"
 	"github.com/dapr/cli/pkg/kubernetes"
+	"k8s.io/client-go/rest"
+
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 
@@ -40,21 +42,24 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 		return "", err
 	}
 
-	app, err := AppPod(client, pluginID)
+	app, err := GetAppPod(client, pluginID)
 	if err != nil {
 		return "", err
 	}
 
-	res := app.App().Request(client.CoreV1().RESTClient().Verb(verb))
-	if data != nil {
-		res = res.Body(data)
+	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb)
+}
+
+func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string) (string, error) {
+	res, err := app.RequestInvoke(client.Verb(verb), method, data)
+	if err != nil {
+		return "", fmt.Errorf("error get request: %w", err)
 	}
-	res = res.RequestURI(method)
 
 	result := res.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
-		return "", fmt.Errorf("error on Invoke: %w", err)
+		return "", fmt.Errorf("error get raw: %w", err)
 	}
 
 	if len(rawbody) > 0 {
@@ -76,22 +81,17 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 	signal.Notify(signals, os.Interrupt)
 	defer signal.Stop(signals)
 
-	pod, err := AppPod(client, pluginID)
+	app, err := GetAppPod(client, pluginID)
 	if err != nil {
 		return "", err
 	}
 
-	if pod.Status.Phase != core_v1.PodRunning {
-		return "", fmt.Errorf("no running pods found for %s", pluginID)
-	}
-
-	a := pod.App()
 	portForward, err := NewPortForward(
 		config,
-		a.Namespace, a.PodName,
+		app.Namespace, app.PodName,
 		"127.0.0.1",
 		0,
-		a.HTTPPort,
+		app.HTTPPort,
 		false,
 	)
 	if err != nil {
@@ -100,7 +100,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 
 	// initialize port forwarding.
 	if err = portForward.Init(); err == nil {
-		url := makeEndpoint(a, portForward, method)
+		url := makeEndpoint(app, portForward, method)
 		fmt.Println(url)
 		req, err := http.NewRequest(verb, url, bytes.NewBuffer(data))
 		if err != nil {
@@ -122,7 +122,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 	return "", nil
 }
 
-func makeEndpoint(app App, pf *PortForward, method string) string {
+func makeEndpoint(app *AppPod, pf *PortForward, method string) string {
 	return fmt.Sprintf("http://127.0.0.1:%s/v%s/invoke/%s/method/%s", fmt.Sprintf("%v", pf.LocalPort), api.RuntimeAPIVersion, app.AppID, method)
 }
 
@@ -160,22 +160,21 @@ func getPortforward(pluginID string) (*PortForward, error) {
 		os.Exit(0)
 	}()
 
-	pod, err := AppPod(client, pluginID)
+	app, err := GetAppPod(client, pluginID)
 	if err != nil {
 		return nil, err
 	}
 
-	if pod.Status.Phase != core_v1.PodRunning {
+	if app.pod.Status.Phase != core_v1.PodRunning {
 		return nil, fmt.Errorf("no running pods found for %s", pluginID)
 	}
 
-	a := pod.App()
 	portForward, err := NewPortForward(
 		config,
-		a.Namespace, a.PodName,
+		app.Namespace, app.PodName,
 		"127.0.0.1",
 		0,
-		a.AppPort,
+		app.AppPort,
 		false,
 	)
 	return portForward, err
