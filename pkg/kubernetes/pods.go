@@ -127,7 +127,7 @@ func getAppInfoFromPod(p *DaprPod) (a *AppPod) {
 			}
 		}
 	}
-	return
+	return a
 }
 
 func (a *AppInfo) Request(r *rest.Request, method string, data []byte) (*rest.Request, error) {

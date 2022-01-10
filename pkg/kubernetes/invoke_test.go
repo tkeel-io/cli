@@ -249,7 +249,7 @@ func restClient(testServer *httptest.Server) (*rest.RESTClient, error) {
 		Password: "pass",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("rest client error: %s", err.Error())
+		return nil, fmt.Errorf("rest client error: %w", err)
 	}
 	return c, nil
 }
