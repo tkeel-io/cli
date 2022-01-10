@@ -201,9 +201,9 @@ func Install(repo, plugin, version, name, config string) error {
 	if err != nil {
 		return err
 	}
-	method := fmt.Sprintf(_installPluginFormat, plugin)
+	method := fmt.Sprintf(_installPluginFormat, name)
 	inReq := pluginAPI.InstallPluginRequest{Installer: &pluginAPI.Installer{
-		Name:          name,
+		Name:          plugin,
 		Version:       version,
 		Repo:          repo,
 		Configuration: []byte(config),
@@ -218,6 +218,9 @@ func Install(repo, plugin, version, name, config string) error {
 	if err != nil {
 		return err
 	}
+	// TODO: After Debug Delete This
+	fmt.Println(string(data))
+	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {

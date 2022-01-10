@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -41,8 +42,7 @@ var PluginInstallCmd = &cobra.Command{
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
 				return
 			}
-
-			config = string(configb)
+			config = base64.StdEncoding.EncodeToString(configb)
 		}
 
 		if err := kubernetes.Install(repo, plugin, version, name, config); err != nil {
@@ -60,7 +60,7 @@ func init() {
 	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginInstallCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
-	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "c", "", "The plugin config file.")
+	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "", "", "The plugin config file.")
 
 	PluginCmd.AddCommand(PluginInstallCmd)
 }
