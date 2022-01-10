@@ -32,7 +32,7 @@ import (
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
-func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
+func Invoke(pluginID, method string, data []byte, verb string, reqOpts ...RestRequestOption) (string, error) {
 	client, err := Client()
 	if err != nil {
 		return "", err
@@ -43,16 +43,22 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 		return "", err
 	}
 
-	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb)
+	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb, reqOpts...)
 }
 
-func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string) (string, error) {
-	res, err := app.Request(client.Verb(verb), method, data)
+func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string, reqOpts ...RestRequestOption) (string, error) {
+	req, err := app.Request(client.Verb(verb), method, data)
 	if err != nil {
 		return "", fmt.Errorf("error get request: %w", err)
 	}
 
-	result := res.Do(context.TODO())
+	for i := 0; i < len(reqOpts); i++ {
+		if err := reqOpts[i](req); err != nil {
+			return "", err
+		}
+	}
+
+	result := req.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
 		return "", fmt.Errorf("error get raw: %w", err)
@@ -66,7 +72,7 @@ func invoke(client rest.Interface, app *AppInfo, method string, data []byte, ver
 }
 
 // InvokeByPortForward is a command to invoke a remote or local dapr instance.
-func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
+func InvokeByPortForward(pluginID, method string, data []byte, verb string, reqOpts ...HTTPRequestOption) (string, error) {
 	portForward, err := GetPortforward(pluginID, WithHTTPPort, WithAppPod)
 	if err != nil {
 		return "", err
@@ -81,6 +87,12 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 			return "", fmt.Errorf("error creat http request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
+
+		for i := 0; i < len(reqOpts); i++ {
+			if err := reqOpts[i](req); err != nil {
+				return "", err
+			}
+		}
 
 		var httpc http.Client
 
@@ -173,4 +185,22 @@ func WebsocketByPortForward(pluginID, method string, data []byte) (string, error
 		}
 	}
 	return "", nil
+}
+
+type HTTPRequestOption func(*http.Request) error
+
+func InvokeSetHTTPHeader(header, val string) HTTPRequestOption {
+	return func(r *http.Request) error {
+		r.Header.Set(header, val)
+		return nil
+	}
+}
+
+type RestRequestOption func(*rest.Request) error
+
+func InvokeSetRestRequestHeader(header string, val string) RestRequestOption {
+	return func(r *rest.Request) error {
+		r.SetHeader(header, val)
+		return nil
+	}
 }
