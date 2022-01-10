@@ -25,7 +25,6 @@ import (
 	"os/signal"
 
 	"github.com/dapr/cli/pkg/kubernetes"
-	core_v1 "k8s.io/api/core/v1"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
@@ -41,7 +40,7 @@ type PortForward struct {
 	LocalPort  int
 	RemotePort int
 	EmitLogs   bool
-	App        App
+	App        *AppPod
 	StopCh     chan struct{}
 	ReadyCh    chan struct{}
 }
@@ -111,7 +110,7 @@ func (pf *PortForward) Init() error {
 	}()
 
 	select {
-	// if `pf.run()` succeeds, block until terminated
+	// if `fw.ForwardPorts()` succeeds, block until terminated
 	case <-pf.ReadyCh:
 		ports, err := fw.GetPorts()
 		if err == nil {
@@ -138,6 +137,7 @@ func (pf *PortForward) GetStop() <-chan struct{} {
 }
 
 func GetPortforward(appName string, options ...PortForwardConfigureOption) (*PortForward, error) {
+
 	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
 		return nil, fmt.Errorf("get kube config error: %w", err)
@@ -147,53 +147,50 @@ func GetPortforward(appName string, options ...PortForwardConfigureOption) (*Por
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, os.Interrupt)
 	defer signal.Stop(signals)
+
+	app, err := GetAppPod(client, appName)
+	if err != nil {
+		return nil, err
+	}
+
+	portForward, err := NewPortForward(
+		config,
+		app.Namespace, app.PodName,
+		"127.0.0.1",
+		0,
+		app.HTTPPort,
+		false,
+	)
+
 	go func() {
 		<-signals
 		os.Exit(0)
 	}()
 
-	pod, err := AppPod(client, appName)
-	if err != nil {
-		return nil, err
-	}
-
-	if pod.Status.Phase != core_v1.PodRunning {
-		return nil, fmt.Errorf("no running pods found for %s", appName)
-	}
-
-	a := pod.App()
-	portForward, err := NewPortForward(
-		config,
-		a.Namespace, a.PodName,
-		"127.0.0.1",
-		0,
-		a.AppPort,
-		false,
-	)
 	if err != nil {
 		return nil, fmt.Errorf("new portforward failed: %w", err)
 	}
 	for i := 0; i < len(options); i++ {
-		if err := options[i](portForward, a); err != nil {
+		if err := options[i](portForward, app); err != nil {
 			return nil, fmt.Errorf("set portforward options failed: %w", err)
 		}
 	}
 	return portForward, nil
 }
 
-type PortForwardConfigureOption func(*PortForward, App) error
+type PortForwardConfigureOption func(*PortForward, *AppPod) error
 
-func WithHTTPPort(pf *PortForward, app App) error {
+func WithHTTPPort(pf *PortForward, app *AppPod) error {
 	pf.RemotePort = app.HTTPPort
 	return nil
 }
 
-func WithAppPort(pf *PortForward, app App) error {
+func WithAppPort(pf *PortForward, app *AppPod) error {
 	pf.RemotePort = app.AppPort
 	return nil
 }
 
-func WithApp(pf *PortForward, app App) error {
+func WithAppPod(pf *PortForward, app *AppPod) error {
 	pf.App = app
 	return nil
 }

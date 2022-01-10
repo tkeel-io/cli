@@ -28,6 +28,7 @@ import (
 	"github.com/dapr/cli/pkg/api"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
@@ -37,21 +38,24 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 		return "", err
 	}
 
-	app, err := AppPod(client, pluginID)
+	app, err := GetAppPod(client, pluginID)
 	if err != nil {
 		return "", err
 	}
 
-	res := app.App().Request(client.CoreV1().RESTClient().Verb(verb))
-	if data != nil {
-		res = res.Body(data)
+	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb)
+}
+
+func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string) (string, error) {
+	res, err := app.Request(client.Verb(verb), method, data)
+	if err != nil {
+		return "", fmt.Errorf("error get request: %w", err)
 	}
-	res = res.RequestURI(method)
 
 	result := res.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
-		return "", fmt.Errorf("error on Invoke: %w", err)
+		return "", fmt.Errorf("error get raw: %w", err)
 	}
 
 	if len(rawbody) > 0 {
@@ -63,13 +67,14 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 
 // InvokeByPortForward is a command to invoke a remote or local dapr instance.
 func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
-	portForward, err := GetPortforward(pluginID, WithHTTPPort, WithApp)
+	portForward, err := GetPortforward(pluginID, WithHTTPPort, WithAppPod)
 	if err != nil {
 		return "", err
 	}
 	// initialize port forwarding.
 	if err = portForward.Init(); err == nil {
 		url := makeEndpoint(portForward.App, portForward, method)
+		// initialize port forwarding.
 		fmt.Println(url)
 		req, err := http.NewRequest(verb, url, bytes.NewBuffer(data))
 		if err != nil {
@@ -91,7 +96,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 	return "", nil
 }
 
-func makeEndpoint(app App, pf *PortForward, method string) string {
+func makeEndpoint(app *AppPod, pf *PortForward, method string) string {
 	return fmt.Sprintf("http://127.0.0.1:%s/v%s/invoke/%s/method/%s", fmt.Sprintf("%v", pf.LocalPort), api.RuntimeAPIVersion, app.AppID, method)
 }
 

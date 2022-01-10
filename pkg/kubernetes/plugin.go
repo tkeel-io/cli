@@ -71,22 +71,21 @@ func List() ([]StatusOutput, error) {
 		pluginsMap[plugin.ID] = plugin
 	}
 
-	apps, err := ListPluginPods(client)
+	apps, err := ListAppInfos(client)
 	if err != nil {
 		return nil, fmt.Errorf("err dapr do list: %w", err)
 	}
 
-	appGroups := apps.GroupByAppID()
+	appGroups := GroupByAppID(apps)
 	statuses := make([]StatusOutput, 0, len(appGroups))
 
-	for appID, lp := range appGroups {
-		if len(lp) == 0 {
+	for appID, apps := range appGroups {
+		if len(apps) == 0 {
 			continue
 		}
-		firstPod := lp[0]
-		replicas := len(lp)
-		info := firstPod.App()
-		status, healthy := GetStatusAndHealthyInPodList(lp)
+		firstApp := apps[0]
+		replicas := len(apps)
+		status, healthy := GetStatusAndHealthyInPodList(apps)
 		pluginStatus := "NOT_REGISTER"
 		if plugin, ok := pluginsMap[appID]; ok {
 			pluginStatus = plugin.Status.String()
@@ -96,11 +95,11 @@ func List() ([]StatusOutput, error) {
 		}
 		statuses = append(statuses, StatusOutput{
 			Name:         appID,
-			Namespace:    info.Namespace,
-			Created:      info.Created,
-			Age:          info.Age,
+			Namespace:    firstApp.Namespace,
+			Created:      firstApp.Created,
+			Age:          firstApp.Age,
 			Status:       status,
-			Version:      info.Version,
+			Version:      firstApp.Version,
 			Healthy:      healthy,
 			Replicas:     replicas,
 			PluginStatus: pluginStatus,
