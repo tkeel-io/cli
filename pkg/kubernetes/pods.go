@@ -63,6 +63,9 @@ func ListAppInfos(client k8s.Interface, appIDs ...string) (DaprAppList, error) {
 	}
 	if len(appIDs) > 0 {
 		fn = func(a *AppPod) bool {
+			if a == nil {
+				return false
+			}
 			for _, id := range appIDs {
 				if id != "" && a.AppID == id {
 					return true
@@ -124,7 +127,7 @@ func getAppInfoFromPod(p *DaprPod) (a *AppPod) {
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func (a *AppInfo) Request(r *rest.Request, method string, data []byte) (*rest.Request, error) {

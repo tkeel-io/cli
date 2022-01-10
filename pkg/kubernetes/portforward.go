@@ -137,7 +137,6 @@ func (pf *PortForward) GetStop() <-chan struct{} {
 }
 
 func GetPortforward(appName string, options ...PortForwardConfigureOption) (*PortForward, error) {
-
 	config, client, err := kubernetes.GetKubeConfigClient()
 	if err != nil {
 		return nil, fmt.Errorf("get kube config error: %w", err)
