@@ -3,22 +3,18 @@ package kubernetes
 import (
 	"encoding/base64"
 	"fmt"
-	"net/http"
-	"net/url"
-	"os"
-	"path"
-
 	"github.com/pkg/errors"
+	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/kit/result"
 	oauth2 "github.com/tkeel-io/tkeel/api/oauth2/v1"
 	"google.golang.org/protobuf/encoding/protojson"
+	"net/http"
+	"net/url"
 )
 
 const (
 	_pluginRudder     = "rudder"
 	_adminLoginMethod = "v1/oauth2/admin"
-	_TokenFile        = ".token"
-	_tkeelRudderDir   = ".tkeel/rudder"
 )
 
 func AdminLogin(password string) (token string, err error) {
@@ -40,7 +36,7 @@ func AdminLogin(password string) (token string, err error) {
 		return "", errors.Wrap(err, "get token err")
 	}
 
-	f, err := openRudderTokenFile()
+	f, err := fileutil.LocateAdminToken()
 	if err != nil {
 		return "", errors.Wrap(err, "open rudder token failed")
 	}
@@ -49,28 +45,6 @@ func AdminLogin(password string) (token string, err error) {
 	}
 
 	return token, nil
-}
-
-func openRudderTokenFile() (*os.File, error) {
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, errors.Wrap(err, "get user home dir failed")
-	}
-	rudderTokenFile := path.Join(homedir, _tkeelRudderDir, _TokenFile)
-	_, err = os.Stat(rudderTokenFile)
-	if err != nil {
-		err = os.MkdirAll(path.Join(homedir, _tkeelRudderDir), os.ModeDir|os.ModePerm)
-		if err != nil {
-			return nil, errors.Wrap(err, "create tkeel rudder dir failed")
-		}
-	}
-
-	f, err := os.OpenFile(rudderTokenFile, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return nil, errors.Wrap(err, "open tkeel rudder token file error")
-	}
-
-	return f, nil
 }
 
 func getToken(body string) (string, error) {
