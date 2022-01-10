@@ -3,13 +3,14 @@ package kubernetes
 import (
 	"encoding/base64"
 	"fmt"
+	"net/http"
+	"net/url"
+
 	"github.com/pkg/errors"
 	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/kit/result"
 	oauth2 "github.com/tkeel-io/tkeel/api/oauth2/v1"
 	"google.golang.org/protobuf/encoding/protojson"
-	"net/http"
-	"net/url"
 )
 
 const (
