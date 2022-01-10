@@ -26,17 +26,13 @@ import (
 	"os/signal"
 
 	"github.com/dapr/cli/pkg/api"
-	"github.com/dapr/cli/pkg/kubernetes"
-	"k8s.io/client-go/rest"
-
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
-
-	core_v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/rest"
 )
 
 // Invoke is a command to invoke a remote or local dapr instance.
-func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
+func Invoke(pluginID, method string, data []byte, verb string, reqOpts ...RestRequestOption) (string, error) {
 	client, err := Client()
 	if err != nil {
 		return "", err
@@ -47,16 +43,22 @@ func Invoke(pluginID, method string, data []byte, verb string) (string, error) {
 		return "", err
 	}
 
-	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb)
+	return invoke(client.CoreV1().RESTClient(), &app.AppInfo, method, data, verb, reqOpts...)
 }
 
-func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string) (string, error) {
-	res, err := app.Request(client.Verb(verb), method, data)
+func invoke(client rest.Interface, app *AppInfo, method string, data []byte, verb string, reqOpts ...RestRequestOption) (string, error) {
+	req, err := app.Request(client.Verb(verb), method, data)
 	if err != nil {
 		return "", fmt.Errorf("error get request: %w", err)
 	}
 
-	result := res.Do(context.TODO())
+	for i := 0; i < len(reqOpts); i++ {
+		if err = reqOpts[i](req); err != nil {
+			return "", err
+		}
+	}
+
+	result := req.Do(context.TODO())
 	rawbody, err := result.Raw()
 	if err != nil {
 		return "", fmt.Errorf("error get raw: %w", err)
@@ -69,44 +71,28 @@ func invoke(client rest.Interface, app *AppInfo, method string, data []byte, ver
 	return "", nil
 }
 
-// Invoke is a command to invoke a remote or local dapr instance.
-func InvokeByPortForward(pluginID, method string, data []byte, verb string) (string, error) {
-	config, client, err := kubernetes.GetKubeConfigClient()
-	if err != nil {
-		return "", fmt.Errorf("get kube config error: %w", err)
-	}
-
-	// manage termination of port forwarding connection on interrupt
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-	defer signal.Stop(signals)
-
-	app, err := GetAppPod(client, pluginID)
+// InvokeByPortForward is a command to invoke a remote or local dapr instance.
+func InvokeByPortForward(pluginID, method string, data []byte, verb string, reqOpts ...HTTPRequestOption) (string, error) {
+	portForward, err := GetPortforward(pluginID, WithHTTPPort, WithAppPod)
 	if err != nil {
 		return "", err
 	}
-
-	portForward, err := NewPortForward(
-		config,
-		app.Namespace, app.PodName,
-		"127.0.0.1",
-		0,
-		app.HTTPPort,
-		false,
-	)
-	if err != nil {
-		return "", err
-	}
-
 	// initialize port forwarding.
 	if err = portForward.Init(); err == nil {
-		url := makeEndpoint(app, portForward, method)
+		url := makeEndpoint(portForward.App, portForward, method)
+		// initialize port forwarding.
 		fmt.Println(url)
 		req, err := http.NewRequest(verb, url, bytes.NewBuffer(data))
 		if err != nil {
 			return "", fmt.Errorf("error creat http request: %w", err)
 		}
 		req.Header.Set("Content-Type", "application/json")
+
+		for i := 0; i < len(reqOpts); i++ {
+			if err = reqOpts[i](req); err != nil {
+				return "", err
+			}
+		}
 
 		var httpc http.Client
 
@@ -115,7 +101,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string) (str
 			return "", fmt.Errorf("error do http request: %w", err)
 		}
 		defer r.Body.Close()
-		return handleResponse(r)
+		return readResponse(r)
 	}
 
 	portForward.Stop()
@@ -131,7 +117,7 @@ func makeWsEndpoint(pf *PortForward, method string) string {
 	return fmt.Sprintf("ws://127.0.0.1:%s/%s", fmt.Sprintf("%v", pf.LocalPort), method)
 }
 
-func handleResponse(response *http.Response) (string, error) {
+func readResponse(response *http.Response) (string, error) {
 	rb, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("error read http response: %w", err)
@@ -144,45 +130,9 @@ func handleResponse(response *http.Response) (string, error) {
 	return "", nil
 }
 
-// get portforward.
-func getPortforward(pluginID string) (*PortForward, error) {
-	config, client, err := kubernetes.GetKubeConfigClient()
-	if err != nil {
-		return nil, fmt.Errorf("get kube config error: %w", err)
-	}
-
-	// manage termination of port forwarding connection on interrupt
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt)
-	defer signal.Stop(signals)
-	go func() {
-		<-signals
-		os.Exit(0)
-	}()
-
-	app, err := GetAppPod(client, pluginID)
-	if err != nil {
-		return nil, err
-	}
-
-	if app.pod.Status.Phase != core_v1.PodRunning {
-		return nil, fmt.Errorf("no running pods found for %s", pluginID)
-	}
-
-	portForward, err := NewPortForward(
-		config,
-		app.Namespace, app.PodName,
-		"127.0.0.1",
-		0,
-		app.AppPort,
-		false,
-	)
-	return portForward, err
-}
-
-// websocket request to the k8s pod.
+// WebsocketByPortForward websocket request to the k8s pod.
 func WebsocketByPortForward(pluginID, method string, data []byte) (string, error) {
-	portForward, err := getPortforward(pluginID)
+	portForward, err := GetPortforward(pluginID, WithAppPort)
 	if err != nil {
 		return "", err
 	}
@@ -235,4 +185,22 @@ func WebsocketByPortForward(pluginID, method string, data []byte) (string, error
 		}
 	}
 	return "", nil
+}
+
+type HTTPRequestOption func(*http.Request) error
+
+func InvokeSetHTTPHeader(header, val string) HTTPRequestOption {
+	return func(r *http.Request) error {
+		r.Header.Set(header, val)
+		return nil
+	}
+}
+
+type RestRequestOption func(*rest.Request) error
+
+func InvokeSetRestRequestHeader(header string, val string) RestRequestOption {
+	return func(r *rest.Request) error {
+		r.SetHeader(header, val)
+		return nil
+	}
 }

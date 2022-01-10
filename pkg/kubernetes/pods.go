@@ -50,7 +50,7 @@ func GetAppPod(client k8s.Interface, appID string) (*AppPod, error) {
 	return app, nil
 }
 
-// List outputs plugins.
+// ListAppInfos ListPluginPods outputs plugins list.
 func ListAppInfos(client k8s.Interface, appIDs ...string) (DaprAppList, error) {
 	opts := v1.ListOptions{}
 	podList, err := client.CoreV1().Pods(v1.NamespaceAll).List(context.TODO(), opts)
@@ -63,6 +63,9 @@ func ListAppInfos(client k8s.Interface, appIDs ...string) (DaprAppList, error) {
 	}
 	if len(appIDs) > 0 {
 		fn = func(a *AppPod) bool {
+			if a == nil {
+				return false
+			}
 			for _, id := range appIDs {
 				if id != "" && a.AppID == id {
 					return true
@@ -72,7 +75,7 @@ func ListAppInfos(client k8s.Interface, appIDs ...string) (DaprAppList, error) {
 		}
 	}
 
-	l := make(DaprAppList, 0)
+	var l DaprAppList
 	for _, p := range podList.Items {
 		p := DaprPod(p)
 		for _, c := range p.Spec.Containers {
@@ -124,7 +127,7 @@ func getAppInfoFromPod(p *DaprPod) (a *AppPod) {
 			}
 		}
 	}
-	return nil
+	return a
 }
 
 func (a *AppInfo) Request(r *rest.Request, method string, data []byte) (*rest.Request, error) {

@@ -248,5 +248,8 @@ func restClient(testServer *httptest.Server) (*rest.RESTClient, error) {
 		Username: "user",
 		Password: "pass",
 	})
-	return c, fmt.Errorf("rest client error: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("rest client error: %w", err)
+	}
+	return c, nil
 }
