@@ -14,11 +14,18 @@ import (
 	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
+	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
 	repoAPI "github.com/tkeel-io/tkeel/api/repo/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-const _getListFromRepoFormat = "v1/repos/%s/installers"
+const (
+	_getPluginListFromRepoFormat = "v1/repos/%s/installers"
+	_installPluginFormat         = "v1/plugins/%s"
+	_uninstallPluginFormat       = "v1/plugins/%s"
+)
+
+var ErrInvalidToken = errors.New("invalid token")
 
 // ListOutput represents the application ID, application port and creation time.
 type ListOutput struct {
@@ -156,23 +163,13 @@ func Unregister(pluginID string) (*Plugin, error) {
 }
 
 func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
-	f, err := fileutil.LocateAdminToken()
+	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "open admin token failed")
+		return nil, errors.Wrap(err, "get token error")
 	}
-	tokenb := make([]byte, 512)
-	n, err := f.Read(tokenb)
-	if err != nil {
-		return nil, errors.Wrap(err, "read token failed")
-	}
-	if n == 0 {
-		return nil, errors.New("invalid token")
-	}
-	token := tokenb[:n]
 	// if auth token is not bearer type ?
-	bearer := fmt.Sprintf("Bearer %s", token)
-	method := fmt.Sprintf(_getListFromRepoFormat, repo)
-	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", bearer))
+	method := fmt.Sprintf(_getPluginListFromRepoFormat, repo)
+	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
 	if err != nil {
 		return nil, errors.Wrap(err, "invoke "+method+" error")
 	}
@@ -197,4 +194,78 @@ func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
 	}
 
 	return l, nil
+}
+
+func Install(repo, plugin, version, name, config string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return err
+	}
+	method := fmt.Sprintf(_installPluginFormat, plugin)
+	inReq := pluginAPI.InstallPluginRequest{Installer: &pluginAPI.Installer{
+		Name:          name,
+		Version:       version,
+		Repo:          repo,
+		Configuration: []byte(config),
+		Type:          1,
+	},
+	}
+	data, err := json.Marshal(inReq) //nolint
+	if err != nil {
+		return errors.Wrap(err, "marshal plugin request failed")
+	}
+	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return err
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+
+	return errors.New("can't handle this")
+}
+
+func UninstallPlugin(pluginID string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return err
+	}
+
+	method := fmt.Sprintf(_uninstallPluginFormat, pluginID)
+	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return err
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+	return errors.New("uninstall plugin failed")
+}
+
+func getAdminToken() (string, error) {
+	f, err := fileutil.LocateAdminToken()
+	if err != nil {
+		return "", errors.Wrap(err, "open admin token failed")
+	}
+	tokenb := make([]byte, 512)
+	n, err := f.Read(tokenb)
+	if err != nil {
+		return "", errors.Wrap(err, "read token failed")
+	}
+	if n == 0 {
+		return "", ErrInvalidToken
+	}
+
+	return fmt.Sprintf("Bearer %s", tokenb[:n]), nil
 }

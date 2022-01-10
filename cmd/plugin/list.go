@@ -17,9 +17,9 @@ limitations under the License.
 package plugin
 
 import (
-	"github.com/pkg/errors"
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
@@ -39,7 +39,7 @@ var PluginStatusCmd = &cobra.Command{
 		if repo != "" {
 			list, err := kubernetes.ListPluginsFromRepo(repo)
 			if err != nil {
-				if errors.Is(err, errors.New("invalid token")) {
+				if errors.Is(err, kubernetes.ErrInvalidToken) {
 					print.FailureStatusEvent(os.Stdout, "please login!")
 					return
 				}

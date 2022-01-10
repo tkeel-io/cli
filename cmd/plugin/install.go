@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -18,6 +19,7 @@ var (
 	timeout      uint
 	tkeelVersion string
 	secret       string
+	configFile   string
 )
 
 var PluginInstallCmd = &cobra.Command{
@@ -30,19 +32,20 @@ var PluginInstallCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
 			return
 		}
-
+		var config string
 		name := args[1]
 		repo, plugin, version := parseInstallArg(args[0])
+		if configFile != "" {
+			configb, err := ioutil.ReadFile(configFile)
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, "unable to read config file")
+				return
+			}
 
-		config := kubernetes.InitConfiguration{
-			Version:   tkeelVersion,
-			Wait:      wait,
-			Timeout:   timeout,
-			DebugMode: debugMode,
-			Secret:    secret,
+			config = string(configb)
 		}
 
-		if err := kubernetes.InstallPlugin(config, repo, plugin, name, version); err != nil {
+		if err := kubernetes.Install(repo, plugin, version, name, config); err != nil {
 			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
 			return
@@ -57,6 +60,8 @@ func init() {
 	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginInstallCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
+	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "c", "", "The plugin config file.")
+
 	PluginCmd.AddCommand(PluginInstallCmd)
 }
 
@@ -70,6 +75,10 @@ func parseInstallArg(arg string) (repo, plugin, version string) {
 
 	if sp := strings.Split(arg, "@"); len(sp) == 2 {
 		plugin, version = sp[0], sp[1]
+	}
+
+	if version[0] == 'v' {
+		version = version[1:]
 	}
 
 	repo = tkeelChartsRepo

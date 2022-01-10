@@ -20,7 +20,7 @@ var PluginUninstallCmd = &cobra.Command{
 			return
 		}
 		pluginID := args[0]
-		if err := kubernetes.Uninstall(pluginID, debugMode); err != nil {
+		if err := kubernetes.UninstallPlugin(pluginID); err != nil {
 			log.Warn("remove the plugin failed", err)
 			print.FailureStatusEvent(os.Stdout, "Try to remove installed plugin %q failed, Because: %s", strings.Join(args, ","), err.Error())
 			return

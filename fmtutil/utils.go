@@ -6,7 +6,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dapr/cli/utils"
+	"github.com/gocarina/gocsv"
 	"github.com/olekukonko/tablewriter"
+	"github.com/tkeel-io/cli/pkg/print"
 )
 
 // PrintTable to print in the table format.
@@ -40,4 +43,14 @@ func WriteTable(writer io.Writer, csvContent string) {
 	}
 
 	table.Render()
+}
+
+func Output(list interface{}) {
+	table, err := gocsv.MarshalString(list)
+	if err != nil {
+		print.FailureStatusEvent(os.Stdout, err.Error())
+		os.Exit(1)
+	}
+
+	utils.PrintTable(table)
 }
