@@ -53,7 +53,7 @@ func invoke(client rest.Interface, app *AppInfo, method string, data []byte, ver
 	}
 
 	for i := 0; i < len(reqOpts); i++ {
-		if err := reqOpts[i](req); err != nil {
+		if err = reqOpts[i](req); err != nil {
 			return "", err
 		}
 	}
@@ -89,7 +89,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string, reqO
 		req.Header.Set("Content-Type", "application/json")
 
 		for i := 0; i < len(reqOpts); i++ {
-			if err := reqOpts[i](req); err != nil {
+			if err = reqOpts[i](req); err != nil {
 				return "", err
 			}
 		}
