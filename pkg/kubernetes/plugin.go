@@ -8,9 +8,17 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
+	"github.com/pkg/errors"
+	"github.com/tkeel-io/cli/fileutil"
+	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
+	repoAPI "github.com/tkeel-io/tkeel/api/repo/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
+
+const _getListFromRepoFormat = "v1/repos/%s/installers"
 
 // ListOutput represents the application ID, application port and creation time.
 type ListOutput struct {
@@ -19,6 +27,11 @@ type ListOutput struct {
 	Age     string `csv:"AGE"`
 	Created string `csv:"CREATED"`
 	Status  string `json:"status"`
+}
+
+type RepoPluginListOutput struct {
+	Name    string `csv:"NAME"`
+	Version string `csv:"VERSION"`
 }
 
 type RegisterAddons struct {
@@ -140,4 +153,48 @@ func Unregister(pluginID string) (*Plugin, error) {
 	}
 
 	return UnregisterPlugins(clientset, pluginID)
+}
+
+func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
+	f, err := fileutil.LocateAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "open admin token failed")
+	}
+	tokenb := make([]byte, 512)
+	n, err := f.Read(tokenb)
+	if err != nil {
+		return nil, errors.Wrap(err, "read token failed")
+	}
+	if n == 0 {
+		return nil, errors.New("invalid token")
+	}
+	token := tokenb[:n]
+	// if auth token is not bearer type ?
+	bearer := fmt.Sprintf("Bearer %s", token)
+	method := fmt.Sprintf(_getListFromRepoFormat, repo)
+	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", bearer))
+	if err != nil {
+		return nil, errors.Wrap(err, "invoke "+method+" error")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(body), r); err != nil {
+		return nil, errors.Wrap(err, "unmarshal response context error")
+	}
+
+	if r.Code != http.StatusOK {
+		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+	}
+
+	listResponse := repoAPI.ListRepoInstallerResponse{}
+	if err = r.Data.UnmarshalTo(&listResponse); err != nil {
+		return nil, errors.Wrap(err, "cant handle response data")
+	}
+
+	l := make([]RepoPluginListOutput, 0, len(listResponse.BriefInstallers))
+	for _, i := range listResponse.BriefInstallers {
+		l = append(l, RepoPluginListOutput{i.Name, i.Version})
+	}
+
+	return l, nil
 }

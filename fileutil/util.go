@@ -43,5 +43,5 @@ func LocateFile(flag int, dir string, files ...string) (*os.File, error) {
 }
 
 func RewriteFlag() int {
-	return os.O_WRONLY | os.O_CREATE
+	return os.O_RDWR | os.O_CREATE
 }
