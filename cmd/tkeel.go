@@ -24,6 +24,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/tkeel-io/cli/cmd/admin"
 	"github.com/tkeel-io/cli/cmd/core"
 	"github.com/tkeel-io/cli/cmd/plugin"
 	"github.com/tkeel-io/cli/cmd/tenant"
@@ -94,6 +95,7 @@ func init() {
 	RootCmd.AddCommand(plugin.PluginCmd)
 	RootCmd.AddCommand(tenant.TenantCmd)
 	RootCmd.AddCommand(core.CoreCmd)
+	RootCmd.AddCommand(admin.AdminCmd)
 
 	if kubeconfig != "" {
 		err := os.Setenv("KUBECONFIG", kubeconfig)
