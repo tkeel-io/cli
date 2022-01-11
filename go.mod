@@ -15,7 +15,7 @@ require (
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tkeel-io/kit v0.0.0-20211223050802-7dfccfe43fdb
-	github.com/tkeel-io/tkeel v0.2.1-0.20220104063042-da4f2efb615a
+	github.com/tkeel-io/tkeel v0.3.0
 	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20211223081012-25aaa61491ab
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b
 	google.golang.org/protobuf v1.27.1

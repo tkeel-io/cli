@@ -19,14 +19,14 @@ package plugin
 import (
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
 var (
-	installable bool
-	update      bool
+	repo string
 )
 
 var PluginStatusCmd = &cobra.Command{
@@ -34,7 +34,21 @@ var PluginStatusCmd = &cobra.Command{
 	Short:   "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
-		status, err := kubernetes.List()
+		if repo != "" {
+			list, err := kubernetes.ListPluginsFromRepo(repo)
+			if err != nil {
+				if errors.Is(err, kubernetes.ErrInvalidToken) {
+					print.FailureStatusEvent(os.Stdout, "please login!")
+					return
+				}
+				print.FailureStatusEvent(os.Stdout, "unable to list plugins:%s", err.Error())
+				return
+			}
+			outputList(list, len(list))
+			return
+		}
+
+		status, err := kubernetes.InstalledList()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
@@ -51,7 +65,6 @@ var PluginStatusCmd = &cobra.Command{
 func init() {
 	PluginStatusCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginStatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	PluginStatusCmd.Flags().BoolVarP(&update, "update", "", false, "this will update your repo list index")
-	PluginStatusCmd.Flags().BoolVarP(&installable, "installable", "i", false, "Show the installable plugin")
+	PluginStatusCmd.Flags().StringVarP(&repo, "repo", "r", "", "Show the plugin list of this repository")
 	PluginCmd.AddCommand(PluginStatusCmd)
 }

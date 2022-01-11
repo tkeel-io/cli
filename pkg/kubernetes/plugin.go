@@ -8,9 +8,26 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
 
+	"github.com/pkg/errors"
+	"github.com/tkeel-io/cli/fileutil"
+	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
+	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
+	repoAPI "github.com/tkeel-io/tkeel/api/repo/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 )
+
+const (
+	_getPluginListFromRepoFormat  = "v1/repos/%s/installers"
+	_installPluginFormat          = "v1/plugins/%s"
+	_uninstallPluginFormat        = "v1/plugins/%s"
+	_getInstalledPluginListFormat = "v1/plugins"
+)
+
+var ErrInvalidToken = errors.New("invalid token")
 
 // ListOutput represents the application ID, application port and creation time.
 type ListOutput struct {
@@ -19,6 +36,20 @@ type ListOutput struct {
 	Age     string `csv:"AGE"`
 	Created string `csv:"CREATED"`
 	Status  string `json:"status"`
+}
+
+type InstalledListOutput struct {
+	Name          string `csv:"NAME"`
+	Plugin        string `csv:"PLUGIN"`
+	PluginVersion string `csv:"PLUGIN VERSION"`
+	Repo          string `csv:"REPO"`
+	RegisterAt    string `csv:"REGISTER_AT"`
+	Status        string `csv:"STATE"`
+}
+
+type RepoPluginListOutput struct {
+	Name    string `csv:"NAME"`
+	Version string `csv:"VERSION"`
 }
 
 type RegisterAddons struct {
@@ -108,6 +139,48 @@ func List() ([]StatusOutput, error) {
 	return statuses, nil
 }
 
+func InstalledList() ([]InstalledListOutput, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "get token error")
+	}
+
+	resp, err := InvokeByPortForward(_pluginRudder, _getInstalledPluginListFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return nil, errors.Wrap(err, "InvokeByPortForward error")
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return nil, errors.Wrap(err, "unmarshal response context error")
+	}
+
+	if r.Code != http.StatusOK {
+		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+	}
+
+	listResponse := pluginAPI.ListPluginResponse{}
+	err = r.Data.UnmarshalTo(&listResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal error")
+	}
+	list := make([]InstalledListOutput, 0, len(listResponse.PluginList))
+	for _, o := range listResponse.GetPluginList() {
+		registeredAt := time.Unix(o.RegisterTimestamp, 0).Format("2006-01-02 15:04:05")
+		if o.RegisterTimestamp == 0 {
+			registeredAt = "UNREGISTER"
+		}
+		list = append(list, InstalledListOutput{
+			Name:          o.Id,
+			Plugin:        o.BriefInstallerInfo.Name,
+			Repo:          o.BriefInstallerInfo.Repo,
+			PluginVersion: o.BriefInstallerInfo.Version,
+			RegisterAt:    registeredAt,
+			Status:        v1.PluginStatus_name[int32(o.Status)],
+		})
+	}
+	return list, nil
+}
+
 func Register(pluginID string) error {
 	clientset, err := Client()
 	if err != nil {
@@ -140,4 +213,114 @@ func Unregister(pluginID string) (*Plugin, error) {
 	}
 
 	return UnregisterPlugins(clientset, pluginID)
+}
+
+func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "get token error")
+	}
+	// if auth token is not bearer type ?
+	method := fmt.Sprintf(_getPluginListFromRepoFormat, repo)
+	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return nil, errors.Wrap(err, "invoke "+method+" error")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(body), r); err != nil {
+		return nil, errors.Wrap(err, "unmarshal response context error")
+	}
+
+	if r.Code != http.StatusOK {
+		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+	}
+
+	listResponse := repoAPI.ListRepoInstallerResponse{}
+	if err = r.Data.UnmarshalTo(&listResponse); err != nil {
+		return nil, errors.Wrap(err, "cant handle response data")
+	}
+
+	l := make([]RepoPluginListOutput, 0, len(listResponse.BriefInstallers))
+	for _, i := range listResponse.BriefInstallers {
+		l = append(l, RepoPluginListOutput{i.Name, i.Version})
+	}
+
+	return l, nil
+}
+
+func Install(repo, plugin, version, name, config string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return err
+	}
+	method := fmt.Sprintf(_installPluginFormat, name)
+	inReq := pluginAPI.Installer{
+		Name:          plugin,
+		Version:       version,
+		Repo:          repo,
+		Configuration: []byte(config),
+		Type:          1,
+	}
+	data, err := json.Marshal(inReq) //nolint
+	if err != nil {
+		return errors.Wrap(err, "marshal plugin request failed")
+	}
+	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return err
+	}
+	// TODO: After Debug Delete This
+	fmt.Println(string(data))
+	fmt.Println(resp)
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+
+	return errors.New("can't handle this")
+}
+
+func UninstallPlugin(pluginID string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return err
+	}
+
+	method := fmt.Sprintf(_uninstallPluginFormat, pluginID)
+	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return err
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+	return errors.New("uninstall plugin failed")
+}
+
+func getAdminToken() (string, error) {
+	f, err := fileutil.LocateAdminToken()
+	if err != nil {
+		return "", errors.Wrap(err, "open admin token failed")
+	}
+	tokenb := make([]byte, 512)
+	n, err := f.Read(tokenb)
+	if err != nil {
+		return "", errors.Wrap(err, "read token failed")
+	}
+	if n == 0 {
+		return "", ErrInvalidToken
+	}
+
+	return fmt.Sprintf("Bearer %s", tokenb[:n]), nil
 }

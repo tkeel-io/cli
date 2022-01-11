@@ -27,6 +27,7 @@ import (
 	"github.com/tkeel-io/cli/cmd/admin"
 	"github.com/tkeel-io/cli/cmd/core"
 	"github.com/tkeel-io/cli/cmd/plugin"
+	"github.com/tkeel-io/cli/cmd/repo"
 	"github.com/tkeel-io/cli/cmd/tenant"
 	"github.com/tkeel-io/cli/pkg/api"
 	"github.com/tkeel-io/cli/pkg/print"
@@ -96,6 +97,7 @@ func init() {
 	RootCmd.AddCommand(tenant.TenantCmd)
 	RootCmd.AddCommand(core.CoreCmd)
 	RootCmd.AddCommand(admin.AdminCmd)
+	RootCmd.AddCommand(repo.RepoCmd)
 
 	if kubeconfig != "" {
 		err := os.Setenv("KUBECONFIG", kubeconfig)
