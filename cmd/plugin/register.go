@@ -18,13 +18,13 @@ package plugin
 
 import (
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
+	"golang.org/x/term"
 )
 
 var secret string
