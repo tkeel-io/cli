@@ -19,7 +19,6 @@ var (
 	wait         bool
 	timeout      uint
 	tkeelVersion string
-	secret       string
 	configFile   string
 )
 
@@ -58,7 +57,6 @@ func init() {
 	PluginInstallCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	PluginInstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
-	PluginInstallCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
 	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "", "", "The plugin config file.")
 
