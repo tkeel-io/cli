@@ -26,8 +26,6 @@ import (
 )
 
 var (
-	update bool
-
 	repo string
 )
 
@@ -50,7 +48,7 @@ var PluginStatusCmd = &cobra.Command{
 			return
 		}
 
-		status, err := kubernetes.List()
+		status, err := kubernetes.InstalledList()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
@@ -67,7 +65,6 @@ var PluginStatusCmd = &cobra.Command{
 func init() {
 	PluginStatusCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginStatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	PluginStatusCmd.Flags().BoolVarP(&update, "update", "", false, "this will update your repo list index")
 	PluginStatusCmd.Flags().StringVarP(&repo, "repo", "r", "", "Show the plugin list of this repository")
 	PluginCmd.AddCommand(PluginStatusCmd)
 }

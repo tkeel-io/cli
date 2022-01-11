@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/tkeel-io/cli/fileutil"
@@ -20,9 +21,10 @@ import (
 )
 
 const (
-	_getPluginListFromRepoFormat = "v1/repos/%s/installers"
-	_installPluginFormat         = "v1/plugins/%s"
-	_uninstallPluginFormat       = "v1/plugins/%s"
+	_getPluginListFromRepoFormat  = "v1/repos/%s/installers"
+	_installPluginFormat          = "v1/plugins/%s"
+	_uninstallPluginFormat        = "v1/plugins/%s"
+	_getInstalledPluginListFormat = "v1/plugins"
 )
 
 var ErrInvalidToken = errors.New("invalid token")
@@ -34,6 +36,15 @@ type ListOutput struct {
 	Age     string `csv:"AGE"`
 	Created string `csv:"CREATED"`
 	Status  string `json:"status"`
+}
+
+type InstalledListOutput struct {
+	Name          string `csv:"NAME"`
+	Plugin        string `csv:"PLUGIN"`
+	PluginVersion string `csv:"PLUGIN VERSION"`
+	Repo          string `csv:"REPO"`
+	RegisterAt    string `csv:"REGISTER_AT"`
+	Status        string `csv:"STATE"`
 }
 
 type RepoPluginListOutput struct {
@@ -128,6 +139,48 @@ func List() ([]StatusOutput, error) {
 	return statuses, nil
 }
 
+func InstalledList() ([]InstalledListOutput, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "get token error")
+	}
+
+	resp, err := InvokeByPortForward(_pluginRudder, _getInstalledPluginListFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return nil, errors.Wrap(err, "InvokeByPortForward error")
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return nil, errors.Wrap(err, "unmarshal response context error")
+	}
+
+	if r.Code != http.StatusOK {
+		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+	}
+
+	listResponse := pluginAPI.ListPluginResponse{}
+	err = r.Data.UnmarshalTo(&listResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "unmarshal error")
+	}
+	list := make([]InstalledListOutput, 0, len(listResponse.PluginList))
+	for _, o := range listResponse.GetPluginList() {
+		registeredAt := time.Unix(o.RegisterTimestamp, 0).Format("2006-01-02 15:04:05")
+		if o.RegisterTimestamp == 0 {
+			registeredAt = "UNREGISTER"
+		}
+		list = append(list, InstalledListOutput{
+			Name:          o.Id,
+			Plugin:        o.BriefInstallerInfo.Name,
+			Repo:          o.BriefInstallerInfo.Repo,
+			PluginVersion: o.BriefInstallerInfo.Version,
+			RegisterAt:    registeredAt,
+			Status:        v1.PluginStatus_name[int32(o.Status)],
+		})
+	}
+	return list, nil
+}
+
 func Register(pluginID string) error {
 	clientset, err := Client()
 	if err != nil {
@@ -202,13 +255,12 @@ func Install(repo, plugin, version, name, config string) error {
 		return err
 	}
 	method := fmt.Sprintf(_installPluginFormat, name)
-	inReq := pluginAPI.InstallPluginRequest{Installer: &pluginAPI.Installer{
+	inReq := pluginAPI.Installer{
 		Name:          plugin,
 		Version:       version,
 		Repo:          repo,
 		Configuration: []byte(config),
 		Type:          1,
-	},
 	}
 	data, err := json.Marshal(inReq) //nolint
 	if err != nil {

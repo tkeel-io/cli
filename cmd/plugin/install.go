@@ -12,7 +12,7 @@ import (
 	"github.com/tkeel-io/kit/log"
 )
 
-const tkeelChartsRepo = "https://tkeel-io.github.io/helm-charts"
+const officialRepo = "tkeel"
 
 var (
 	debugMode    bool
@@ -81,11 +81,11 @@ func parseInstallArg(arg string) (repo, plugin, version string) {
 		version = version[1:]
 	}
 
-	repo = tkeelChartsRepo
+	repo = officialRepo
 	if spi := strings.LastIndex(plugin, "/"); spi != -1 {
 		repo, plugin = plugin[:spi], plugin[spi+1:]
 		if repo == "" || strings.EqualFold(repo, "tkeel") {
-			repo = tkeelChartsRepo
+			repo = officialRepo
 			return
 		}
 	}

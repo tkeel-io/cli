@@ -1,7 +1,6 @@
 package kubernetes
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -61,10 +60,7 @@ func AddRepo(name, url string) error {
 		return errors.Wrap(err, "get token error")
 	}
 	method := fmt.Sprintf(_addRepoMethodFormat, name)
-	data, err := json.Marshal(repoAPI.CreateRepoRequest{Url: url})
-	if err != nil {
-		return errors.Wrap(err, "json marshal error")
-	}
+	data := []byte(fmt.Sprintf("%q", url))
 
 	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
 	if err != nil {
