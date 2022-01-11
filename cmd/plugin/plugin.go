@@ -54,9 +54,9 @@ import (
 var PluginHelpExample = `
 # Get status of tKeel plugins from Kubernetes
 tkeel plugin list
-tkeel plugin list --installable || -i
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName> <pluginID>
-tkeel plugin install https://tkeel-io.github.io/helm-charts/<pluginName>@v0.1.0 <pluginID>
+tkeel plugin list -r <repo>
+tkeel plugin install <repo>/<plugin> <pluginID>
+tkeel plugin install <repo>/<plugin>@v0.1.0 <pluginID>
 tkeel plugin uninstall <pluginID>
 tkeel plugin register <pluginID>
 tkeel plugin unregister <pluginID>

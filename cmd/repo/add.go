@@ -16,7 +16,6 @@ var AddCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, "please input 2 arguments,1st repo name 2nd repo url")
 		}
 		name, url := args[0], args[1]
-
 		err := kubernetes.AddRepo(name, url)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "unable add repo to tkeel")
