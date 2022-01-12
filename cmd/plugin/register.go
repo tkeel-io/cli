@@ -40,7 +40,7 @@ var PluginRegisterCmd = &cobra.Command{
 		}
 		if secret == "" {
 			print.InfoStatusEvent(os.Stdout, "Input Your Plugin Secret:")
-			bytes, err := term.ReadPassword(int(syscall.Stdin))
+			bytes, err := term.ReadPassword(int(syscall.Stdin)) // nolint
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read secret from stdin")
 				return
