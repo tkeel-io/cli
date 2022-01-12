@@ -19,12 +19,11 @@ package plugin
 import (
 	"fmt"
 	"os"
-	"syscall"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
-	"golang.org/x/term"
 )
 
 var secret string
@@ -39,13 +38,11 @@ var PluginRegisterCmd = &cobra.Command{
 			return
 		}
 		if secret == "" {
-			print.InfoStatusEvent(os.Stdout, "Input Your Plugin Secret:")
-			bytes, err := term.ReadPassword(int(syscall.Stdin)) // nolint
-			if err != nil {
+			prompt := &survey.Password{Message: "Please enter your Plugin Secret: "}
+			if err := survey.AskOne(prompt, &secret); err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read secret from stdin")
 				return
 			}
-			secret = string(bytes)
 		}
 
 		if kubernetesMode {
