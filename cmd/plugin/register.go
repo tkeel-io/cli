@@ -19,11 +19,15 @@ package plugin
 import (
 	"fmt"
 	"os"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
+	"golang.org/x/term"
 )
+
+var secret string
 
 var PluginRegisterCmd = &cobra.Command{
 	Use:     "register",
@@ -34,9 +38,19 @@ var PluginRegisterCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register -k pluginID")
 			return
 		}
+		if secret == "" {
+			print.InfoStatusEvent(os.Stdout, "Input Your Plugin Secret:")
+			bytes, err := term.ReadPassword(syscall.Stdin)
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, "failed to read secret from stdin")
+				return
+			}
+			secret = string(bytes)
+		}
+
 		if kubernetesMode {
 			pluginID := args[0]
-			err := kubernetes.Register(pluginID)
+			err := kubernetes.RegisterPlugin(pluginID, secret)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
@@ -47,5 +61,6 @@ var PluginRegisterCmd = &cobra.Command{
 }
 
 func init() {
+	PluginRegisterCmd.Flags().StringVarP(&secret, "secret", "s", "", "The secret of the tKeel Platform when you installed the Plugin.(Almost It configured with configuration file).")
 	PluginCmd.AddCommand(PluginRegisterCmd)
 }

@@ -25,6 +25,8 @@ const (
 	_installPluginFormat          = "v1/plugins/%s"
 	_uninstallPluginFormat        = "v1/plugins/%s"
 	_getInstalledPluginListFormat = "v1/plugins"
+	_registerPluginFormat         = "v1/plugins/%s/register"
+	_unregisterPluginFormat       = "v1/plugins/%s/register"
 )
 
 var ErrInvalidToken = errors.New("invalid token")
@@ -145,7 +147,7 @@ func InstalledList() ([]InstalledListOutput, error) {
 		return nil, errors.Wrap(err, "get token error")
 	}
 
-	resp, err := InvokeByPortForward(_pluginRudder, _getInstalledPluginListFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginRudder, _getInstalledPluginListFormat, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "InvokeByPortForward error")
 	}
@@ -166,7 +168,7 @@ func InstalledList() ([]InstalledListOutput, error) {
 	list := make([]InstalledListOutput, 0, len(listResponse.PluginList))
 	for _, o := range listResponse.GetPluginList() {
 		registeredAt := time.Unix(o.RegisterTimestamp, 0).Format("2006-01-02 15:04:05")
-		if o.RegisterTimestamp == 0 {
+		if o.RegisterTimestamp == 0 || o.Status < 2 {
 			registeredAt = "UNREGISTER"
 		}
 		list = append(list, InstalledListOutput{
@@ -206,6 +208,53 @@ func Register(pluginID string) error {
 	return fmt.Errorf("plugin<%s> not found", pluginID)
 }
 
+func RegisterPlugin(plugin, secret string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return errors.Wrap(err, "get token error")
+	}
+	method := fmt.Sprintf(_registerPluginFormat, plugin)
+	data := []byte(fmt.Sprintf("%q", secret))
+
+	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, setAuthenticate(token))
+	if err != nil {
+		return errors.Wrap(err, "invoke "+method+" error")
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+
+	return errors.New("register failed")
+}
+
+func UnregisterPlugin(plugin string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return errors.Wrap(err, "get token error")
+	}
+	method := fmt.Sprintf(_unregisterPluginFormat, plugin)
+
+	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, setAuthenticate(token))
+	if err != nil {
+		return errors.Wrap(err, "invoke "+method+" error")
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == http.StatusOK {
+		return nil
+	}
+
+	return errors.New("register failed")
+}
+
 func Unregister(pluginID string) (*Plugin, error) {
 	clientset, err := Client()
 	if err != nil {
@@ -222,7 +271,7 @@ func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
 	}
 	// if auth token is not bearer type ?
 	method := fmt.Sprintf(_getPluginListFromRepoFormat, repo)
-	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	body, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "invoke "+method+" error")
 	}
@@ -266,13 +315,10 @@ func Install(repo, plugin, version, name, config string) error {
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}
-	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "invoke "+method+" error")
 	}
-	// TODO: After Debug Delete This
-	fmt.Println(string(data))
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -293,9 +339,9 @@ func UninstallPlugin(pluginID string) error {
 	}
 
 	method := fmt.Sprintf(_uninstallPluginFormat, pluginID)
-	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "invoke "+method+" error")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -323,4 +369,8 @@ func getAdminToken() (string, error) {
 	}
 
 	return fmt.Sprintf("Bearer %s", tokenb[:n]), nil
+}
+
+func setAuthenticate(token string) HTTPRequestOption {
+	return InvokeSetHTTPHeader("Authorization", token)
 }

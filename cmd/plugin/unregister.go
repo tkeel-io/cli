@@ -36,12 +36,10 @@ var PluginRemoveCmd = &cobra.Command{
 		}
 		if kubernetesMode {
 			pluginID := args[0]
-			rmP, err := kubernetes.Unregister(pluginID)
-			if err != nil {
+			if err := kubernetes.UnregisterPlugin(pluginID); err != nil {
 				print.FailureStatusEvent(os.Stdout, err.Error())
 				os.Exit(1)
 			}
-			print.InfoStatusEvent(os.Stdout, fmt.Sprintf("Unregister plugin: %s", rmP))
 			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
 		}
 	},
