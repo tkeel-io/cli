@@ -30,7 +30,7 @@ var adminLoginCmd = &cobra.Command{
 		)
 		if len(args) == 0 && password == "" {
 			print.InfoStatusEvent(os.Stdout, "Input your password: ")
-			bytes, err = term.ReadPassword(syscall.Stdin)
+			bytes, err = term.ReadPassword(int(syscall.Stdin))
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read password from stdin")
 				return
