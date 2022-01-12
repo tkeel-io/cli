@@ -2,12 +2,11 @@ package admin
 
 import (
 	"os"
-	"syscall"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
-	"golang.org/x/term"
 )
 
 var (
@@ -23,22 +22,14 @@ var adminLoginCmd = &cobra.Command{
 	tkeel admin login -p your_password --print
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			token string
-			err   error
-			bytes []byte
-		)
+		prompt := &survey.Password{Message: "Please enter your password: "}
 		if len(args) == 0 && password == "" {
-			print.InfoStatusEvent(os.Stdout, "Input your password: ")
-			bytes, err = term.ReadPassword(int(syscall.Stdin)) // nolint
-			if err != nil {
+			if err := survey.AskOne(prompt, &password); err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read password from stdin")
 				return
 			}
-			password = string(bytes)
 		}
-
-		token, err = kubernetes.AdminLogin(password)
+		token, err := kubernetes.AdminLogin(password)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "Login Failed: %s", err.Error())
 			return
