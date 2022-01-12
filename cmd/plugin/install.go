@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"encoding/base64"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -32,19 +31,19 @@ var PluginInstallCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
 			return
 		}
-		var config string
+		var configb []byte
+		var err error
 		name := args[1]
 		repo, plugin, version := parseInstallArg(args[0])
 		if configFile != "" {
-			configb, err := ioutil.ReadFile(configFile)
+			configb, err = ioutil.ReadFile(configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
 				return
 			}
-			config = base64.StdEncoding.EncodeToString(configb)
 		}
 
-		if err := kubernetes.Install(repo, plugin, version, name, config); err != nil {
+		if err := kubernetes.Install(repo, plugin, version, name, configb); err != nil {
 			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
 			return

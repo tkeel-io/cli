@@ -298,7 +298,7 @@ func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
 	return l, nil
 }
 
-func Install(repo, plugin, version, name, config string) error {
+func Install(repo, plugin, version, name string, config []byte) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return err
@@ -308,7 +308,7 @@ func Install(repo, plugin, version, name, config string) error {
 		Name:          plugin,
 		Version:       version,
 		Repo:          repo,
-		Configuration: []byte(config),
+		Configuration: config,
 		Type:          1,
 	}
 	data, err := json.Marshal(inReq) //nolint
