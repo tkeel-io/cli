@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -63,7 +64,7 @@ func Execute(version, apiVersion string) {
 	RootCmd.Version = version
 	api.PlatformAPIVersion = apiVersion
 
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig, setKubConfig)
 
 	setVersion()
 
@@ -76,6 +77,21 @@ func Execute(version, apiVersion string) {
 func setVersion() {
 	template := fmt.Sprintf("Keel CLI version: %s (%s %s) \n", RootCmd.Version, gitCommit, buildDate)
 	RootCmd.SetVersionTemplate(template)
+}
+
+func setKubConfig() {
+	if kubeconfig != "" {
+		var err error
+		if kubeconfig, err = filepath.Abs(kubeconfig); err != nil {
+			print.WarningStatusEvent(os.Stdout, "get kubeconfig absolute path failed")
+			return
+		}
+		err = os.Setenv("KUBECONFIG", kubeconfig)
+		if err != nil {
+			print.WarningStatusEvent(os.Stdout, "set kubeconfig environment variable failed")
+			return
+		}
+	}
 }
 
 func initConfig() {
@@ -98,11 +114,4 @@ func init() {
 	RootCmd.AddCommand(core.CoreCmd)
 	RootCmd.AddCommand(admin.AdminCmd)
 	RootCmd.AddCommand(repo.RepoCmd)
-
-	if kubeconfig != "" {
-		err := os.Setenv("KUBECONFIG", kubeconfig)
-		if err != nil {
-			print.WarningStatusEvent(os.Stdout, "set kubeconfig environment variable failed")
-		}
-	}
 }

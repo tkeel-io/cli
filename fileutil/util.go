@@ -2,7 +2,7 @@ package fileutil
 
 import (
 	"os"
-	"path"
+	path "path/filepath"
 
 	"github.com/pkg/errors"
 )

@@ -1,8 +1,10 @@
 package plugin
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -14,11 +16,10 @@ import (
 const officialRepo = "tkeel"
 
 var (
-	debugMode    bool
-	wait         bool
-	timeout      uint
-	tkeelVersion string
-	configFile   string
+	debugMode  bool
+	wait       bool
+	timeout    uint
+	configFile string
 )
 
 var PluginInstallCmd = &cobra.Command{
@@ -36,6 +37,12 @@ var PluginInstallCmd = &cobra.Command{
 		name := args[1]
 		repo, plugin, version := parseInstallArg(args[0])
 		if configFile != "" {
+			configFile, err = filepath.Abs(configFile)
+			fmt.Println("filepath.Abs:", configFile)
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, "unable to read config file")
+				return
+			}
 			configb, err = ioutil.ReadFile(configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
@@ -56,7 +63,6 @@ func init() {
 	PluginInstallCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	PluginInstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
-	PluginInstallCmd.Flags().StringVarP(&tkeelVersion, "tkeel_version", "", "0.2.0", "The plugin depened tkeel version.")
 	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "", "", "The plugin config file.")
 
 	PluginCmd.AddCommand(PluginInstallCmd)
