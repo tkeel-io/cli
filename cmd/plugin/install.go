@@ -3,6 +3,7 @@ package plugin
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -36,6 +37,11 @@ var PluginInstallCmd = &cobra.Command{
 		name := args[1]
 		repo, plugin, version := parseInstallArg(args[0])
 		if configFile != "" {
+			configFile, err = filepath.Abs(configFile)
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, "unable to read config file")
+				return
+			}
 			configb, err = ioutil.ReadFile(configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
