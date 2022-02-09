@@ -36,6 +36,10 @@ var (
 	enableMTLS     bool
 	enableHA       bool
 	values         []string
+	configFile     string
+	repoUrl        string
+	repoName       string
+	password       string
 )
 
 var InitCmd = &cobra.Command{
@@ -63,6 +67,12 @@ tkeel init --wait --timeout 600
 				Timeout:    timeout,
 				DebugMode:  debugMode,
 				Secret:     secret,
+				Repo: &kubernetes.Repo{
+					Url:  repoUrl,
+					Name: repoName,
+				},
+				Password:   password,
+				ConfigFile: configFile,
 			}
 			err := kubernetes.Init(config)
 			if err != nil {
@@ -85,6 +95,10 @@ func init() {
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	InitCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	InitCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
+	InitCmd.Flags().StringVarP(&configFile, "middleware-config", "f", "~/.tkeel/middleware.yaml", "The tkeel middleware config file")
+	InitCmd.Flags().StringVarP(&repoUrl, "repo-url", "", "https://wuxs.github.io/helm-charts/", "The tkeel repo url")
+	InitCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
+	InitCmd.Flags().StringVarP(&password, "password", "", "changeme", "The tkeel admin password")
 	InitCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(InitCmd)
 }

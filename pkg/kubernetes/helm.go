@@ -91,56 +91,80 @@ func chartValues(config InitConfiguration) (map[string]interface{}, error) {
 	return chartVals, nil
 }
 
-func installTkeel(config InitConfiguration) error {
-	coreComponentChartNames := []string{tkeelRudderHelmChart, tkeelCoreHelmChart}
-	if err := createNamespace(config.Namespace); err != nil {
-		return err
-	}
-	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
+func MiddlewareChart(config InitConfiguration) (*chart.Chart, error) {
+	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelPluginMiddlewareHelmChart, helmConf)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return middlewareChart, nil
+}
 
+func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[string]map[string]interface{}, error) {
 	keelChart, err := tKeelChart(config.Version, tKeelHelmRepo, tkeelKeelHelmChart, helmConf)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if err = addDaprComponentChartDependency(config, helmConf, keelChart,
 		tkeelKeelHelmChart); err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelPluginMiddlewareHelmChart, helmConf)
-	if err != nil {
-		return err
+	result := make(map[string]map[string]interface{})
+	chartConfig := make(map[string]interface{})
+	middlewares := keelChart.Values["middleware"].(map[string]interface{})
+	for k, v := range middlewares {
+		chartConfig[k] = v
 	}
-
-	keelChart.AddDependency(middlewareChart)
+	result[tkeelKeelHelmChart] = chartConfig
 
 	for _, coreComponentName := range coreComponentChartNames {
 		coreChart, err2 := tKeelChart(config.Version, tKeelHelmRepo, coreComponentName, helmConf)
 		if err2 != nil {
-			return err2
+			return nil, nil, err
 		}
 		if err2 = addDaprComponentChartDependency(config, helmConf, coreChart,
 			coreComponentName); err2 != nil {
-			return err
+			return nil, nil, err
 		}
+		if coreComponentName == tkeelRudderHelmChart {
+			coreChart.Values["adminPassword"] = password
+		}
+		chartConfig = make(map[string]interface{})
+		middlewares = coreChart.Values["middleware"].(map[string]interface{})
+		for k, v := range middlewares {
+			chartConfig[k] = v
+		}
+		result[coreComponentName] = chartConfig
 		keelChart.AddDependency(coreChart)
 	}
+	return keelChart, result, err
+}
 
-	installClient := helm.NewInstall(helmConf)
-	installClient.ReleaseName = tKeelReleaseName
-	installClient.Namespace = config.Namespace
-	installClient.Wait = config.Wait
-	installClient.Timeout = time.Duration(config.Timeout) * time.Second
-
+func installTkeel(config InitConfiguration, middlewareChart *chart.Chart, keelChart *chart.Chart) error {
+	err := createNamespace(config.Namespace)
+	if err != nil {
+		return err
+	}
 	var values map[string]interface{}
 	values, err = chartValues(config)
 	if err != nil {
 		return err
 	}
+
+	installClient := helm.NewInstall(helmConf)
+	installClient.Namespace = config.Namespace
+	installClient.Timeout = time.Duration(config.Timeout) * time.Second
+
+	installClient.ReleaseName = tKeelMiddlewareReleaseName
+	installClient.Wait = true
+	if _, err = installClient.Run(middlewareChart, values); err != nil {
+		return fmt.Errorf("helm install err:%w", err)
+	}
+	print.InfoStatusEvent(os.Stdout, "install tKeel middleware done.")
+
+	installClient.ReleaseName = tKeelReleaseName
+	installClient.Wait = config.Wait
 	if _, err = installClient.Run(keelChart, values); err != nil {
 		return fmt.Errorf("helm install err:%w", err)
 	}

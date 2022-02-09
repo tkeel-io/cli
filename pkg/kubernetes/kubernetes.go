@@ -19,9 +19,15 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
+	"github.com/tkeel-io/cli/fileutil"
+	"helm.sh/helm/v3/pkg/chart"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
+	"sigs.k8s.io/yaml"
+	"strings"
 
 	dapr "github.com/dapr/cli/pkg/kubernetes"
 	"github.com/dapr/cli/pkg/print"
@@ -33,7 +39,7 @@ import (
 
 const (
 	tKeelReleaseName               = "tkeel-platform"
-	tKeelHelmRepo                  = "https://tkeel-io.github.io/helm-charts/"
+	tKeelMiddlewareReleaseName     = "tkeel-platform-middleware"
 	tKeelPluginConfigHelmChart     = "tkeel-plugin-components"
 	tKeelPluginMiddlewareHelmChart = "tkeel-middleware"
 	tkeelKeelHelmChart             = "keel"
@@ -41,18 +47,50 @@ const (
 	tkeelCoreHelmChart             = "core"
 )
 
+var tKeelHelmRepo = "https://tkeel-io.github.io/helm-charts/"
 var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
 
+var helmConf *helm.Configuration
+var coreComponentChartNames = []string{tkeelRudderHelmChart, tkeelCoreHelmChart}
+
 type InitConfiguration struct {
-	Version    string
-	Namespace  string
-	Secret     string
-	EnableMTLS bool
-	EnableHA   bool
-	Args       []string
-	Wait       bool
-	Timeout    uint
-	DebugMode  bool
+	Version       string
+	Namespace     string
+	Secret        string
+	EnableMTLS    bool
+	EnableHA      bool
+	Args          []string
+	Wait          bool
+	Timeout       uint
+	DebugMode     bool
+	ConfigFile    string
+	Password      string
+	Repo          *Repo
+	DefaultConfig bool
+}
+
+type InstallConfig struct {
+	Middleware map[string]interface{} `yaml:"middleware"`
+	Repo       map[string]interface{} `yaml:"repo"`
+}
+
+// middleware.yaml
+type MiddlewareConfig struct {
+	Queue           string `json:"queue" yaml:"queue" mapstructure:"queue,omitempty"`
+	Database        string `json:"database" yaml:"database" mapstructure:"database,omitempty"`
+	Cache           string `json:"cache" yaml:"cache" mapstructure:"cache,omitempty"`
+	Search          string `json:"search" yaml:"search" mapstructure:"search,omitempty"`
+	TSDB            string `json:"tsdb" yaml:"tsdb" mapstructure:"tsdb,omitempty"`
+	ServiceRegistry string `json:"service_registry" yaml:"service_registry" mapstructure:"service_registry,omitempty"`
+}
+
+func (c *MiddlewareConfig) Empty() bool {
+	return c.Queue == "" && c.Database == "" && c.Cache == "" && c.Search == "" && c.TSDB == "" && c.ServiceRegistry == ""
+}
+
+type Repo struct {
+	Url  string
+	Name string
 }
 
 // Init deploys the tKeel operator using the supplied runtime version.
@@ -63,7 +101,77 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	err = deploy(config)
+	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
+	if err != nil {
+		return err
+	}
+
+	var middlewareMap = make(map[string]string)
+	middlewareConfig, err := loadMiddlewareConfig(config.ConfigFile)
+	if err != nil {
+		return err
+	}
+	err = mapstructure.Decode(middlewareConfig, &middlewareMap)
+	if err != nil {
+		return err
+	}
+
+	tKeelHelmRepo = config.Repo.Url
+
+	keelChart, componentMiddleware, err := KeelChart(config, config.Password)
+	if err != nil {
+		return err
+	}
+
+	middlewareChart, err := MiddlewareChart(config)
+	if err != nil {
+		return err
+	}
+
+	dependencies := make(map[string]*chart.Chart)
+	for _, k := range middlewareChart.Dependencies() {
+		dependencies[k.Name()] = k
+	}
+	for _, v := range middlewareMap {
+		items := strings.Split(v, ",")
+		res, err := url.Parse(items[0])
+		if err != nil {
+			return err
+		}
+		if _, ok := dependencies[res.Scheme]; ok {
+			delete(dependencies, res.Scheme)
+		}
+	}
+	newDependency := make([]*chart.Chart, 0)
+	for _, v := range dependencies {
+		newDependency = append(newDependency, v)
+	}
+	middlewareChart.SetDependencies(newDependency...)
+	// cover middleware config with custom middleware
+	for component, middleware := range componentMiddleware {
+		for k := range middleware {
+			if v, ok := middlewareMap[k]; ok {
+				middleware[k] = v
+			}
+		}
+		if component == tkeelKeelHelmChart {
+			keelChart.Values["middleware"] = middleware
+		} else {
+			keelChart.Values[component] = map[string]interface{}{"middleware": middleware}
+		}
+	}
+
+	err = deploy(config, middlewareChart, keelChart)
+	if err != nil {
+		return err
+	}
+
+	_, err = AdminLogin(config.Password)
+	if err != nil {
+		return err
+	}
+
+	err = AddRepo(config.Repo.Name, config.Repo.Url)
 	if err != nil {
 		return err
 	}
@@ -76,13 +184,13 @@ func Init(config InitConfiguration) (err error) {
 	return nil
 }
 
-func deploy(config InitConfiguration) (err error) {
+func deploy(config InitConfiguration, middlewareChart *chart.Chart, keelChart *chart.Chart) (err error) {
 	msg := "Deploying the tKeel Platform to your cluster..."
 
 	stopSpinning := print.Spinner(os.Stdout, msg)
 	defer stopSpinning(print.Failure)
 
-	err = installTkeel(config)
+	err = installTkeel(config, middlewareChart, keelChart)
 	if err != nil {
 		return err
 	}
@@ -113,6 +221,30 @@ func deploy(config InitConfiguration) (err error) {
 // 	return err
 // }
 
+// load middleware config form file
+func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	config = strings.Replace(config, "~", home, 1)
+	middlewareConfig := &MiddlewareConfig{}
+	file, err := fileutil.LocateFile(os.O_RDONLY, config)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+	err = yaml.Unmarshal(data, &middlewareConfig)
+	if err != nil {
+		return nil, err
+	}
+	return middlewareConfig, nil
+}
+
 func check(config InitConfiguration) error {
 	client, err := dapr.NewStatusClient()
 	if err != nil {
@@ -124,6 +256,13 @@ func check(config InitConfiguration) error {
 	}
 	if len(status) == 0 {
 		return ErrDaprNotInstall
+	}
+	enabled, err := dapr.IsMTLSEnabled()
+	if err != nil {
+		return fmt.Errorf("can't connect to a Kubernetes cluster: %w", err)
+	}
+	if !enabled {
+		return errors.New("dapr mtls is disabled")
 	}
 	if status[0].Namespace != config.Namespace {
 		return fmt.Errorf("dapr is installed in namespace: `%v`, not in `%v`\nUse `-n %v` flag", status[0].Namespace, config.Namespace, status[0].Namespace)
