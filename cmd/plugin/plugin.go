@@ -76,7 +76,6 @@ var PluginCmd = &cobra.Command{
 }
 
 func init() {
-	PluginCmd.PersistentFlags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "", "The output format of the list. Valid values are: json, yaml, or table (default)")
 	PluginCmd.PersistentFlags().BoolP("help", "h", false, "Print this help message")
 }
@@ -96,7 +95,7 @@ func outputList(list interface{}, length int) {
 		}
 
 		// Standalone mode displays a separate message when no instances are found.
-		if !kubernetesMode && length == 0 {
+		if length == 0 {
 			fmt.Println("No Dapr instances found.")
 			return
 		}

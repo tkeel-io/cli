@@ -91,14 +91,6 @@ func chartValues(config InitConfiguration) (map[string]interface{}, error) {
 	return chartVals, nil
 }
 
-func MiddlewareChart(config InitConfiguration) (*chart.Chart, error) {
-	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelPluginMiddlewareHelmChart, helmConf)
-	if err != nil {
-		return nil, err
-	}
-	return middlewareChart, nil
-}
-
 func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[string]map[string]interface{}, error) {
 	keelChart, err := tKeelChart(config.Version, tKeelHelmRepo, tkeelKeelHelmChart, helmConf)
 	if err != nil {

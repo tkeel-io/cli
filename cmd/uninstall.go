@@ -27,8 +27,7 @@ import (
 )
 
 var (
-	uninstallKubernetes bool
-	uninstallAll        bool
+	uninstallAll bool
 )
 
 // UninstallCmd is a command from removing a tKeel installation.
@@ -52,10 +51,8 @@ dapr uninstall -k
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
-		if uninstallKubernetes {
-			print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
-			err = kubernetes.UninstallPlatform(namespace, timeout, debugMode)
-		}
+		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
+		err = kubernetes.UninstallPlatform(namespace, timeout, debugMode)
 
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing tKeel: %s", err))
@@ -66,7 +63,6 @@ dapr uninstall -k
 }
 
 func init() {
-	UninstallCmd.Flags().BoolVarP(&uninstallKubernetes, "kubernetes", "k", true, "Uninstall tKeel from a Kubernetes cluster")
 	UninstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The timeout for the Kubernetes uninstall")
 	UninstallCmd.Flags().BoolVar(&uninstallAll, "all", false, "Remove @TODO .dapr directory, Redis, Placement and Zipkin containers")
 	UninstallCmd.Flags().String("network", "", "The Docker network from which to remove the tKeel Platform")

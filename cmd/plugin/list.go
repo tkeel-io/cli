@@ -63,7 +63,6 @@ var PluginStatusCmd = &cobra.Command{
 }
 
 func init() {
-	PluginStatusCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	PluginStatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginStatusCmd.Flags().StringVarP(&repo, "repo", "r", "", "Show the plugin list of this repository")
 	PluginCmd.AddCommand(PluginStatusCmd)

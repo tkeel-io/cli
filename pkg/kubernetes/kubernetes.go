@@ -95,15 +95,42 @@ type Repo struct {
 
 // Init deploys the tKeel operator using the supplied runtime version.
 func Init(config InitConfiguration) (err error) {
-	print.InfoStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
-	err = check(config)
-	if err != nil {
-		return err
-	}
+	//print.InfoStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
+	//err = check(config)
+	//if err != nil {
+	//	return err
+	//}
+	tKeelHelmRepo = config.Repo.Url
 
 	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
+	}
+
+	keelChart, componentMiddleware, err := KeelChart(config, config.Password)
+	if err != nil {
+		return err
+	}
+
+	if config.ConfigFile[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		config.ConfigFile = strings.Replace(config.ConfigFile, "~", home, 1)
+	}
+
+	if _, err := os.Stat(config.ConfigFile); os.IsNotExist(err) {
+		middlewares := make(map[string]interface{})
+		for _, config := range componentMiddleware {
+			for k, v := range config {
+				middlewares[k] = v
+			}
+		}
+		err = initMiddlewareConfig(config.ConfigFile, middlewares)
+		if err != nil {
+			return err
+		}
 	}
 
 	var middlewareMap = make(map[string]string)
@@ -116,14 +143,7 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	tKeelHelmRepo = config.Repo.Url
-
-	keelChart, componentMiddleware, err := KeelChart(config, config.Password)
-	if err != nil {
-		return err
-	}
-
-	middlewareChart, err := MiddlewareChart(config)
+	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelPluginMiddlewareHelmChart, helmConf)
 	if err != nil {
 		return err
 	}
@@ -223,11 +243,6 @@ func deploy(config InitConfiguration, middlewareChart *chart.Chart, keelChart *c
 
 // load middleware config form file
 func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	config = strings.Replace(config, "~", home, 1)
 	middlewareConfig := &MiddlewareConfig{}
 	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
 	if err != nil {
@@ -243,6 +258,25 @@ func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
 		return nil, err
 	}
 	return middlewareConfig, nil
+}
+
+func initMiddlewareConfig(config string, middlewareConfig map[string]interface{}) error {
+	data, err := yaml.Marshal(middlewareConfig)
+	if err != nil {
+		return err
+	}
+	content := string(data)
+	lines := strings.Split(content, "\n")
+	newContent := ""
+	for _, line := range lines {
+		newContent += "# " + line + "\n"
+	}
+	f, err := os.OpenFile(config, os.O_CREATE|os.O_RDWR, 0777)
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(newContent)
+	return err
 }
 
 func check(config InitConfiguration) error {
