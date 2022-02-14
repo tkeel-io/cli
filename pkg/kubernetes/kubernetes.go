@@ -229,7 +229,7 @@ func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
 	}
 	config = strings.Replace(config, "~", home, 1)
 	middlewareConfig := &MiddlewareConfig{}
-	file, err := fileutil.LocateFile(os.O_RDONLY, config)
+	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
 	if err != nil {
 		return nil, err
 	}
