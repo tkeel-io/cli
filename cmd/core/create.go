@@ -8,7 +8,7 @@ import (
 // createCmd represents the create command.
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a entity from a flie",
+	Short: "Create a entity from a file",
 	Run: func(cmd *cobra.Command, args []string) {
 		kubernetes.CoreCreate(filenames)
 	},

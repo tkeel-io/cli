@@ -26,27 +26,23 @@ tKeel tenant list -k
 			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
 			return
 		}
-		if kubernetesMode {
-			title := args[0]
-			adminName, adminPw := "", ""
-			if len(args) == 3 {
-				adminName = args[1]
-				adminPw = args[2]
-			}
-			err := kubernetes.TenantCreate(title, adminName, adminPw)
-			if err != nil {
-				print.FailureStatusEvent(os.Stdout, err.Error())
-				os.Exit(1)
-			}
-
-			print.SuccessStatusEvent(os.Stdout, "Success! ")
+		title := args[0]
+		adminName, adminPw := "", ""
+		if len(args) == 3 {
+			adminName = args[1]
+			adminPw = args[2]
 		}
+		err := kubernetes.TenantCreate(title, adminName, adminPw)
+		if err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		}
+
+		print.SuccessStatusEvent(os.Stdout, "Success! ")
 	},
 }
 
 func init() {
-	TenantCreateCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	TenantCreateCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	TenantCreateCmd.MarkFlagRequired("kubernetes")
 	TenantCmd.AddCommand(TenantCreateCmd)
 }
