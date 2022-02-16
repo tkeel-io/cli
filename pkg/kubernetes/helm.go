@@ -49,7 +49,9 @@ func tKeelChart(version, repo, chartName string, config *helm.Configuration) (*c
 	pull := helm.NewPull()
 	pull.RepoURL = repo
 	pull.Settings = &cli.EnvSettings{}
-
+	if version != "latest" {
+		pull.Version = version
+	}
 	dir, err := createTempDir()
 	if err != nil {
 		return nil, err

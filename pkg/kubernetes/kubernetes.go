@@ -39,7 +39,7 @@ import (
 
 const (
 	tKeelReleaseName               = "tkeel-platform"
-	tKeelMiddlewareReleaseName     = "tkeel-platform-middleware"
+	tKeelMiddlewareReleaseName     = "tkeel-middleware"
 	tKeelPluginConfigHelmChart     = "tkeel-plugin-components"
 	tKeelPluginMiddlewareHelmChart = "tkeel-middleware"
 	tkeelKeelHelmChart             = "keel"
