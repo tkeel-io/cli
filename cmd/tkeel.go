@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 	"path/filepath"
 	"strings"
@@ -64,7 +65,7 @@ func Execute(version, apiVersion string) {
 	RootCmd.Version = version
 	api.PlatformAPIVersion = apiVersion
 
-	cobra.OnInitialize(initConfig, setKubConfig)
+	cobra.OnInitialize(initConfig, setKubConfig, checkDapr)
 
 	setVersion()
 
@@ -104,9 +105,17 @@ func initConfig() {
 	viper.AutomaticEnv()
 }
 
+func checkDapr() {
+	status := kubernetes.Check()
+	if !status.Installed {
+		print.FailureStatusEvent(os.Stdout, status.Error.Error())
+		os.Exit(1)
+	}
+	namespace = status.Namespace
+}
+
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
-	RootCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "tkeel-platform", "The Kubernetes namespace to install tKeel in")
 	RootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "c", "", "The Kubernetes cluster which you want")
 
 	RootCmd.AddCommand(plugin.PluginCmd)

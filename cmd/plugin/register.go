@@ -45,15 +45,14 @@ var PluginRegisterCmd = &cobra.Command{
 			}
 		}
 
-		if kubernetesMode {
-			pluginID := args[0]
-			err := kubernetes.RegisterPlugin(pluginID, secret)
-			if err != nil {
-				print.FailureStatusEvent(os.Stdout, err.Error())
-				os.Exit(1)
-			}
-			print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
+		pluginID := args[0]
+		err := kubernetes.RegisterPlugin(pluginID, secret)
+		if err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
 		}
+		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
+
 	},
 }
 
