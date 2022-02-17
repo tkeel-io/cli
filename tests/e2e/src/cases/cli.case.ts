@@ -126,14 +126,14 @@ export const cases = {
     "007",
     "tkeel 创建租户",
     "创建租户abcdefg",
-    { cmd: "tkeel", args: ["tenant", "create", "abcdefg", "-k"] },
+    { cmd: "tkeel", args: ["tenant", "create", "abcdefg"] },
     "Success!"
   ),
   c7_1: Case.init(
     "007",
     "tkeel 查看租户",
     "查看租户列表",
-    { cmd: "tkeel", args: ["tenant", "list", "-k"] },
+    { cmd: "tkeel", args: ["tenant", "list"] },
     "abcdefg"
   ),
 };
