@@ -18,12 +18,12 @@ var TenantCreateCmd = &cobra.Command{
 	Short: "create tenant . Supported platforms: Kubernetes",
 	Example: `
 # Manager plugins. in Kubernetes mode
-tKeel tenant create -k tenantTitle
-tKeel tenant list -k
+tKeel tenant create tenantTitle
+tKeel tenant list
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
+			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant tenantTitle adminName adminPassword")
 			return
 		}
 		title := args[0]
