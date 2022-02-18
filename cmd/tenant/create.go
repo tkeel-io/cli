@@ -15,7 +15,7 @@ import (
 
 var TenantCreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "create tenant . Supported platforms: Kubernetes",
+	Short: "create tenant .",
 	Example: `
 # Manager plugins. in Kubernetes mode
 tKeel tenant create tenantTitle

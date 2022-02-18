@@ -41,7 +41,7 @@ var (
 
 var InvokeCmd = &cobra.Command{
 	Use:   "invoke",
-	Short: "Invoke a method on a given tKeel plugin(application). Supported platforms: kubernetes",
+	Short: "Invoke a method on a given tKeel plugin(application).",
 	Example: `
 # Invoke a sample method on target app with POST Verb
 tkeel invoke --plugin-id target --method v1/sample --dao '{"key":"value"}

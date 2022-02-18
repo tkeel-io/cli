@@ -17,7 +17,7 @@ import (
 
 var TenantListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list tenant . Supported platforms: Kubernetes",
+	Short: "list tenant .",
 	Example: `
 # Manager plugins. in Kubernetes mode
 tKeel tenant create tenantTitle

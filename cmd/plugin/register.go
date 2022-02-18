@@ -30,7 +30,7 @@ var secret string
 
 var PluginRegisterCmd = &cobra.Command{
 	Use:     "register",
-	Short:   "Register plugins. Supported platforms: Kubernetes",
+	Short:   "Register plugins.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
