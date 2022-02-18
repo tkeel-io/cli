@@ -31,7 +31,7 @@ var (
 
 var PluginStatusCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "Show the health status of tKeel plugins. Supported platforms: Kubernetes",
+	Short:   "Show the health status of tKeel plugins.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if repo != "" {

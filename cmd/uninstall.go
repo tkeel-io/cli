@@ -33,7 +33,7 @@ var (
 // UninstallCmd is a command from removing a tKeel installation.
 var UninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "Uninstall tKeel Platform. Supported platforms: Kubernetes",
+	Short: "Uninstall tKeel Platform.",
 	Example: `
 # Uninstall from self-hosted mode
 tkeel uninstall

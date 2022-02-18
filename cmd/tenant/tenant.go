@@ -11,7 +11,7 @@ import (
 
 var TenantCmd = &cobra.Command{
 	Use:   "tenant",
-	Short: "tenant of Auth plugins. Supported platforms: Kubernetes",
+	Short: "tenant of Auth plugins.",
 	Example: `
 # Manager plugins. in Kubernetes mode
 tKeel tenant create tenantTitle
