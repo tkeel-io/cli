@@ -11,11 +11,11 @@ import (
 
 var TenantCmd = &cobra.Command{
 	Use:   "tenant",
-	Short: "tenant of Auth plugins. Supported platforms: Kubernetes",
+	Short: "tenant of Auth plugins.",
 	Example: `
 # Manager plugins. in Kubernetes mode
-tKeel tenant create -k tenantTitle
-tKeel tenant list -k
+tKeel tenant create tenantTitle
+tKeel tenant list
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter

@@ -77,7 +77,7 @@ tkeel init --wait --timeout 600
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		successEvent := fmt.Sprintf("Success! tKeel Platform has been installed to namespace %s. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace)
+		successEvent := fmt.Sprintf("Success! tKeel Platform has been installed to namespace %s. To verify, run `tkeel plugin list' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started", config.Namespace)
 		print.SuccessStatusEvent(os.Stdout, successEvent)
 	},
 }

@@ -17,11 +17,11 @@ import (
 
 var TenantListCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list tenant . Supported platforms: Kubernetes",
+	Short: "list tenant .",
 	Example: `
 # Manager plugins. in Kubernetes mode
-tKeel tenant create -k tenantTitle
-tKeel tenant list -k
+tKeel tenant create tenantTitle
+tKeel tenant list
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		data, err := kubernetes.TenantList()

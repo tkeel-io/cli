@@ -30,11 +30,11 @@ var secret string
 
 var PluginRegisterCmd = &cobra.Command{
 	Use:     "register",
-	Short:   "Register plugins. Supported platforms: Kubernetes",
+	Short:   "Register plugins.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register -k pluginID")
+			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register pluginID")
 			return
 		}
 		if secret == "" {
@@ -51,7 +51,7 @@ var PluginRegisterCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal. ", pluginID))
+		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list' in your terminal. ", pluginID))
 
 	},
 }

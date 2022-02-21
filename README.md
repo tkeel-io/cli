@@ -84,7 +84,7 @@ Output should look like so:
 ℹ️  Plugin<plugins>  is registered.                                                                                          
 ℹ️  Plugin<keel>  is registered.                                                                                                                        
 ℹ️  Plugin<auth>  is registered.                                                                                                                        
-✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list -k' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
+✅  Success! tKeel Platform has been installed to namespace keel-system. To verify, run `tkeel plugin list' in your terminal. To get started, go here: https://tkeel.io/keel-getting-started
 ```
 
 ### Uninstall tKeel on Kubernetes
@@ -119,7 +119,7 @@ echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m  
 
 ```bash
 $ tkeel plugin register echo-demo
-✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list -k' in your terminal.
+✅  Success! Plugin<echo-demo> has been Registered to tKeel Platform . To verify, run `tkeel plugin list' in your terminal.
 ```
 
 Check the status
