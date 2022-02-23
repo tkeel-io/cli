@@ -73,14 +73,14 @@ func init() {
 // url style install target plugin: https://tkeel-io.github.io/helm-charts/A@version
 // short style install official plugin： tkeel/B@version or C@version.
 func parseInstallArg(arg string) (repo, plugin, version string) {
-	version = "latest"
+	version = ""
 	plugin = arg
 
 	if sp := strings.Split(arg, "@"); len(sp) == 2 {
 		plugin, version = sp[0], sp[1]
 	}
 
-	if version[0] == 'v' {
+	if version != "" && version[0] == 'v' {
 		version = version[1:]
 	}
 

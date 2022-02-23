@@ -59,6 +59,8 @@ tkeel plugin install <repo>/<plugin> <pluginID>
 tkeel plugin install <repo>/<plugin>@v0.1.0 <pluginID>
 tkeel plugin uninstall <pluginID>
 tkeel plugin show <pluginID>
+tkeel plugin enable <pluginID> -t <tenantId>
+tkeel plugin disable <pluginID> -t <tenantId>
 `
 
 var PluginCmd = &cobra.Command{

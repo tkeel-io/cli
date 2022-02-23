@@ -17,11 +17,6 @@ const (
 	_deleteTenantMethodFormat = "apis/rudder/v1/tenants/%s"
 	_infoTenantMethodFormat   = "apis/rudder/v1/tenants/%s"
 
-	_listTenantUserMethodFormat   = "apis/rudder/v1/tenants/%s/users"
-	_createTenantUserMethodFormat = "apis/rudder/v1/tenants/%s/users"
-	_deleteTenantUserMethodFormat = "apis/rudder/v1/tenants/%s/users/%s"
-	_infoTenantUserMethodFormat   = "apis/rudder/v1/tenants/%s/users/%s"
-
 	_listTenantPluginsMethodFormat  = "apis/rudder/v1/tenants/%s/plugins"
 	_createTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins"
 	_deleteTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
@@ -70,11 +65,11 @@ func CreateTenant(tenant *TenantCreateIn) error {
 		return errors.Wrap(err, "can't unmarshal'")
 	}
 
-	if r.Code == terrors.Success.Reason {
-		return nil
+	if r.Code != terrors.Success.Reason {
+		return errors.New("response error: " + r.Msg)
 	}
 
-	return errors.New("can't handle this")
+	return nil
 }
 
 func TenantList() ([]TenantListOutPut, error) {
@@ -83,7 +78,7 @@ func TenantList() ([]TenantListOutPut, error) {
 		return nil, errors.Wrap(err, "error getting admin token")
 	}
 
-	resp, err := InvokeByPortForward(_pluginKeel, _listTenantsMethodFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, _listTenantsMethodFormat, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
@@ -95,7 +90,7 @@ func TenantList() ([]TenantListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: unexpected status code")
+		return nil, errors.New("response error: " + r.Msg)
 	}
 
 	listResponse := tenantApi.ListTenantResponse{}
@@ -118,18 +113,19 @@ func TenantInfo(tenantId string) ([]TenantListOutPut, error) {
 	}
 	method := fmt.Sprintf(_infoTenantMethodFormat, tenantId)
 
-	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
 
+	fmt.Println(resp)
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
 		return nil, errors.Wrap(err, "error unmarshal")
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: unexpected status code")
+		return nil, errors.New("response error: " + r.Msg)
 	}
 
 	tenantResponse := tenantApi.GetTenantResponse{}
@@ -150,7 +146,7 @@ func TenantDelete(tenantId string) error {
 	}
 	method := fmt.Sprintf(_deleteTenantMethodFormat, tenantId)
 
-	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "error invoke")
 	}
@@ -161,9 +157,8 @@ func TenantDelete(tenantId string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: unexpected status code")
+		return errors.New("response error: " + r.Msg)
 	}
-	// TODO 删除失败
 	return nil
 }
 

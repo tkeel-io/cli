@@ -512,6 +512,7 @@ github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/
 github.com/dimfeld/httptreemux v5.0.1+incompatible/go.mod h1:rbUlSV+CCpv/SuqUTP/8Bk2O3LyUV436/yaRGkhP6Z0=
 github.com/distribution/distribution/v3 v3.0.0-20210804104954-38ab4c606ee3 h1:rEK0juuU5idazw//KzUcL3yYwUU3DIe2OnfJwjDBqno=
 github.com/distribution/distribution/v3 v3.0.0-20210804104954-38ab4c606ee3/go.mod h1:gt38b7cvVKazi5XkHvINNytZXgTEntyhtyM3HQz46Nk=
+github.com/dlclark/regexp2 v1.4.0/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
 github.com/dnaeon/go-vcr v1.0.1/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
 github.com/dnaeon/go-vcr v1.1.0/go.mod h1:M7tiix8f0r6mKKJ3Yq/kqU1OYf3MnfmBWVbPx/yU9ko=
 github.com/docker/cli v20.10.3+incompatible/go.mod h1:JLrzqnKDaYBop7H2jaqPtU4hHvMKP+vjCwu2uszcLI8=
@@ -1667,8 +1668,8 @@ github.com/tkeel-io/kit v0.0.0-20220216043628-5f604f7d21db/go.mod h1:FYeTM+tqf/t
 github.com/tkeel-io/kit v0.0.0-20220216070111-216ac6e8fa29 h1:3E2nIkgPWdHTb4YuRd8oGjk3TkOnUp7W0sMZIdeWDq4=
 github.com/tkeel-io/kit v0.0.0-20220216070111-216ac6e8fa29/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
 github.com/tkeel-io/security v0.0.0-20220218100545-fea94640f836/go.mod h1:YnasaSkW3Fmownt0TKzhuulgGkm/0IJBhfSE3niKhFM=
-github.com/tkeel-io/tkeel v0.3.1-0.20220218104312-9a13291e2030 h1:2G+38hPyYLnMbgULIca1LcCbcW61w0UK9il4iFgsPw4=
-github.com/tkeel-io/tkeel v0.3.1-0.20220218104312-9a13291e2030/go.mod h1:Fyf7fKbRPubHj5Btt39d6SApCiYwu4CKSTi5eJCZ8Xg=
+github.com/tkeel-io/tkeel v0.3.1-0.20220222103242-07ef84d52e19 h1:dvMHz87wAyLqtzmmLtOWZkxPF30Ly0AgOZeoUuxLDb8=
+github.com/tkeel-io/tkeel v0.3.1-0.20220222103242-07ef84d52e19/go.mod h1:BD48LH8jH+mW5Z7WMYW+Xt1KOmbm0KnLPSHAhCCeF0c=
 github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd h1:YkV5HcR55JDkvqWvP0KXkLphv4g0c3SXYS2jPcZK1ns=
 github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd/go.mod h1:tjJgHPar2pFjydhnOCLspww8tSOvcKch241PeP9OL8E=
 github.com/tklauser/go-sysconf v0.3.6/go.mod h1:MkWzOF4RMCshBAMXuhXJs64Rte09mITnppBXY/rYEFI=

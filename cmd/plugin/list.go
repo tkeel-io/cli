@@ -48,6 +48,20 @@ var PluginStatusCmd = &cobra.Command{
 			return
 		}
 
+		if tenant != "" {
+			list, err := kubernetes.ListPluginsFromTenant(tenant)
+			if err != nil {
+				if errors.Is(err, kubernetes.ErrInvalidToken) {
+					print.FailureStatusEvent(os.Stdout, "please login!")
+					return
+				}
+				print.FailureStatusEvent(os.Stdout, "unable to list plugins:%s", err.Error())
+				return
+			}
+			outputList(list, len(list))
+			return
+		}
+
 		status, err := kubernetes.InstalledList()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
@@ -65,5 +79,6 @@ var PluginStatusCmd = &cobra.Command{
 func init() {
 	PluginStatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	PluginStatusCmd.Flags().StringVarP(&repo, "repo", "r", "", "Show the plugin list of this repository")
+	PluginStatusCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "Show the plugin of this tenant")
 	PluginCmd.AddCommand(PluginStatusCmd)
 }
