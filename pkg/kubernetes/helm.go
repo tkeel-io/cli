@@ -105,12 +105,14 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 	}
 
 	result := make(map[string]map[string]interface{})
-	chartConfig := make(map[string]interface{})
-	middlewares := keelChart.Values["middleware"].(map[string]interface{})
-	for k, v := range middlewares {
-		chartConfig[k] = v
+	if value, ok := keelChart.Values["middleware"]; ok {
+		chartConfig := make(map[string]interface{})
+		middlewares := value.(map[string]interface{})
+		for k, v := range middlewares {
+			chartConfig[k] = v
+		}
+		result[tkeelKeelHelmChart] = chartConfig
 	}
-	result[tkeelKeelHelmChart] = chartConfig
 
 	for _, coreComponentName := range coreComponentChartNames {
 		coreChart, err2 := tKeelChart(config.Version, tKeelHelmRepo, coreComponentName, helmConf)
@@ -124,12 +126,14 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 		if coreComponentName == tkeelRudderHelmChart {
 			coreChart.Values["adminPassword"] = password
 		}
-		chartConfig = make(map[string]interface{})
-		middlewares = coreChart.Values["middleware"].(map[string]interface{})
-		for k, v := range middlewares {
-			chartConfig[k] = v
+		if value, ok := coreChart.Values["middleware"]; ok {
+			chartConfig := make(map[string]interface{})
+			middlewares := value.(map[string]interface{})
+			for k, v := range middlewares {
+				chartConfig[k] = v
+			}
+			result[coreComponentName] = chartConfig
 		}
-		result[coreComponentName] = chartConfig
 		keelChart.AddDependency(coreChart)
 	}
 	return keelChart, result, err
