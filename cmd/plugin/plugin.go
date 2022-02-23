@@ -58,13 +58,12 @@ tkeel plugin list -r <repo>
 tkeel plugin install <repo>/<plugin> <pluginID>
 tkeel plugin install <repo>/<plugin>@v0.1.0 <pluginID>
 tkeel plugin uninstall <pluginID>
-tkeel plugin register <pluginID>
-tkeel plugin unregister <pluginID>
+tkeel plugin show <pluginID>
 `
 
 var PluginCmd = &cobra.Command{
 	Use:     "plugin",
-	Short:   "Manager plugins.",
+	Short:   "manage plugins.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter

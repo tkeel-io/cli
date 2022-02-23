@@ -16,13 +16,9 @@ import (
 )
 
 var TenantListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "list tenant .",
-	Example: `
-# Manager plugins. in Kubernetes mode
-tKeel tenant create tenantTitle
-tKeel tenant list
-`,
+	Use:     "list",
+	Short:   "list tenant.",
+	Example: TenantHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		data, err := kubernetes.TenantList()
 		if err != nil {

@@ -20,29 +20,43 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var PluginRemoveCmd = &cobra.Command{
-	Use:     "unregister",
-	Short:   "Unregister plugins from tKeel.",
+var secret string
+
+var PluginRegisterCmd = &cobra.Command{
+	Use:     "enable",
+	Short:   "enable plugins of tenant.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register pluginID")
 			return
 		}
+		if secret == "" {
+			prompt := &survey.Password{Message: "Please enter your Plugin Secret: "}
+			if err := survey.AskOne(prompt, &secret); err != nil {
+				print.FailureStatusEvent(os.Stdout, "failed to read secret from stdin")
+				return
+			}
+		}
+
 		pluginID := args[0]
-		if err := kubernetes.UnregisterPlugin(pluginID); err != nil {
+		err := kubernetes.EnablePlugin(pluginID, secret)
+		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
 		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been Registered to tKeel Platform . To verify, run `tkeel plugin list' in your terminal. ", pluginID))
+
 	},
 }
 
 func init() {
-	PluginCmd.AddCommand(PluginRemoveCmd)
+	PluginRegisterCmd.Flags().StringVarP(&secret, "secret", "s", "", "The secret of the tKeel Platform when you installed the Plugin.(Almost It configured with configuration file).")
+	PluginCmd.AddCommand(PluginRegisterCmd)
 }

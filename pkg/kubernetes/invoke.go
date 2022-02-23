@@ -105,7 +105,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string, reqO
 	}
 
 	portForward.Stop()
-	return "", nil
+	return "", err
 }
 
 func makeEndpoint(app *AppPod, pf *PortForward, method string) string {
