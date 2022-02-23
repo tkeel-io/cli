@@ -1,7 +1,9 @@
 package kubernetes
 
 import (
+	"encoding/json"
 	"fmt"
+	terrors "github.com/tkeel-io/kit/errors"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -11,14 +13,18 @@ import (
 )
 
 const (
-	_listReposMethodFormat  = "v1/repos"
-	_addRepoMethodFormat    = "v1/repos/%s"
-	_deleteRepoMethodFormat = "v1/repos/%s"
+	_listReposMethodFormat  = "apis/rudder/v1/repos"
+	_addRepoMethodFormat    = "apis/rudder/v1/repos/%s"
+	_deleteRepoMethodFormat = "apis/rudder/v1/repos/%s"
 )
 
 type RepoListOutput struct {
 	Name   string `csv:"REPO NAME"`
 	Remote string `csv:"REMOTE"`
+}
+
+type AddRepoRequest struct {
+	Url string `json:"url"`
 }
 
 func ListRepo() ([]RepoListOutput, error) {
@@ -27,7 +33,7 @@ func ListRepo() ([]RepoListOutput, error) {
 		return nil, errors.Wrap(err, "error getting admin token")
 	}
 
-	resp, err := InvokeByPortForward(_pluginRudder, _listReposMethodFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, _listReposMethodFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
@@ -37,7 +43,7 @@ func ListRepo() ([]RepoListOutput, error) {
 		return nil, errors.Wrap(err, "error unmarsh")
 	}
 
-	if r.Code != http.StatusOK {
+	if r.Code != terrors.Success.Reason {
 		return nil, errors.New("response error: unexpected status code")
 	}
 
@@ -60,9 +66,12 @@ func AddRepo(name, url string) error {
 		return errors.Wrap(err, "get token error")
 	}
 	method := fmt.Sprintf(_addRepoMethodFormat, name)
-	data := []byte(fmt.Sprintf("%q", url))
-
-	resp, err := InvokeByPortForward(_pluginRudder, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
+	req := AddRepoRequest{Url: url}
+	data, err := json.Marshal(req)
+	if err != nil {
+		return errors.Wrap(err, "marshal add repo request failed")
+	}
+	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
 	if err != nil {
 		return errors.Wrap(err, "invoke by port forward error")
 	}
@@ -71,7 +80,7 @@ func AddRepo(name, url string) error {
 		return errors.Wrap(err, "error unmarshal")
 	}
 
-	if r.Code != http.StatusOK {
+	if r.Code != terrors.Success.Reason {
 		return errors.New("response error: unexpected status code")
 	}
 
@@ -84,7 +93,7 @@ func DeleteRepo(name string) error {
 	if err != nil {
 		return errors.Wrap(err, "get admin token error")
 	}
-	resp, err := InvokeByPortForward(_pluginRudder, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
 	if err != nil {
 		return errors.Wrap(err, "invoke error")
 	}
@@ -94,7 +103,7 @@ func DeleteRepo(name string) error {
 		return errors.Wrap(err, "error unmarshal")
 	}
 
-	if r.Code != http.StatusOK {
+	if r.Code != terrors.Success.Reason {
 		return errors.New("response error: unexpected status code")
 	}
 

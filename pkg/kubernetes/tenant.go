@@ -1,127 +1,195 @@
 package kubernetes
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-
-	k8s "k8s.io/client-go/kubernetes"
+	"github.com/pkg/errors"
+	terrors "github.com/tkeel-io/kit/errors"
+	"github.com/tkeel-io/kit/result"
+	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
+	"google.golang.org/protobuf/encoding/protojson"
+	"net/http"
 )
 
-func TenantCreate(title, adminName, adminPW string) error {
+const (
+	_listTenantsMethodFormat  = "apis/rudder/v1/tenants"
+	_createTenantMethodFormat = "apis/rudder/v1/tenants"
+	_deleteTenantMethodFormat = "apis/rudder/v1/tenants/%s"
+	_infoTenantMethodFormat   = "apis/rudder/v1/tenants/%s"
+
+	_listTenantUserMethodFormat   = "apis/rudder/v1/tenants/%s/users"
+	_createTenantUserMethodFormat = "apis/rudder/v1/tenants/%s/users"
+	_deleteTenantUserMethodFormat = "apis/rudder/v1/tenants/%s/users/%s"
+	_infoTenantUserMethodFormat   = "apis/rudder/v1/tenants/%s/users/%s"
+
+	_listTenantPluginsMethodFormat  = "apis/rudder/v1/tenants/%s/plugins"
+	_createTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins"
+	_deleteTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
+	_infoTenantPluginMethodFormat   = "apis/rudder/v1/tenants/%s/plugins/%s"
+)
+
+type TenantListOutPut struct {
+	ID     string `csv:"ID"`
+	Title  string `csv:"TITLE"`
+	Remark string `csv:"REMARK"`
+}
+
+func TenantCreate(title, remark, adminName, adminPW string) error {
 	if len(title) == 0 {
 		return errors.New("title param nil")
 	}
-	client, err := Client()
-	if err != nil {
-		return err
-	}
-
-	tenant := &TenantCreateIn{Title: title}
+	tenant := &TenantCreateIn{Title: title, Remark: remark}
 	if len(adminName) != 0 && len(adminPW) != 0 {
 		admin := TenantAdmin{UserName: adminName, Password: adminPW}
 		tenant.Admin = admin
 	}
 
-	return CreateTenant(client, tenant)
+	return CreateTenant(tenant)
 }
 
-func CreateTenant(client k8s.Interface, tenant *TenantCreateIn) error {
-	rudder, err := GetAppPod(client, "rudder")
+func CreateTenant(tenant *TenantCreateIn) error {
+	token, err := getAdminToken()
 	if err != nil {
 		return err
 	}
+	method := fmt.Sprintf(_createTenantMethodFormat)
 
-	body, _ := json.Marshal(tenant)
-	res, err := rudder.Request(client.CoreV1().RESTClient().Post(), "v1/tenants", body)
+	data, err := json.Marshal(tenant) //nolint
 	if err != nil {
-		return err
+		return errors.Wrap(err, "marshal plugin request failed")
+	}
+	fmt.Println(string(data))
+	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
+	if err != nil {
+		return errors.Wrap(err, "invoke "+method+" error")
 	}
 
-	ret := res.Do(context.TODO())
-	if ret.Error() != nil {
-		return fmt.Errorf("k8s query result err: %w", ret.Error())
+	fmt.Println(resp)
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
 	}
-	_, err = ret.Raw()
+
+	if r.Code == terrors.Success.Reason {
+		return nil
+	}
+
+	return errors.New("can't handle this")
+}
+
+func TenantList() ([]TenantListOutPut, error) {
+	token, err := getAdminToken()
 	if err != nil {
-		return fmt.Errorf("do k8s query err: %w", err)
+		return nil, errors.Wrap(err, "error getting admin token")
 	}
+
+	resp, err := InvokeByPortForward(_pluginKeel, _listTenantsMethodFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return nil, errors.Wrap(err, "error invoke")
+	}
+	fmt.Println(resp)
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	if r.Code != terrors.Success.Reason {
+		return nil, errors.New("response error: unexpected status code")
+	}
+
+	listResponse := tenantApi.ListTenantResponse{}
+	err = r.Data.UnmarshalTo(&listResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	var list = make([]TenantListOutPut, 0, len(listResponse.Tenants))
+	for _, tenant := range listResponse.Tenants {
+		list = append(list, TenantListOutPut{tenant.TenantId, tenant.Title, tenant.Remark})
+	}
+	return list, nil
+}
+
+func TenantInfo(tenantId string) ([]TenantListOutPut, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting admin token")
+	}
+	method := fmt.Sprintf(_infoTenantMethodFormat, tenantId)
+
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return nil, errors.Wrap(err, "error invoke")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	if r.Code != terrors.Success.Reason {
+		return nil, errors.New("response error: unexpected status code")
+	}
+
+	tenantResponse := tenantApi.GetTenantResponse{}
+	err = r.Data.UnmarshalTo(&tenantResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	var list = make([]TenantListOutPut, 0, 1)
+	list = append(list, TenantListOutPut{tenantResponse.TenantId, tenantResponse.Title, tenantResponse.Remark})
+	return list, nil
+}
+
+func TenantDelete(tenantId string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return errors.Wrap(err, "error getting admin token")
+	}
+	method := fmt.Sprintf(_deleteTenantMethodFormat, tenantId)
+
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	if err != nil {
+		return errors.Wrap(err, "error invoke")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "error unmarshal")
+	}
+
+	if r.Code != terrors.Success.Reason {
+		return errors.New("response error: unexpected status code")
+	}
+	// TODO 删除失败
+	return nil
+}
+
+// tenant plugin manage
+func TenantPluginEnable(tenantId, pluginId string) error {
 
 	return nil
 }
 
-func TenantList() ([]Tenant, error) {
-	client, err := Client()
-	if err != nil {
-		return nil, err
-	}
+func TenantPluginDisable(tenantId, pluginId string) error {
 
-	rudder, err := GetAppPod(client, "rudder")
-	if err != nil {
-		return nil, err
-	}
+	return nil
+}
 
-	res, err := rudder.Request(client.CoreV1().RESTClient().Get(), "v1/tenants", nil)
-	if err != nil {
-		return nil, err
-	}
+func TenantPluginList(tenantId string) error {
 
-	ret := res.Do(context.TODO())
-	if ret.Error() != nil {
-		return nil, fmt.Errorf("k8s query result err: %w", err)
-	}
-	raw, err := ret.Raw()
-	if err != nil {
-		return nil, fmt.Errorf("do k8s query err: %w", err)
-	}
-	resp := TenantListResponse{}
-	err = json.Unmarshal(raw, &resp)
-	if err != nil {
-		err = fmt.Errorf("unmarshal err :%w", err)
-	}
-	return resp.Data, err
+	return nil
 }
 
 type TenantCreateIn struct {
-	Title string      `json:"title"`
-	Admin TenantAdmin `json:"admin"`
+	Title  string      `json:"title"`
+	Remark string      `json:"remark"`
+	Admin  TenantAdmin `json:"admin"`
 }
 
 type TenantAdmin struct {
 	UserName string `json:"username"` //nolint
 	Password string `json:"password"` //nolint
-}
-
-type TenantCreateResponse struct {
-	Code int              `json:"code"`
-	Msg  string           `json:"msg"`
-	Data TenantCreateResp `json:"data"`
-}
-
-type TenantListResponse struct {
-	Ret  int      `json:"ret"`
-	Msg  string   `json:"msg"`
-	Data []Tenant `json:"data"`
-}
-
-type TenantListData struct {
-	TenantList []TenantCreateResp `json:"tenant_list"`
-}
-
-type TenantCreateResp struct {
-	TenantID int         `json:"tenant_id"`
-	Title    string      `json:"title"`
-	Admin    TenantAdmin `json:"admin"`
-}
-
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type Tenant struct {
-	ID     int    `json:"id"`
-	Title  string `json:"title"`
-	Remark string `json:"remark"`
 }

@@ -9,14 +9,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var TenantHelpExample = `
+# Manage tenants.
+tkeel tenant create <tenantTitle>
+tkeel tenant show <tenantId>
+tkeel tenant delete <tenantId>
+tkeel tenant list
+`
 var TenantCmd = &cobra.Command{
-	Use:   "tenant",
-	Short: "tenant of Auth plugins.",
-	Example: `
-# Manager plugins. in Kubernetes mode
-tKeel tenant create tenantTitle
-tKeel tenant list
-`,
+	Use:     "tenant",
+	Short:   "manage tenants.",
+	Example: TenantHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter
 		if len(args) == 0 {

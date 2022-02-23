@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"encoding/base64"
 	"fmt"
+	terrors "github.com/tkeel-io/kit/errors"
 	"net/http"
 	"net/url"
 
@@ -15,6 +16,7 @@ import (
 
 const (
 	_pluginRudder     = "rudder"
+	_pluginKeel       = "keel"
 	_adminLoginMethod = "v1/oauth2/admin"
 )
 
@@ -56,11 +58,11 @@ func getToken(body string) (string, error) {
 		return "", errors.Wrap(err, "unmarshal response context error")
 	}
 
-	if r.Code == http.StatusBadRequest && r.Msg == "OAUTH2_ERR_PASSWORD_NOT_MATCH" {
+	if r.Code == "io.tkeel.rudder.api.oauth2.v1.OAUTH2_ERR_PASSWORD_NOT_MATCH" {
 		return "", errors.New("invalid password")
 	}
 
-	if r.Code != http.StatusOK {
+	if r.Code != terrors.Success.Reason {
 		return "", fmt.Errorf("invalid response: %s", r.Msg)
 	}
 

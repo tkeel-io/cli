@@ -13,26 +13,20 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
+var username string
+var password string
+var remark string
 var TenantCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "create tenant .",
-	Example: `
-# Manager plugins. in Kubernetes mode
-tKeel tenant create tenantTitle
-tKeel tenant list
-`,
+	Use:     "create",
+	Short:   "create tenant.",
+	Example: TenantHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant tenantTitle adminName adminPassword")
+			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
 			return
 		}
 		title := args[0]
-		adminName, adminPw := "", ""
-		if len(args) == 3 {
-			adminName = args[1]
-			adminPw = args[2]
-		}
-		err := kubernetes.TenantCreate(title, adminName, adminPw)
+		err := kubernetes.TenantCreate(title, remark, username, password)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
@@ -44,5 +38,10 @@ tKeel tenant list
 
 func init() {
 	TenantCreateCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	TenantCreateCmd.Flags().StringVarP(&username, "username", "u", "", "username of tenant")
+	TenantCreateCmd.Flags().StringVarP(&password, "password", "p", "", "password of tenant")
+	TenantCreateCmd.Flags().StringVarP(&remark, "remark", "r", "", "remark of tenant")
+	TenantCreateCmd.MarkFlagRequired("username")
+	TenantCreateCmd.MarkFlagRequired("password")
 	TenantCmd.AddCommand(TenantCreateCmd)
 }
