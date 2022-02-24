@@ -33,7 +33,7 @@ func ListRepo() ([]RepoListOutput, error) {
 		return nil, errors.Wrap(err, "error getting admin token")
 	}
 
-	resp, err := InvokeByPortForward(_pluginKeel, _listReposMethodFormat, nil, http.MethodGet, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, _listReposMethodFormat, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
@@ -44,7 +44,7 @@ func ListRepo() ([]RepoListOutput, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: unexpected status code")
+		return nil, errors.New("response error: " + r.Msg)
 	}
 
 	listResponse := repoAPI.ListRepoResponse{}
@@ -71,7 +71,7 @@ func AddRepo(name, url string) error {
 	if err != nil {
 		return errors.Wrap(err, "marshal add repo request failed")
 	}
-	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke by port forward error")
 	}
@@ -81,7 +81,7 @@ func AddRepo(name, url string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: unexpected status code")
+		return errors.New("response error: " + r.Msg)
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func DeleteRepo(name string) error {
 	if err != nil {
 		return errors.Wrap(err, "get admin token error")
 	}
-	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, InvokeSetHTTPHeader("Authorization", token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke error")
 	}
@@ -104,7 +104,7 @@ func DeleteRepo(name string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: unexpected status code")
+		return errors.New("response error: " + r.Msg)
 	}
 
 	return nil

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	terrors "github.com/tkeel-io/kit/errors"
+	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 	"net/http"
 	"time"
 
@@ -22,14 +23,16 @@ import (
 )
 
 const (
-	_getPluginListFromRepoFormat  = "apis/rudder/v1/repos/%s/installers"
-	_showPluginFormat             = "apis/rudder/v1/repos/%s/installers/%s/%s"
-	_installPluginFormat          = "apis/rudder/v1/plugins/%s"
-	_uninstallPluginFormat        = "apis/rudder/v1/plugins/%s"
-	_getInstalledPluginListFormat = "apis/rudder/v1/plugins"
+	_getInstallerListFromRepoFormat = "apis/rudder/v1/repos/%s/installers"
+	_showInstallerFormat            = "apis/rudder/v1/repos/%s/installers/%s/%s"
+	_installPluginFormat            = "apis/rudder/v1/plugins/%s"
+	_showPluginFormat               = "apis/rudder/v1/plugins/%s"
+	_uninstallPluginFormat          = "apis/rudder/v1/plugins/%s"
+	_getInstalledPluginListFormat   = "apis/rudder/v1/plugins"
 
 	_enablePluginFormat  = "apis/rudder/v1/tenants/%s/plugins"
 	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
+	_enabledPluginFormat = "apis/security/v1/tenants/%s/plugins"
 )
 
 var ErrInvalidToken = errors.New("invalid token")
@@ -192,12 +195,12 @@ func InstalledList() ([]InstalledListOutput, error) {
 	return list, nil
 }
 
-func PluginInfo(repo, pluginId, version string) ([]InstalledListOutput, error) {
+func PluginInfo(pluginId string) ([]InstalledListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_showPluginFormat, repo, pluginId, version)
+	method := fmt.Sprintf(_showPluginFormat, pluginId)
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
@@ -212,36 +215,31 @@ func PluginInfo(repo, pluginId, version string) ([]InstalledListOutput, error) {
 		return nil, fmt.Errorf("invalid response: %s", r.Msg)
 	}
 
-	listResponse := pluginAPI.ListPluginResponse{}
-	err = r.Data.UnmarshalTo(&listResponse)
+	response := pluginAPI.GetPluginResponse{}
+	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
 		return nil, errors.Wrap(err, "unmarshal error")
 	}
-	list := make([]InstalledListOutput, 0, len(listResponse.PluginList))
-	for _, o := range listResponse.GetPluginList() {
-		registeredAt := time.Unix(o.RegisterTimestamp, 0).Format("2006-01-02 15:04:05")
-		if o.RegisterTimestamp == 0 || o.Status < 2 {
-			registeredAt = "UNREGISTER"
-		}
-		list = append(list, InstalledListOutput{
-			Name:          o.Id,
-			Plugin:        o.InstallerBrief.Name,
-			Repo:          o.InstallerBrief.Repo,
-			PluginVersion: o.InstallerBrief.Version,
-			RegisterAt:    registeredAt,
-			Status:        v1.PluginStatus_name[int32(o.Status)],
-		})
-	}
+	list := make([]InstalledListOutput, 0, 1)
+	registeredAt := time.Unix(response.Plugin.GetPlugin().RegisterTimestamp, 0).Format("2006-01-02 15:04:05")
+	list = append(list, InstalledListOutput{
+		Name:          response.Plugin.GetPlugin().Id,
+		Plugin:        response.Plugin.GetPlugin().InstallerBrief.Name,
+		Repo:          response.Plugin.GetPlugin().InstallerBrief.Repo,
+		PluginVersion: response.Plugin.GetPlugin().InstallerBrief.Version,
+		RegisterAt:    registeredAt,
+		Status:        v1.PluginStatus_name[int32(response.Plugin.GetPlugin().Status)],
+	})
 	return list, nil
 }
 
-func EnablePlugin(plugin, tenantId string) error {
+func EnablePlugin(pluginId, tenantId string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
 	method := fmt.Sprintf(_enablePluginFormat, tenantId)
-	req := EnablePluginRequest{PluginId: plugin}
+	req := EnablePluginRequest{PluginId: pluginId}
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "can't marshal'")
@@ -263,18 +261,13 @@ func EnablePlugin(plugin, tenantId string) error {
 	return errors.New("enable failed")
 }
 
-func DisablePlugin(plugin string, tenaneId string) error {
+func DisablePlugin(pluginId, tenantId string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_disablePluginFormat, tenaneId, plugin)
-	req := AuthRequest{Username: "", Password: ""}
-	data, err := json.Marshal(req)
-	if err != nil {
-		return errors.Wrap(err, "can't marshal'")
-	}
-	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodDelete, setAuthenticate(token))
+	method := fmt.Sprintf(_disablePluginFormat, tenantId, pluginId)
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke "+method+" error")
 	}
@@ -299,13 +292,47 @@ func Unregister(pluginID string) (*Plugin, error) {
 	return UnregisterPlugins(clientset, pluginID)
 }
 
+func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "get token error")
+	}
+	method := fmt.Sprintf(_enabledPluginFormat, tenant)
+	body, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
+	if err != nil {
+		return nil, errors.Wrap(err, "invoke "+method+" error")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(body), r); err != nil {
+		return nil, errors.Wrap(err, "unmarshal response context error")
+	}
+
+	if r.Code != terrors.Success.Reason {
+		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+	}
+
+	fmt.Println(body)
+	response := tenantApi.ListTenantPluginResponse{}
+	if err = r.Data.UnmarshalTo(&response); err != nil {
+		return nil, errors.Wrap(err, "cant handle response data")
+	}
+
+	l := make([]RepoPluginListOutput, 0, len(response.Plugins))
+	for _, i := range response.Plugins {
+		l = append(l, RepoPluginListOutput{i, ""})
+	}
+
+	return l, nil
+}
+
 func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
 	}
 	// if auth token is not bearer type ?
-	method := fmt.Sprintf(_getPluginListFromRepoFormat, repo)
+	method := fmt.Sprintf(_getInstallerListFromRepoFormat, repo)
 	body, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "invoke "+method+" error")
@@ -339,14 +366,14 @@ func Install(repo, plugin, version, name string, config []byte) error {
 		return err
 	}
 	method := fmt.Sprintf(_installPluginFormat, name)
-	inReq := pluginAPI.Installer{
+	req := pluginAPI.Installer{
 		Name:          plugin,
 		Version:       version,
 		Repo:          repo,
 		Configuration: config,
 		Type:          1,
 	}
-	data, err := json.Marshal(inReq) //nolint
+	data, err := json.Marshal(req) //nolint
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/tkeel-io/cli/cmd/installer"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 	"path/filepath"
@@ -31,6 +32,7 @@ import (
 	"github.com/tkeel-io/cli/cmd/plugin"
 	"github.com/tkeel-io/cli/cmd/repo"
 	"github.com/tkeel-io/cli/cmd/tenant"
+	"github.com/tkeel-io/cli/cmd/user"
 	"github.com/tkeel-io/cli/pkg/api"
 	"github.com/tkeel-io/cli/pkg/print"
 )
@@ -123,4 +125,6 @@ func init() {
 	RootCmd.AddCommand(core.CoreCmd)
 	RootCmd.AddCommand(admin.AdminCmd)
 	RootCmd.AddCommand(repo.RepoCmd)
+	RootCmd.AddCommand(user.UserCmd)
+	RootCmd.AddCommand(installer.InstallerCmd)
 }

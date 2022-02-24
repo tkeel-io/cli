@@ -17,34 +17,38 @@ limitations under the License.
 package plugin
 
 import (
-	"fmt"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var PluginDisableCmd = &cobra.Command{
-	Use:     "disable",
-	Short:   "disable plugins of tenant.",
+var PluginInfoCmd = &cobra.Command{
+	Use:     "show",
+	Short:   "show plugin info.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register pluginId")
+			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register pluginID")
 			return
 		}
-		pluginId := args[0]
-		if err := kubernetes.DisablePlugin(pluginId, tenant); err != nil {
+
+		pluginID := args[0]
+		status, err := kubernetes.PluginInfo(pluginID)
+		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been disabled for tenant<%s>.", pluginId, tenant))
+		if len(status) == 0 {
+			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel plugins not install in your cluster?")
+			os.Exit(1)
+		}
+
+		outputList(status, len(status))
 	},
 }
 
 func init() {
-	PluginDisableCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "tenant id")
-	PluginDisableCmd.MarkFlagRequired("tenant")
-	PluginCmd.AddCommand(PluginDisableCmd)
+	PluginCmd.AddCommand(PluginInfoCmd)
 }
