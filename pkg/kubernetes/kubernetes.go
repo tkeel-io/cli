@@ -181,6 +181,8 @@ func Init(config InitConfiguration) (err error) {
 		}
 	}
 
+	keelChart.Values["tkeelRepo"] = tKeelHelmRepo
+
 	err = deploy(config, middlewareChart, keelChart)
 	if err != nil {
 		return err
@@ -245,6 +247,7 @@ func deploy(config InitConfiguration, middlewareChart *chart.Chart, keelChart *c
 func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
 	middlewareConfig := &MiddlewareConfig{}
 	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
+	defer file.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -271,11 +274,12 @@ func initMiddlewareConfig(config string, middlewareConfig map[string]interface{}
 	for _, line := range lines {
 		newContent += "# " + line + "\n"
 	}
-	f, err := os.OpenFile(config, os.O_CREATE|os.O_RDWR, 0777)
+	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
+	defer file.Close()
 	if err != nil {
 		return err
 	}
-	_, err = f.WriteString(newContent)
+	_, err = file.WriteString(newContent)
 	return err
 }
 
