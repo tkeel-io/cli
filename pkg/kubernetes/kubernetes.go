@@ -181,7 +181,7 @@ func Init(config InitConfiguration) (err error) {
 		}
 	}
 
-	keelChart.Values["tkeelRepo"] = tKeelHelmRepo
+	keelChart.Values["rudder"] = map[string]string{"tkeelRepo": tKeelHelmRepo}
 
 	err = deploy(config, middlewareChart, keelChart)
 	if err != nil {
