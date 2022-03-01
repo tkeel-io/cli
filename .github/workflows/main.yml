@@ -99,7 +99,7 @@ jobs:
       - name: Init tkeel
         run: |
           mv ./dist/linux_amd64/release/tkeel /usr/local/bin/tkeel
-          tkeel init -n testing --wait
+          tkeel init --wait
 
       - name: Run e2e test
         run: |
