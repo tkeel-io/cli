@@ -176,12 +176,15 @@ func Init(config InitConfiguration) (err error) {
 		}
 		if component == tkeelKeelHelmChart {
 			keelChart.Values["middleware"] = middleware
+		} else if component == tkeelRudderHelmChart {
+			keelChart.Values[component] = map[string]interface{}{
+				"middleware": middleware,
+				"tkeelRepo":  tKeelHelmRepo,
+			}
 		} else {
 			keelChart.Values[component] = map[string]interface{}{"middleware": middleware}
 		}
 	}
-
-	keelChart.Values["tkeelRepo"] = tKeelHelmRepo
 
 	err = deploy(config, middlewareChart, keelChart)
 	if err != nil {
@@ -281,31 +284,6 @@ func initMiddlewareConfig(config string, middlewareConfig map[string]interface{}
 	}
 	_, err = file.WriteString(newContent)
 	return err
-}
-
-func check(config InitConfiguration) error {
-	client, err := dapr.NewStatusClient()
-	if err != nil {
-		return fmt.Errorf("can't connect to a Kubernetes cluster: %w", err)
-	}
-	status, err := client.Status()
-	if err != nil {
-		return fmt.Errorf("can't connect to a Kubernetes cluster: %w", err)
-	}
-	if len(status) == 0 {
-		return ErrDaprNotInstall
-	}
-	enabled, err := dapr.IsMTLSEnabled()
-	if err != nil {
-		return fmt.Errorf("can't connect to a Kubernetes cluster: %w", err)
-	}
-	if !enabled {
-		return errors.New("dapr mtls is disabled")
-	}
-	if status[0].Namespace != config.Namespace {
-		return fmt.Errorf("dapr is installed in namespace: `%v`, not in `%v`\nUse `-n %v` flag", status[0].Namespace, config.Namespace, status[0].Namespace)
-	}
-	return nil
 }
 
 func createNamespace(namespace string) error {
