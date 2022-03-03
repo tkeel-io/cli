@@ -8,17 +8,15 @@ require (
 	github.com/dapr/cli v1.5.0
 	github.com/fatih/color v1.13.0
 	github.com/gocarina/gocsv v0.0.0-20210516172204-ca9e8a8ddea8
-	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/gosuri/uitable v0.0.4
-	github.com/mitchellh/mapstructure v1.4.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	github.com/tkeel-io/kit v0.0.0-20220216070111-216ac6e8fa29
-	github.com/tkeel-io/tkeel v0.3.1-0.20220222103242-07ef84d52e19
+	github.com/tkeel-io/kit v0.0.0-20220303033354-65a1720add9a
+	github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063
 	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd
 	google.golang.org/protobuf v1.27.1
 	helm.sh/helm/v3 v3.7.2
@@ -85,6 +83,7 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
 	github.com/hashicorp/go-version v1.3.0 // indirect
@@ -110,6 +109,7 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/mitchellh/copystructure v1.1.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
+	github.com/mitchellh/mapstructure v1.4.2 // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/spdystream v0.2.0 // indirect

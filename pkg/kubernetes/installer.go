@@ -2,12 +2,13 @@ package kubernetes
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/pkg/errors"
 	terrors "github.com/tkeel-io/kit/errors"
 	"github.com/tkeel-io/kit/result"
 	repoApi "github.com/tkeel-io/tkeel/api/repo/v1"
 	"google.golang.org/protobuf/encoding/protojson"
-	"net/http"
 )
 
 const (
@@ -17,10 +18,10 @@ const (
 )
 
 type InstallerListOutPut struct {
-	Name      string `csv:"NAME"`
-	Version   string `csv:"VERSION"`
-	Repo      string `csv:"REPO"`
-	Installed bool   `csv:"INSTALLED"`
+	Name    string `csv:"NAME"`
+	Version string `csv:"VERSION"`
+	Repo    string `csv:"REPO"`
+	Status  string `csv:"STATUS"`
 }
 
 func InstallerList(repo string) ([]InstallerListOutPut, error) {
@@ -34,7 +35,6 @@ func InstallerList(repo string) ([]InstallerListOutPut, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -53,7 +53,7 @@ func InstallerList(repo string) ([]InstallerListOutPut, error) {
 
 	var list = make([]InstallerListOutPut, 0, len(response.BriefInstallers))
 	for _, installer := range response.BriefInstallers {
-		list = append(list, InstallerListOutPut{installer.Name, installer.Version, installer.Repo, installer.Installed})
+		list = append(list, InstallerListOutPut{installer.Name, installer.Version, installer.Repo, repoApi.InstallerState_name[int32(installer.State)]})
 	}
 	return list, nil
 }
@@ -64,13 +64,12 @@ func InstallerListAll() ([]InstallerListOutPut, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting admin token")
 	}
-	method := fmt.Sprintf(_installerListAllFormat)
+	method := _installerListAllFormat
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -89,7 +88,7 @@ func InstallerListAll() ([]InstallerListOutPut, error) {
 
 	var list = make([]InstallerListOutPut, 0, len(response.BriefInstallers))
 	for _, installer := range response.BriefInstallers {
-		list = append(list, InstallerListOutPut{installer.Name, installer.Version, installer.Repo, installer.Installed})
+		list = append(list, InstallerListOutPut{installer.Name, installer.Version, installer.Repo, repoApi.InstallerState_name[int32(installer.State)]})
 	}
 	return list, nil
 }
@@ -105,7 +104,6 @@ func InstallerInfo(repo, installer, version string) ([]InstallerListOutPut, erro
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -123,6 +121,6 @@ func InstallerInfo(repo, installer, version string) ([]InstallerListOutPut, erro
 	}
 
 	var list = make([]InstallerListOutPut, 0, 1)
-	list = append(list, InstallerListOutPut{response.Installer.Name, response.Installer.Version, response.Installer.Repo, response.Installer.Installed})
+	list = append(list, InstallerListOutPut{response.Installer.Name, response.Installer.Version, response.Installer.Repo, repoApi.InstallerState_name[int32(response.Installer.State)]})
 	return list, nil
 }

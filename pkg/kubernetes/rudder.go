@@ -3,9 +3,10 @@ package kubernetes
 import (
 	"encoding/base64"
 	"fmt"
-	terrors "github.com/tkeel-io/kit/errors"
 	"net/http"
 	"net/url"
+
+	terrors "github.com/tkeel-io/kit/errors"
 
 	"github.com/pkg/errors"
 	"github.com/tkeel-io/cli/fileutil"

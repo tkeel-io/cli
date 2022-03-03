@@ -1665,11 +1665,11 @@ github.com/tidwall/rtree v0.0.0-20180113144539-6cd427091e0e/go.mod h1:/h+UnNGt0I
 github.com/tidwall/tinyqueue v0.0.0-20180302190814-1e39f5511563/go.mod h1:mLqSmt7Dv/CNneF2wfcChfN1rvapyQr01LGKnKex0DQ=
 github.com/tkeel-io/kit v0.0.0-20211223050802-7dfccfe43fdb/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
 github.com/tkeel-io/kit v0.0.0-20220216043628-5f604f7d21db/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
-github.com/tkeel-io/kit v0.0.0-20220216070111-216ac6e8fa29 h1:3E2nIkgPWdHTb4YuRd8oGjk3TkOnUp7W0sMZIdeWDq4=
-github.com/tkeel-io/kit v0.0.0-20220216070111-216ac6e8fa29/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
+github.com/tkeel-io/kit v0.0.0-20220303033354-65a1720add9a h1:Zk7NShGeZa5A9BXDFKwsWjVRZFHATsqKYCXXRGZxHCM=
+github.com/tkeel-io/kit v0.0.0-20220303033354-65a1720add9a/go.mod h1:ki+q/zN0N2eSfjUnpkx8g3UlVps5waO2bkiIvO85ZCg=
 github.com/tkeel-io/security v0.0.0-20220218100545-fea94640f836/go.mod h1:YnasaSkW3Fmownt0TKzhuulgGkm/0IJBhfSE3niKhFM=
-github.com/tkeel-io/tkeel v0.3.1-0.20220222103242-07ef84d52e19 h1:dvMHz87wAyLqtzmmLtOWZkxPF30Ly0AgOZeoUuxLDb8=
-github.com/tkeel-io/tkeel v0.3.1-0.20220222103242-07ef84d52e19/go.mod h1:BD48LH8jH+mW5Z7WMYW+Xt1KOmbm0KnLPSHAhCCeF0c=
+github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063 h1:1YeyyrTx1GsTIu1c/JvJ0XdyEMQtp3uAEYl9WQIvfjI=
+github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063/go.mod h1:o0icW003sane6kc2y9WB7l0lqmlFAQMCEBgpTJoBd4Y=
 github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd h1:YkV5HcR55JDkvqWvP0KXkLphv4g0c3SXYS2jPcZK1ns=
 github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd/go.mod h1:tjJgHPar2pFjydhnOCLspww8tSOvcKch241PeP9OL8E=
 github.com/tklauser/go-sysconf v0.3.6/go.mod h1:MkWzOF4RMCshBAMXuhXJs64Rte09mITnppBXY/rYEFI=

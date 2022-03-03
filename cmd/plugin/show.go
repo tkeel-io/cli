@@ -17,8 +17,9 @@ limitations under the License.
 package plugin
 
 import (
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
+
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/print"
