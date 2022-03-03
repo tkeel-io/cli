@@ -108,8 +108,8 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 	if value, ok := keelChart.Values["middleware"]; ok {
 		chartConfig := make(map[string]interface{})
 		middlewares := value.(map[string]interface{})
-		for k, v := range middlewares {
-			chartConfig[k] = v
+		for service, uri := range middlewares {
+			chartConfig[service] = uri
 		}
 		result[tkeelKeelHelmChart] = chartConfig
 	}
@@ -129,8 +129,8 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 		if value, ok := coreChart.Values["middleware"]; ok {
 			chartConfig := make(map[string]interface{})
 			middlewares := value.(map[string]interface{})
-			for k, v := range middlewares {
-				chartConfig[k] = v
+			for service, uri := range middlewares {
+				chartConfig[service] = uri
 			}
 			result[coreComponentName] = chartConfig
 		}

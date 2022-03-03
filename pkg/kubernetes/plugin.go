@@ -8,10 +8,11 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
-	terrors "github.com/tkeel-io/kit/errors"
-	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 	"net/http"
 	"time"
+
+	terrors "github.com/tkeel-io/kit/errors"
+	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 
 	"github.com/pkg/errors"
 	"github.com/tkeel-io/cli/fileutil"
@@ -312,7 +313,6 @@ func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
 		return nil, fmt.Errorf("invalid response: %s", r.Msg)
 	}
 
-	fmt.Println(body)
 	response := tenantApi.ListTenantPluginResponse{}
 	if err = r.Data.UnmarshalTo(&response); err != nil {
 		return nil, errors.Wrap(err, "cant handle response data")

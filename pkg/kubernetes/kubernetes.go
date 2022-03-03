@@ -19,15 +19,16 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/tkeel-io/cli/fileutil"
-	"helm.sh/helm/v3/pkg/chart"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
-	"sigs.k8s.io/yaml"
 	"strings"
+
+	"github.com/tkeel-io/cli/fileutil"
+	kitconfig "github.com/tkeel-io/kit/config"
+	"helm.sh/helm/v3/pkg/chart"
+	"sigs.k8s.io/yaml"
 
 	dapr "github.com/dapr/cli/pkg/kubernetes"
 	"github.com/dapr/cli/pkg/print"
@@ -45,6 +46,12 @@ const (
 	tkeelKeelHelmChart             = "keel"
 	tkeelRudderHelmChart           = "rudder"
 	tkeelCoreHelmChart             = "core"
+)
+
+const (
+	tkeelAdminHost  = "admin.tkeel.io"
+	tkeelTenantHost = "tkeel.io"
+	tkeelPort       = "30080"
 )
 
 var tKeelHelmRepo = "https://tkeel-io.github.io/helm-charts/"
@@ -65,13 +72,8 @@ type InitConfiguration struct {
 	DebugMode     bool
 	ConfigFile    string
 	Password      string
-	Repo          *Repo
+	Repo          *kitconfig.Repo
 	DefaultConfig bool
-}
-
-type InstallConfig struct {
-	Middleware map[string]interface{} `yaml:"middleware"`
-	Repo       map[string]interface{} `yaml:"repo"`
 }
 
 // middleware.yaml
@@ -88,18 +90,16 @@ func (c *MiddlewareConfig) Empty() bool {
 	return c.Queue == "" && c.Database == "" && c.Cache == "" && c.Search == "" && c.TSDB == "" && c.ServiceRegistry == ""
 }
 
-type Repo struct {
-	Url  string
-	Name string
-}
-
 // Init deploys the tKeel operator using the supplied runtime version.
 func Init(config InitConfiguration) (err error) {
-	//print.InfoStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
-	//err = check(config)
-	//if err != nil {
-	//	return err
-	//}
+	installConfig := &kitconfig.InstallConfig{}
+	if config.ConfigFile != "" {
+		installConfig, err = loadInstallConfig(config)
+		if err != nil {
+			return err
+		}
+	}
+
 	tKeelHelmRepo = config.Repo.Url
 
 	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
@@ -112,35 +112,19 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	if config.ConfigFile[0] == '~' {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
+	customizedMiddleware := make(map[string]string)
+	middleware := installConfig.GetMiddleware()
+	for _, value := range middleware {
+		if !value.Customized {
+			continue
 		}
-		config.ConfigFile = strings.Replace(config.ConfigFile, "~", home, 1)
-	}
-
-	if _, err := os.Stat(config.ConfigFile); os.IsNotExist(err) {
-		middlewares := make(map[string]interface{})
-		for _, config := range componentMiddleware {
-			for k, v := range config {
-				middlewares[k] = v
+		items := strings.Split(value.Url, ",")
+		if len(items) > 0 {
+			uri, err := url.Parse(items[0])
+			if err == nil {
+				customizedMiddleware[uri.Scheme] = value.Url
 			}
 		}
-		err = initMiddlewareConfig(config.ConfigFile, middlewares)
-		if err != nil {
-			return err
-		}
-	}
-
-	var middlewareMap = make(map[string]string)
-	middlewareConfig, err := loadMiddlewareConfig(config.ConfigFile)
-	if err != nil {
-		return err
-	}
-	err = mapstructure.Decode(middlewareConfig, &middlewareMap)
-	if err != nil {
-		return err
 	}
 
 	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelPluginMiddlewareHelmChart, helmConf)
@@ -148,45 +132,58 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	dependencies := make(map[string]*chart.Chart)
+	dependencies := make([]*chart.Chart, 0)
 	for _, k := range middlewareChart.Dependencies() {
-		dependencies[k.Name()] = k
-	}
-	for _, v := range middlewareMap {
-		items := strings.Split(v, ",")
-		res, err := url.Parse(items[0])
-		if err != nil {
-			return err
-		}
-		if _, ok := dependencies[res.Scheme]; ok {
-			delete(dependencies, res.Scheme)
+		if _, ok := customizedMiddleware[k.Name()]; !ok {
+			dependencies = append(dependencies, k)
 		}
 	}
-	newDependency := make([]*chart.Chart, 0)
-	for _, v := range dependencies {
-		newDependency = append(newDependency, v)
-	}
-	middlewareChart.SetDependencies(newDependency...)
+	middlewareChart.SetDependencies(dependencies...)
+
 	// cover middleware config with custom middleware
-	for component, middleware := range componentMiddleware {
-		for k := range middleware {
-			if v, ok := middlewareMap[k]; ok {
-				middleware[k] = v
+	for component, middlewareConfig := range componentMiddleware {
+		for service, iuri := range middlewareConfig {
+			value, exist := middleware[service]
+			if exist {
+				middlewareConfig[service] = value.Url
+			} else {
+				if uri, ok := iuri.(string); ok {
+					middleware[service] = &kitconfig.Value{
+						Customized: false,
+						Url:        uri,
+					}
+				}
 			}
 		}
 		if component == tkeelKeelHelmChart {
-			keelChart.Values["middleware"] = middleware
+			keelChart.Values["middleware"] = middlewareConfig
 		} else if component == tkeelRudderHelmChart {
 			keelChart.Values[component] = map[string]interface{}{
-				"middleware": middleware,
+				"middleware": middlewareConfig,
 				"tkeelRepo":  tKeelHelmRepo,
 			}
 		} else {
-			keelChart.Values[component] = map[string]interface{}{"middleware": middleware}
+			keelChart.Values[component] = map[string]interface{}{
+				"middleware": middlewareConfig,
+			}
 		}
 	}
 
+	installConfig.SetMiddleware(middleware)
+
+	updateComponentsValues(middlewareChart, installConfig)
+	updateIngresValues(middlewareChart, installConfig)
+	err = updateConfigMap(middlewareChart, installConfig)
+	if err != nil {
+		return err
+	}
+
 	err = deploy(config, middlewareChart, keelChart)
+	if err != nil {
+		return err
+	}
+
+	err = dumpInstallConfig(config.ConfigFile, installConfig)
 	if err != nil {
 		return err
 	}
@@ -200,11 +197,6 @@ func Init(config InitConfiguration) (err error) {
 	if err != nil {
 		return err
 	}
-
-	// err = registerPlugins(config)
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
@@ -223,34 +215,93 @@ func deploy(config InitConfiguration, middlewareChart *chart.Chart, keelChart *c
 	return err
 }
 
-// func registerPlugins(config InitConfiguration) error {
-// 	msg := "Register the plugins ..."
+func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
+	redisUrl, err := url.Parse(config.Middleware.Cache.Url)
+	if err != nil {
+		return
+	}
+	kafkaUrl, err := url.Parse(config.Middleware.Queue.Url)
+	if err != nil {
+		return
+	}
+	components := make(map[string]interface{})
+	state := make(map[string]interface{})
+	pubsub := make(map[string]interface{})
+	kafka := map[string]interface{}{
+		"host": kafkaUrl.Host,
+	}
+	password, ok := redisUrl.User.Password()
+	if !ok {
+		password = ""
+	}
+	redis := map[string]interface{}{
+		"host":     redisUrl.Host,
+		"password": password,
+	}
+	state["redis"] = redis
+	pubsub["kafka"] = kafka
+	components["state"] = state
+	components["pubsub"] = pubsub
+	middlewareChart.Values["components"] = components
+}
 
-// 	stopSpinning := print.Spinner(os.Stdout, msg)
-// 	defer stopSpinning(print.Failure)
+func updateIngresValues(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
+	ingress := make(map[string]interface{})
+	ingress["host"] = map[string]interface{}{
+		"admin":  config.Host.Admin,
+		"tenant": config.Host.Tenant,
+	}
+	ingress["port"] = config.Port
+	middlewareChart.Values["ingress"] = ingress
+}
 
-// 	clientset, err := Client()
-// 	if err != nil {
-// 		return err
-// 	}
+func updateConfigMap(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) error {
+	for _, f := range middlewareChart.Templates {
+		if f.Name == "templates/configmap.yaml" {
+			configmap := make(map[string]interface{})
+			err := yaml.Unmarshal(f.Data, &configmap)
+			if err != nil {
+				return err
+			}
+			bConfig, err := yaml.Marshal(config)
+			if err != nil {
+				return err
+			}
+			configmap["data"] = map[string]string{"config": string(bConfig)}
+			data, err := yaml.Marshal(configmap)
+			if err != nil {
+				return err
+			}
+			f.Data = data
+			break
+		}
+	}
+	return nil
+}
 
-// 	for _, pluginID := range controlPlanePlugins {
-// 		err = RegisterPlugins(clientset, pluginID)
-// 		if err != nil {
-// 			return err
-// 		}
-// 		print.InfoStatusEvent(os.Stdout, "Plugin<%s>  is registered.", pluginID)
-// 	}
-
-// 	stopSpinning(print.Success)
-// 	return err
-// }
+func dumpInstallConfig(configFile string, config *kitconfig.InstallConfig) error {
+	if configFile == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		configFile = filepath.Join(home, ".tkeel/config.yaml")
+	}
+	data, err := yaml.Marshal(config)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(configFile, data, 0666)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // load middleware config form file
-func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
-	middlewareConfig := &MiddlewareConfig{}
-	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
-	defer file.Close()
+func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, error) {
+	installConfig := &kitconfig.InstallConfig{}
+	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config.ConfigFile)
 	if err != nil {
 		return nil, err
 	}
@@ -259,31 +310,34 @@ func loadMiddlewareConfig(config string) (*MiddlewareConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = yaml.Unmarshal(data, &middlewareConfig)
+	err = yaml.Unmarshal(data, &installConfig)
 	if err != nil {
 		return nil, err
 	}
-	return middlewareConfig, nil
-}
-
-func initMiddlewareConfig(config string, middlewareConfig map[string]interface{}) error {
-	data, err := yaml.Marshal(middlewareConfig)
-	if err != nil {
-		return err
+	installConfig.Namespace = config.Namespace
+	if installConfig.Repo != nil {
+		if installConfig.Repo.Url != "" {
+			config.Repo.Url = installConfig.Repo.Url
+		}
+		if installConfig.Repo.Name != "" {
+			config.Repo.Name = installConfig.Repo.Name
+		}
+	} else {
+		installConfig.Repo = &kitconfig.Repo{
+			Url:  config.Repo.Url,
+			Name: config.Repo.Name,
+		}
 	}
-	content := string(data)
-	lines := strings.Split(content, "\n")
-	newContent := ""
-	for _, line := range lines {
-		newContent += "# " + line + "\n"
+	if installConfig.Host == nil {
+		installConfig.Host = &kitconfig.Host{
+			Admin:  tkeelAdminHost,
+			Tenant: tkeelTenantHost,
+		}
 	}
-	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config)
-	defer file.Close()
-	if err != nil {
-		return err
+	if installConfig.Port == "" {
+		installConfig.Port = tkeelPort
 	}
-	_, err = file.WriteString(newContent)
-	return err
+	return installConfig, nil
 }
 
 func createNamespace(namespace string) error {

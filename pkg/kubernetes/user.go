@@ -3,12 +3,13 @@ package kubernetes
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/pkg/errors"
 	terrors "github.com/tkeel-io/kit/errors"
 	"github.com/tkeel-io/kit/result"
 	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 	"google.golang.org/protobuf/encoding/protojson"
-	"net/http"
 )
 
 const (
@@ -40,13 +41,11 @@ func TenantUserCreate(tenantId, username, password string) error {
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}
-	fmt.Println(string(data))
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke "+method+" error")
 	}
 
-	fmt.Println(resp)
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
 		return errors.Wrap(err, "can't unmarshal'")
@@ -71,7 +70,6 @@ func TenantUserDelete(tenantId, userId string) error {
 		return errors.Wrap(err, "invoke "+method+" error")
 	}
 
-	fmt.Println(resp)
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
 		return errors.Wrap(err, "can't unmarshal'")
@@ -95,7 +93,6 @@ func TenantUserInfo(tenantId, userId string) ([]UserListOutPut, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -128,7 +125,6 @@ func TenantUserList(tenantId string) ([]UserListOutPut, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "error invoke")
 	}
-	fmt.Println(resp)
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {

@@ -18,11 +18,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/tkeel-io/cli/cmd/installer"
-	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/tkeel-io/cli/cmd/installer"
+	"github.com/tkeel-io/cli/pkg/kubernetes"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -51,12 +52,13 @@ var RootCmd = &cobra.Command{
 Things Keel Platform`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 	},
+	Version: "0.4.0",
 }
 
 var (
 	logAsJSON  bool
-	namespace  string
 	kubeconfig string
+	daprStatus *kubernetes.DaprStatus
 
 	gitCommit = ""
 	buildDate = ""
@@ -108,12 +110,11 @@ func initConfig() {
 }
 
 func checkDapr() {
-	status := kubernetes.Check()
-	if !status.Installed {
-		print.FailureStatusEvent(os.Stdout, status.Error.Error())
+	daprStatus = kubernetes.Check()
+	if !daprStatus.Installed {
+		print.FailureStatusEvent(os.Stdout, daprStatus.Error.Error())
 		os.Exit(1)
 	}
-	namespace = status.Namespace
 }
 
 func init() {
