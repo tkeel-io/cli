@@ -99,6 +99,29 @@ func Init(config InitConfiguration) (err error) {
 			return err
 		}
 	}
+	installConfig.Namespace = config.Namespace
+	if installConfig.Repo != nil {
+		if installConfig.Repo.Url != "" {
+			config.Repo.Url = installConfig.Repo.Url
+		}
+		if installConfig.Repo.Name != "" {
+			config.Repo.Name = installConfig.Repo.Name
+		}
+	} else {
+		installConfig.Repo = &kitconfig.Repo{
+			Url:  config.Repo.Url,
+			Name: config.Repo.Name,
+		}
+	}
+	if installConfig.Host == nil {
+		installConfig.Host = &kitconfig.Host{
+			Admin:  tkeelAdminHost,
+			Tenant: tkeelTenantHost,
+		}
+	}
+	if installConfig.Port == "" {
+		installConfig.Port = tkeelPort
+	}
 
 	tKeelHelmRepo = config.Repo.Url
 
@@ -313,29 +336,6 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 	err = yaml.Unmarshal(data, &installConfig)
 	if err != nil {
 		return nil, err
-	}
-	installConfig.Namespace = config.Namespace
-	if installConfig.Repo != nil {
-		if installConfig.Repo.Url != "" {
-			config.Repo.Url = installConfig.Repo.Url
-		}
-		if installConfig.Repo.Name != "" {
-			config.Repo.Name = installConfig.Repo.Name
-		}
-	} else {
-		installConfig.Repo = &kitconfig.Repo{
-			Url:  config.Repo.Url,
-			Name: config.Repo.Name,
-		}
-	}
-	if installConfig.Host == nil {
-		installConfig.Host = &kitconfig.Host{
-			Admin:  tkeelAdminHost,
-			Tenant: tkeelTenantHost,
-		}
-	}
-	if installConfig.Port == "" {
-		installConfig.Port = tkeelPort
 	}
 	return installConfig, nil
 }

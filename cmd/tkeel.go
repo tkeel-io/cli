@@ -69,7 +69,7 @@ func Execute(version, apiVersion string) {
 	RootCmd.Version = version
 	api.PlatformAPIVersion = apiVersion
 
-	cobra.OnInitialize(initConfig, setKubConfig, checkDapr)
+	cobra.OnInitialize(initConfig, setKubConfig)
 
 	setVersion()
 
