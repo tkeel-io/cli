@@ -47,6 +47,7 @@ dapr uninstall --all
 dapr uninstall -k
 `,
 	PreRun: func(cmd *cobra.Command, args []string) {
+		checkDapr()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error

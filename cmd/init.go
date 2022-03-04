@@ -47,6 +47,7 @@ var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Install tKeel platform on dapr.",
 	PreRun: func(cmd *cobra.Command, args []string) {
+		checkDapr()
 		if configFile != "" && configFile[0] == '~' {
 			home, err := os.UserHomeDir()
 			if err != nil {
