@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -38,7 +37,6 @@ var PluginInstallCmd = &cobra.Command{
 		repo, plugin, version := parseInstallArg(args[0])
 		if configFile != "" {
 			configFile, err = filepath.Abs(configFile)
-			fmt.Println("filepath.Abs:", configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
 				return

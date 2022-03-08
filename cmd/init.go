@@ -19,11 +19,13 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
+	kitconfig "github.com/tkeel-io/kit/config"
 )
 
 var (
@@ -45,6 +47,15 @@ var InitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Install tKeel platform on dapr.",
 	PreRun: func(cmd *cobra.Command, args []string) {
+		checkDapr()
+		if configFile != "" && configFile[0] == '~' {
+			home, err := os.UserHomeDir()
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, err.Error())
+				os.Exit(1)
+			}
+			configFile = strings.Replace(configFile, "~", home, 1)
+		}
 	},
 	Example: `
 # Initialize Keel in Kubernetes
@@ -56,7 +67,7 @@ tkeel init --wait --timeout 600
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		config := kubernetes.InitConfiguration{
-			Namespace:  namespace,
+			Namespace:  daprStatus.Namespace,
 			Version:    runtimeVersion,
 			EnableMTLS: enableMTLS,
 			EnableHA:   enableHA,
@@ -65,7 +76,7 @@ tkeel init --wait --timeout 600
 			Timeout:    timeout,
 			DebugMode:  debugMode,
 			Secret:     secret,
-			Repo: &kubernetes.Repo{
+			Repo: &kitconfig.Repo{
 				Url:  repoUrl,
 				Name: repoName,
 			},
@@ -89,7 +100,7 @@ func init() {
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	InitCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	InitCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
-	InitCmd.Flags().StringVarP(&configFile, "middleware-config", "f", "~/.tkeel/middleware.yaml", "The tkeel middleware config file")
+	InitCmd.Flags().StringVarP(&configFile, "config", "f", "", "The tkeel installation config file")
 	InitCmd.Flags().StringVarP(&repoUrl, "repo-url", "", "https://tkeel-io.github.io/helm-charts/", "The tkeel repo url")
 	InitCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
 	InitCmd.Flags().StringVarP(&password, "password", "", "changeme", "The tkeel admin password")

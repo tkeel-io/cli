@@ -47,12 +47,13 @@ dapr uninstall --all
 dapr uninstall -k
 `,
 	PreRun: func(cmd *cobra.Command, args []string) {
+		checkDapr()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 
 		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
-		err = kubernetes.UninstallPlatform(namespace, timeout, debugMode)
+		err = kubernetes.UninstallPlatform(daprStatus.Namespace, timeout, debugMode)
 
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing tKeel: %s", err))

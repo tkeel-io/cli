@@ -32,21 +32,15 @@ func Check() *DaprStatus {
 		result.Error = ErrDaprNotInstall
 		result.Installed = false
 		return result
-	} else {
-		result.Installed = true
-		result.Namespace = status[0].Namespace
 	}
-	client, err := dapr.Client()
-	if err != nil {
-		result.Error = err
-		return result
+	result.Installed = true
+	result.Namespace = status[0].Namespace
+	for _, item := range status {
+		if item.Name == "dapr-sentry" {
+			result.Version = item.Version
+			break
+		}
 	}
-	info, err := client.ServerVersion()
-	if err != nil {
-		result.Error = err
-		return result
-	}
-	result.Version = info.String()
 	enabled, err := dapr.IsMTLSEnabled()
 	if err != nil {
 		result.Error = err
