@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// UninstallCmd is a command from removing a tKeel installation.
+// ConfigCmd is a command from removing a tKeel installation.
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print default install config.",

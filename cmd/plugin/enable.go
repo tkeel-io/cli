@@ -36,13 +36,6 @@ var PluginEnableCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register pluginID")
 			return
 		}
-		//if secret == "" {
-		//	prompt := &survey.Password{Message: "Please enter your Plugin Secret: "}
-		//	if err := survey.AskOne(prompt, &secret); err != nil {
-		//		print.FailureStatusEvent(os.Stdout, "failed to read secret from stdin")
-		//		return
-		//	}
-		//}
 
 		pluginID := args[0]
 		err := kubernetes.EnablePlugin(pluginID, tenant)
@@ -55,7 +48,6 @@ var PluginEnableCmd = &cobra.Command{
 }
 
 func init() {
-	//PluginEnableCmd.Flags().StringVarP(&secret, "secret", "s", "", "The secret of the tKeel Platform when you installed the Plugin.(Almost It configured with configuration file).")
 	PluginEnableCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "tenant id")
 	PluginEnableCmd.MarkFlagRequired("tenant")
 	PluginCmd.AddCommand(PluginEnableCmd)

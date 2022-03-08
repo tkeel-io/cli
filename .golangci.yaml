@@ -240,7 +240,7 @@ linters-settings:
         avro: snake
         mapstructure: snake
   cyclop:
-    max-complexity: 15
+    max-complexity: 25
 
 linters:
   fast: false
@@ -273,6 +273,7 @@ linters:
     - exhaustivestruct
     - paralleltest
     - gofumpt
+    - wrapcheck
 issues:
   exclude:
     # staticcheck

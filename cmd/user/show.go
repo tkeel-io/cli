@@ -24,8 +24,8 @@ var UserInfoCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, "please input 1 arguments,1st user id")
 			return
 		}
-		userId := args[0]
-		data, err := kubernetes.TenantUserInfo(tenant, userId)
+		userID := args[0]
+		data, err := kubernetes.TenantUserInfo(tenant, userID)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)

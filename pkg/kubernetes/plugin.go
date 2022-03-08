@@ -25,7 +25,6 @@ import (
 
 const (
 	_getInstallerListFromRepoFormat = "apis/rudder/v1/repos/%s/installers"
-	_showInstallerFormat            = "apis/rudder/v1/repos/%s/installers/%s/%s"
 	_installPluginFormat            = "apis/rudder/v1/plugins/%s"
 	_showPluginFormat               = "apis/rudder/v1/plugins/%s"
 	_uninstallPluginFormat          = "apis/rudder/v1/plugins/%s"
@@ -96,7 +95,7 @@ type DeleteResponse struct {
 }
 
 type EnablePluginRequest struct {
-	PluginId string `json:"plugin_id"`
+	PluginID string `json:"plugin_id"`
 }
 
 type AuthRequest struct {
@@ -196,12 +195,12 @@ func InstalledList() ([]InstalledListOutput, error) {
 	return list, nil
 }
 
-func PluginInfo(pluginId string) ([]InstalledListOutput, error) {
+func PluginInfo(pluginID string) ([]InstalledListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_showPluginFormat, pluginId)
+	method := fmt.Sprintf(_showPluginFormat, pluginID)
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
@@ -234,13 +233,13 @@ func PluginInfo(pluginId string) ([]InstalledListOutput, error) {
 	return list, nil
 }
 
-func EnablePlugin(pluginId, tenantId string) error {
+func EnablePlugin(pluginID, tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_enablePluginFormat, tenantId)
-	req := EnablePluginRequest{PluginId: pluginId}
+	method := fmt.Sprintf(_enablePluginFormat, tenantID)
+	req := EnablePluginRequest{PluginID: pluginID}
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "can't marshal'")
@@ -262,12 +261,12 @@ func EnablePlugin(pluginId, tenantId string) error {
 	return errors.New("enable failed")
 }
 
-func DisablePlugin(pluginId, tenantId string) error {
+func DisablePlugin(pluginID, tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_disablePluginFormat, tenantId, pluginId)
+	method := fmt.Sprintf(_disablePluginFormat, tenantID, pluginID)
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke "+method+" error")

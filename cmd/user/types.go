@@ -16,5 +16,5 @@ limitations under the License.
 
 package user
 
-//var kubernetesMode bool
+// var kubernetesMode bool.
 var tenant string

@@ -30,6 +30,6 @@ var UserCmd = &cobra.Command{
 }
 
 func init() {
-	//UserCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	// UserCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	UserCmd.Flags().BoolP("help", "h", false, "Print this help message")
 }

@@ -76,53 +76,12 @@ type InitConfiguration struct {
 	DefaultConfig bool
 }
 
-// middleware.yaml
-type MiddlewareConfig struct {
-	Queue           string `json:"queue" yaml:"queue" mapstructure:"queue,omitempty"`
-	Database        string `json:"database" yaml:"database" mapstructure:"database,omitempty"`
-	Cache           string `json:"cache" yaml:"cache" mapstructure:"cache,omitempty"`
-	Search          string `json:"search" yaml:"search" mapstructure:"search,omitempty"`
-	TSDB            string `json:"tsdb" yaml:"tsdb" mapstructure:"tsdb,omitempty"`
-	ServiceRegistry string `json:"service_registry" yaml:"service_registry" mapstructure:"service_registry,omitempty"`
-}
-
-func (c *MiddlewareConfig) Empty() bool {
-	return c.Queue == "" && c.Database == "" && c.Cache == "" && c.Search == "" && c.TSDB == "" && c.ServiceRegistry == ""
-}
-
 // Init deploys the tKeel operator using the supplied runtime version.
-func Init(config InitConfiguration) (err error) {
-	installConfig := &kitconfig.InstallConfig{}
-	if config.ConfigFile != "" {
-		installConfig, err = loadInstallConfig(config)
-		if err != nil {
-			return err
-		}
+func Init(config InitConfiguration) error {
+	installConfig, err := loadInstallConfig(config)
+	if err != nil {
+		return err
 	}
-	installConfig.Namespace = config.Namespace
-	if installConfig.Repo != nil {
-		if installConfig.Repo.Url != "" {
-			config.Repo.Url = installConfig.Repo.Url
-		}
-		if installConfig.Repo.Name != "" {
-			config.Repo.Name = installConfig.Repo.Name
-		}
-	} else {
-		installConfig.Repo = &kitconfig.Repo{
-			Url:  config.Repo.Url,
-			Name: config.Repo.Name,
-		}
-	}
-	if installConfig.Host == nil {
-		installConfig.Host = &kitconfig.Host{
-			Admin:  tkeelAdminHost,
-			Tenant: tkeelTenantHost,
-		}
-	}
-	if installConfig.Port == "" {
-		installConfig.Port = tkeelPort
-	}
-
 	tKeelHelmRepo = config.Repo.Url
 
 	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
@@ -143,7 +102,8 @@ func Init(config InitConfiguration) (err error) {
 		}
 		items := strings.Split(value.Url, ",")
 		if len(items) > 0 {
-			uri, err := url.Parse(items[0])
+			var uri *url.URL
+			uri, err = url.Parse(items[0])
 			if err == nil {
 				customizedMiddleware[uri.Scheme] = value.Url
 			}
@@ -166,8 +126,7 @@ func Init(config InitConfiguration) (err error) {
 	// cover middleware config with custom middleware
 	for component, middlewareConfig := range componentMiddleware {
 		for service, iuri := range middlewareConfig {
-			value, exist := middleware[service]
-			if exist {
+			if value, exist := middleware[service]; exist {
 				middlewareConfig[service] = value.Url
 			} else {
 				if uri, ok := iuri.(string); ok {
@@ -178,14 +137,15 @@ func Init(config InitConfiguration) (err error) {
 				}
 			}
 		}
-		if component == tkeelKeelHelmChart {
+		switch component {
+		case tkeelKeelHelmChart:
 			keelChart.Values["middleware"] = middlewareConfig
-		} else if component == tkeelRudderHelmChart {
+		case tkeelRudderHelmChart:
 			keelChart.Values[component] = map[string]interface{}{
 				"middleware": middlewareConfig,
 				"tkeelRepo":  tKeelHelmRepo,
 			}
-		} else {
+		default:
 			keelChart.Values[component] = map[string]interface{}{
 				"middleware": middlewareConfig,
 			}
@@ -211,12 +171,7 @@ func Init(config InitConfiguration) (err error) {
 		return err
 	}
 
-	_, err = AdminLogin(config.Password)
-	if err != nil {
-		return err
-	}
-
-	err = AddRepo(config.Repo.Name, config.Repo.Url)
+	err = afterDeploy(config)
 	if err != nil {
 		return err
 	}
@@ -238,12 +193,25 @@ func deploy(config InitConfiguration, middlewareChart *chart.Chart, keelChart *c
 	return err
 }
 
+func afterDeploy(config InitConfiguration) error {
+	_, err := AdminLogin(config.Password)
+	if err != nil {
+		return err
+	}
+
+	err = AddRepo(config.Repo.Name, config.Repo.Url)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
-	redisUrl, err := url.Parse(config.Middleware.Cache.Url)
+	redisURL, err := url.Parse(config.Middleware.Cache.Url)
 	if err != nil {
 		return
 	}
-	kafkaUrl, err := url.Parse(config.Middleware.Queue.Url)
+	kafkaURL, err := url.Parse(config.Middleware.Queue.Url)
 	if err != nil {
 		return
 	}
@@ -251,14 +219,14 @@ func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.Inst
 	state := make(map[string]interface{})
 	pubsub := make(map[string]interface{})
 	kafka := map[string]interface{}{
-		"host": kafkaUrl.Host,
+		"host": kafkaURL.Host,
 	}
-	password, ok := redisUrl.User.Password()
+	password, ok := redisURL.User.Password()
 	if !ok {
 		password = ""
 	}
 	redis := map[string]interface{}{
-		"host":     redisUrl.Host,
+		"host":     redisURL.Host,
 		"password": password,
 	}
 	state["redis"] = redis
@@ -309,36 +277,61 @@ func dumpInstallConfig(configFile string, config *kitconfig.InstallConfig) error
 	if configFile == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "dump install config error")
 		}
 		configFile = filepath.Join(home, ".tkeel/config.yaml")
 	}
 	data, err := yaml.Marshal(config)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "marshal install config error")
 	}
-	err = ioutil.WriteFile(configFile, data, 0666)
+	err = ioutil.WriteFile(configFile, data, 0600)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "write install config error")
 	}
 	return nil
 }
 
-// load middleware config form file
+// load middleware config form file.
 func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, error) {
 	installConfig := &kitconfig.InstallConfig{}
-	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config.ConfigFile)
-	if err != nil {
-		return nil, err
+	if config.ConfigFile != "" {
+		file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config.ConfigFile)
+		if err != nil {
+			return nil, errors.Wrap(err, "load install config error")
+		}
+		defer file.Close()
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			return nil, errors.Wrap(err, "read install config error")
+		}
+		err = yaml.Unmarshal(data, &installConfig)
+		if err != nil {
+			return nil, errors.Wrap(err, "unmarshal install config error")
+		}
 	}
-	defer file.Close()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
+	installConfig.Namespace = config.Namespace
+	if installConfig.Repo != nil {
+		if installConfig.Repo.Url != "" {
+			config.Repo.Url = installConfig.Repo.Url
+		}
+		if installConfig.Repo.Name != "" {
+			config.Repo.Name = installConfig.Repo.Name
+		}
+	} else {
+		installConfig.Repo = &kitconfig.Repo{
+			Url:  config.Repo.Url,
+			Name: config.Repo.Name,
+		}
 	}
-	err = yaml.Unmarshal(data, &installConfig)
-	if err != nil {
-		return nil, err
+	if installConfig.Host == nil {
+		installConfig.Host = &kitconfig.Host{
+			Admin:  tkeelAdminHost,
+			Tenant: tkeelTenantHost,
+		}
+	}
+	if installConfig.Port == "" {
+		installConfig.Port = tkeelPort
 	}
 	return installConfig, nil
 }

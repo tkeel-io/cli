@@ -16,6 +16,5 @@ limitations under the License.
 
 package installer
 
-//var kubernetesMode bool
 var repo string
 var all bool
