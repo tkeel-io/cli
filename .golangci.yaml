@@ -273,7 +273,6 @@ linters:
     - exhaustivestruct
     - paralleltest
     - gofumpt
-    - varnamelen
     - wrapcheck
 issues:
   exclude:
