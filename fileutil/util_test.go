@@ -65,5 +65,5 @@ func TestLocateFile(t *testing.T) {
 
 func checkFile(file string) error {
 	_, err := os.Stat(file)
-	return err //nolint
+	return err
 }

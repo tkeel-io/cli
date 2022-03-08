@@ -59,7 +59,6 @@ func InstallerList(repo string) ([]InstallerListOutPut, error) {
 }
 
 func InstallerListAll() ([]InstallerListOutPut, error) {
-
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting admin token")

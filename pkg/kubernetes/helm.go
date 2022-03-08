@@ -105,13 +105,14 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 	}
 
 	result := make(map[string]map[string]interface{})
-	if value, ok := keelChart.Values["middleware"]; ok {
+	if value, exists := keelChart.Values["middleware"]; exists {
 		chartConfig := make(map[string]interface{})
-		middlewares := value.(map[string]interface{})
-		for service, uri := range middlewares {
-			chartConfig[service] = uri
+		if middlewares, ok := value.(map[string]interface{}); ok {
+			for service, uri := range middlewares {
+				chartConfig[service] = uri
+			}
+			result[tkeelKeelHelmChart] = chartConfig
 		}
-		result[tkeelKeelHelmChart] = chartConfig
 	}
 
 	for _, coreComponentName := range coreComponentChartNames {
@@ -128,11 +129,12 @@ func KeelChart(config InitConfiguration, password string) (*chart.Chart, map[str
 		}
 		if value, ok := coreChart.Values["middleware"]; ok {
 			chartConfig := make(map[string]interface{})
-			middlewares := value.(map[string]interface{})
-			for service, uri := range middlewares {
-				chartConfig[service] = uri
+			if middlewares, ok := value.(map[string]interface{}); ok {
+				for service, uri := range middlewares {
+					chartConfig[service] = uri
+				}
+				result[coreComponentName] = chartConfig
 			}
-			result[coreComponentName] = chartConfig
 		}
 		keelChart.AddDependency(coreChart)
 	}
@@ -185,69 +187,6 @@ func addDaprComponentChartDependency(config InitConfiguration, helmConf *helm.Co
 	componentChart.Values["secret"] = config.Secret
 	root.AddDependency(componentChart)
 	return nil
-}
-
-func InstallPlugin(config InitConfiguration, repo, chartName, releaseName, version string) error {
-	clientset, err := Client()
-	if err != nil {
-		return err
-	}
-
-	namespace, err := GetTKeelNamespace(clientset)
-	if err != nil {
-		return err
-	}
-
-	config.Namespace = namespace
-	helmConf, err := helmConfig(config.Namespace, getLog(config.DebugMode))
-	if err != nil {
-		return err
-	}
-	pluginChart, err := tKeelChart(version, repo, chartName, helmConf)
-	if err != nil {
-		return err
-	}
-	if err = addDaprComponentChartDependency(config, helmConf,
-		pluginChart, releaseName); err != nil {
-		return err
-	}
-	installClient := helm.NewInstall(helmConf)
-	installClient.ReleaseName = releaseName
-	installClient.Namespace = config.Namespace
-	installClient.Wait = config.Wait
-	installClient.Timeout = time.Duration(config.Timeout) * time.Second
-
-	var values map[string]interface{}
-	values, err = chartValues(config)
-	if err != nil {
-		return err
-	}
-	if _, err = installClient.Run(pluginChart, values); err != nil {
-		return fmt.Errorf("helm install err:%w", err)
-	}
-
-	print.InfoStatusEvent(os.Stdout, "install tKeel plugin<%s> done.", chartName)
-	return nil
-}
-
-func HelmList(namespace string) ([]*release.Release, error) {
-	settings := cli.New()
-	actionConfig := new(helm.Configuration)
-	// You can pass an empty string instead of settings.Namespace() to list
-	// all namespaces
-	err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf)
-	if err != nil {
-		return nil, fmt.Errorf("error init helm config: %w", err)
-	}
-
-	client := helm.NewList(actionConfig)
-	// Only list deployed
-	client.Deployed = true
-	ret, err := client.Run()
-	if err != nil {
-		return nil, fmt.Errorf("error helm list: %w", err)
-	}
-	return ret, nil
 }
 
 func HelmUninstall(namespace, pluginName string) (*release.UninstallReleaseResponse, error) {
