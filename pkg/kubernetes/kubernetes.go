@@ -285,7 +285,11 @@ func dumpInstallConfig(configFile string, config *kitconfig.InstallConfig) error
 	if err != nil {
 		return errors.Wrap(err, "marshal install config error")
 	}
-	err = ioutil.WriteFile(configFile, data, 0600)
+	file, err := fileutil.LocateFile(fileutil.RewriteFlag(), configFile)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(data)
 	if err != nil {
 		return errors.Wrap(err, "write install config error")
 	}
@@ -296,7 +300,7 @@ func dumpInstallConfig(configFile string, config *kitconfig.InstallConfig) error
 func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, error) {
 	installConfig := &kitconfig.InstallConfig{}
 	if config.ConfigFile != "" {
-		file, err := fileutil.LocateFile(fileutil.RewriteFlag(), config.ConfigFile)
+		file, err := fileutil.LocateFile(fileutil.RWFlag(), config.ConfigFile)
 		if err != nil {
 			return nil, errors.Wrap(err, "load install config error")
 		}
