@@ -17,7 +17,7 @@ func LocateAdminToken() (*os.File, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "get user home dir failed")
 	}
-	return LocateFile(RewriteFlag(), homedir, _tkeelRudderDir, _tokenFile)
+	return LocateFile(RWFlag(), homedir, _tkeelRudderDir, _tokenFile)
 }
 
 func LocateFile(flag int, dir string, files ...string) (*os.File, error) {
@@ -42,6 +42,10 @@ func LocateFile(flag int, dir string, files ...string) (*os.File, error) {
 	return f, nil
 }
 
-func RewriteFlag() int {
+func RWFlag() int {
 	return os.O_RDWR | os.O_CREATE
+}
+
+func RewriteFlag() int {
+	return os.O_RDWR | os.O_CREATE | os.O_TRUNC
 }

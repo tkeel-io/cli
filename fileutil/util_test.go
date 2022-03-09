@@ -37,9 +37,9 @@ func TestLocateFile(t *testing.T) {
 		assert.NotNil(t, err)
 
 		if len(test.params) == 1 {
-			f, err = LocateFile(RewriteFlag(), test.params[0])
+			f, err = LocateFile(RWFlag(), test.params[0])
 		} else {
-			f, err = LocateFile(RewriteFlag(), test.params[0], test.params[1:]...)
+			f, err = LocateFile(RWFlag(), test.params[0], test.params[1:]...)
 		}
 
 		if test.want.ErrNotNil {
