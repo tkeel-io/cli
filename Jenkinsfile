@@ -19,6 +19,7 @@ spec:
     parameters {
         string(name:'GITHUB_ACCOUNT',defaultValue: 'lunz1207',description:'默认的 chart 仓库')
         string(name:'NAME_SPACES',defaultValue: 'testing',description:'平台的命名空间')
+        string(name:'TKEEL_VERSION',defaultValue: '0.4.2-testing',description:'平台版本')
     }
 
     environment {
@@ -50,7 +51,7 @@ spec:
                     variable: 'KUBECONFIG')
                     ]) {
                       sh './dist/linux_amd64/release/tkeel doctor'
-                      sh './dist/linux_amd64/release/tkeel init --repo-url=https://$GITHUB_ACCOUNT.github.io/helm-charts/  --repo-name=$GITHUB_ACCOUNT --wait --timeout 3000'
+                      sh './dist/linux_amd64/release/tkeel init --repo-url=https://$GITHUB_ACCOUNT.github.io/helm-charts/  --repo-name=$GITHUB_ACCOUNT --runtime-version=$TKEEL_VERSION --wait --timeout 3000'
                 }
             }
           }
