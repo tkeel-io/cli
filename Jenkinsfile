@@ -50,7 +50,7 @@ spec:
                     variable: 'KUBECONFIG')
                     ]) {
                       sh './dist/linux_amd64/release/tkeel doctor'
-                      sh './dist/linux_amd64/release/tkeel init  -n $NAME_SPACES --repo-url=https://$GITHUB_ACCOUNT.github.io/helm-charts/  --repo-name=$GITHUB_ACCOUNT --wait --timeout 3000'
+                      sh './dist/linux_amd64/release/tkeel init --repo-url=https://$GITHUB_ACCOUNT.github.io/helm-charts/  --repo-name=$GITHUB_ACCOUNT --wait --timeout 3000'
                 }
             }
           }
