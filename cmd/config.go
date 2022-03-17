@@ -22,6 +22,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var tenantHost string
+var adminHost string
+var port string
+
 // ConfigCmd is a command from removing a tKeel installation.
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
@@ -36,9 +40,9 @@ tkeel config > config.yaml
 	PreRun: func(cmd *cobra.Command, args []string) {
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		config := `host:
-  admin: admin.tkeel.io
-  tenant: tkeel.io
+		configFromat := `host:
+  admin: %s
+  tenant: %s
 middleware:
   cache:
     customized: false
@@ -55,17 +59,20 @@ middleware:
   service_registry:
     customized: false
     url: etcd://tkeel-middleware-etcd:2379
-port: "30080"
+port: %s
 repo:
   name: tkeel
   url: https://tkeel-io.github.io/helm-charts
 `
-
+		config := fmt.Sprintf(configFromat, adminHost, tenantHost, port)
 		fmt.Println(config)
 	},
 }
 
 func init() {
+	ConfigCmd.Flags().StringVarP(&tenantHost, "tenant-host", "", "tkeel.io", "The host domain of tenant platform")
+	ConfigCmd.Flags().StringVarP(&adminHost, "admin-host", "", "admin.tkeel.io", "The host domain of admin platform")
+	ConfigCmd.Flags().StringVarP(&port, "port", "", "30080", "The port of ingress")
 	ConfigCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(ConfigCmd)
 }
