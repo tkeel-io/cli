@@ -20,6 +20,14 @@ func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
 	if err != nil {
 		return fmt.Errorf("helm uninstall err:%w", err)
 	}
+	_, err = uninstallClient.Run(fmt.Sprintf("tkeel-%s", tkeelCoreHelmChart))
+	if err != nil {
+		return fmt.Errorf("helm uninstall err:%w", err)
+	}
+	_, err = uninstallClient.Run(fmt.Sprintf("tkeel-%s", tkeelRudderHelmChart))
+	if err != nil {
+		return fmt.Errorf("helm uninstall err:%w", err)
+	}
 	_, err = uninstallClient.Run(tKeelMiddlewareReleaseName)
 	if err != nil {
 		return fmt.Errorf("helm uninstall err:%w", err)
