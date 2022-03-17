@@ -259,7 +259,11 @@ func updateConfigMap(middlewareChart *chart.Chart, config *kitconfig.InstallConf
 			if value, ok := configmap["metadata"].(map[string]interface{}); ok {
 				value["namespace"] = config.Namespace
 			}
-			configmap["data"] = map[string]string{"config": string(bConfig)}
+			configmap["data"] = map[string]string{
+				"config":      string(bConfig),
+				"TENANT_HOST": config.Host.Tenant,
+				"ADMIN_HOST":  config.Host.Admin,
+			}
 			data, err := yaml.Marshal(configmap)
 			if err != nil {
 				return err
