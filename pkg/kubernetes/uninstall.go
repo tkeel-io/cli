@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/tkeel-io/cli/fileutil"
 	helm "helm.sh/helm/v3/pkg/action"
 )
 
@@ -54,4 +55,23 @@ func Uninstall(pluginID string, debugMode bool) error {
 
 	_, err = HelmUninstall(namespace, pluginID)
 	return err
+}
+
+func UninstallAllPlugin(namespace string, debugMode bool) error {
+	list, err := InstalledList()
+	if err != nil {
+		return err
+	}
+	for _, plugin := range list {
+		//_, err = HelmUninstall(namespace, plugin.Name)
+		err = Uninstall(plugin.Name, debugMode)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CleanToken() {
+	_, _ = fileutil.LocateAdminToken(fileutil.RewriteFlag())
 }

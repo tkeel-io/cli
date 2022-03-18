@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	"github.com/tkeel-io/cli/fileutil"
+	"github.com/tkeel-io/cli/pkg/utils"
 	kitconfig "github.com/tkeel-io/kit/config"
 	"helm.sh/helm/v3/pkg/chart"
 	"sigs.k8s.io/yaml"
@@ -59,7 +60,11 @@ var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
 
 var helmConf *helm.Configuration
 
-//var coreComponentChartNames = []string{tkeelRudderHelmChart, tkeelCoreHelmChart}
+var defaultPlugins = []string{
+	"tkeel/console-portal-admin@v0.4.1",
+	"tkeel/console-portal-tenant@v0.4.1",
+	"tkeel/console-plugin-admin-plugins@v0.4.1",
+}
 
 type InitConfiguration struct {
 	Version       string
@@ -173,6 +178,8 @@ func Init(config InitConfiguration) error {
 	if err != nil {
 		return err
 	}
+
+	installPlugins(config, installConfig.Plugins)
 
 	return nil
 }
@@ -338,6 +345,9 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 	}
 	if installConfig.Port == "" {
 		installConfig.Port = tkeelPort
+	}
+	if installConfig.Plugins == nil {
+		installConfig.Plugins = defaultPlugins
 	}
 	return installConfig, nil
 }
@@ -506,4 +516,15 @@ func Upgrade(config InitConfiguration) error {
 	}
 
 	return nil
+}
+
+func installPlugins(config InitConfiguration, plugins []string) {
+	for _, plugin := range plugins {
+		repo, name, version := utils.ParseInstallArg(plugin, config.Repo.Name)
+		if err := Install(repo, name, version, name, nil); err != nil {
+			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", name, err.Error())
+			continue
+		}
+		print.SuccessStatusEvent(os.Stdout, "Install %q success! It's named %q in k8s", plugin, name)
+	}
 }

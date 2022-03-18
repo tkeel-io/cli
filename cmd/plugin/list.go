@@ -19,7 +19,6 @@ package plugin
 import (
 	"os"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
@@ -37,10 +36,6 @@ var PluginStatusCmd = &cobra.Command{
 		if repo != "" {
 			list, err := kubernetes.ListPluginsFromRepo(repo)
 			if err != nil {
-				if errors.Is(err, kubernetes.ErrInvalidToken) {
-					print.FailureStatusEvent(os.Stdout, "please login!")
-					return
-				}
 				print.FailureStatusEvent(os.Stdout, "unable to list plugins:%s", err.Error())
 				return
 			}
@@ -51,10 +46,6 @@ var PluginStatusCmd = &cobra.Command{
 		if tenant != "" {
 			list, err := kubernetes.ListPluginsFromTenant(tenant)
 			if err != nil {
-				if errors.Is(err, kubernetes.ErrInvalidToken) {
-					print.FailureStatusEvent(os.Stdout, "please login!")
-					return
-				}
 				print.FailureStatusEvent(os.Stdout, "unable to list plugins:%s", err.Error())
 				return
 			}

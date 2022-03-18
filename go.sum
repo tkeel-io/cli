@@ -1665,8 +1665,8 @@ github.com/tidwall/rtree v0.0.0-20180113144539-6cd427091e0e/go.mod h1:/h+UnNGt0I
 github.com/tidwall/tinyqueue v0.0.0-20180302190814-1e39f5511563/go.mod h1:mLqSmt7Dv/CNneF2wfcChfN1rvapyQr01LGKnKex0DQ=
 github.com/tkeel-io/kit v0.0.0-20211223050802-7dfccfe43fdb/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
 github.com/tkeel-io/kit v0.0.0-20220216043628-5f604f7d21db/go.mod h1:FYeTM+tqf/tdrf2HxUX2wdAAHQM8ggN4+IbZv4b6+wU=
-github.com/tkeel-io/kit v0.0.0-20220303033354-65a1720add9a h1:Zk7NShGeZa5A9BXDFKwsWjVRZFHATsqKYCXXRGZxHCM=
-github.com/tkeel-io/kit v0.0.0-20220303033354-65a1720add9a/go.mod h1:ki+q/zN0N2eSfjUnpkx8g3UlVps5waO2bkiIvO85ZCg=
+github.com/tkeel-io/kit v0.0.0-20220318074455-2c14ff2895e8 h1:i5zbvcYh1aE3a/rzvbe5zBCV1WHINPEil0RvfcQ0KQ4=
+github.com/tkeel-io/kit v0.0.0-20220318074455-2c14ff2895e8/go.mod h1:ki+q/zN0N2eSfjUnpkx8g3UlVps5waO2bkiIvO85ZCg=
 github.com/tkeel-io/security v0.0.0-20220218100545-fea94640f836/go.mod h1:YnasaSkW3Fmownt0TKzhuulgGkm/0IJBhfSE3niKhFM=
 github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063 h1:1YeyyrTx1GsTIu1c/JvJ0XdyEMQtp3uAEYl9WQIvfjI=
 github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063/go.mod h1:o0icW003sane6kc2y9WB7l0lqmlFAQMCEBgpTJoBd4Y=

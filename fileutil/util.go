@@ -12,12 +12,12 @@ const (
 	_tokenFile      = ".token"
 )
 
-func LocateAdminToken() (*os.File, error) {
+func LocateAdminToken(flag int) (*os.File, error) {
 	homedir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, errors.Wrap(err, "get user home dir failed")
 	}
-	return LocateFile(RWFlag(), homedir, _tkeelRudderDir, _tokenFile)
+	return LocateFile(flag, homedir, _tkeelRudderDir, _tokenFile)
 }
 
 func LocateFile(flag int, dir string, files ...string) (*os.File, error) {

@@ -53,6 +53,16 @@ dapr uninstall -k
 		var err error
 
 		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
+
+		if uninstallAll {
+			err = kubernetes.UninstallAllPlugin(daprStatus.Namespace, debugMode)
+			if err != nil {
+				print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing plugins: %s", err))
+			} else {
+				print.SuccessStatusEvent(os.Stdout, "tKeel plugins has been removed successfully")
+			}
+		}
+
 		err = kubernetes.UninstallPlatform(daprStatus.Namespace, timeout, debugMode)
 
 		if err != nil {
@@ -60,6 +70,7 @@ dapr uninstall -k
 		} else {
 			print.SuccessStatusEvent(os.Stdout, "tKeel Platform has been removed successfully")
 		}
+		kubernetes.CleanToken()
 	},
 }
 
