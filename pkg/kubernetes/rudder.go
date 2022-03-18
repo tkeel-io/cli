@@ -40,7 +40,7 @@ func AdminLogin(password string) (token string, err error) {
 		return "", errors.Wrap(err, "get token err")
 	}
 
-	f, err := fileutil.LocateAdminToken()
+	f, err := fileutil.LocateAdminToken(fileutil.RewriteFlag())
 	if err != nil {
 		return "", errors.Wrap(err, "open rudder token failed")
 	}

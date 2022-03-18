@@ -63,6 +63,11 @@ port: %s
 repo:
   name: tkeel
   url: https://tkeel-io.github.io/helm-charts
+plugins:
+  - tkeel/console-portal-admin@v0.4.1
+  - tkeel/console-portal-tenant@v0.4.1
+  - tkeel/console-plugin-admin-plugins@v0.4.1
+
 `
 		config := fmt.Sprintf(configFromat, adminHost, tenantHost, port)
 		fmt.Println(config)

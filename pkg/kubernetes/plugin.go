@@ -15,7 +15,6 @@ import (
 	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
 	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
@@ -34,8 +33,6 @@ const (
 	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
 	_enabledPluginFormat = "apis/security/v1/tenants/%s/plugins"
 )
-
-var ErrInvalidToken = errors.New("invalid token")
 
 // ListOutput represents the application ID, application port and creation time.
 type ListOutput struct {
@@ -413,25 +410,4 @@ func UninstallPlugin(pluginID string) error {
 		return nil
 	}
 	return errors.New("uninstall plugin failed")
-}
-
-func getAdminToken() (string, error) {
-	f, err := fileutil.LocateAdminToken()
-	if err != nil {
-		return "", errors.Wrap(err, "open admin token failed")
-	}
-	tokenb := make([]byte, 512)
-	n, err := f.Read(tokenb)
-	if err != nil {
-		return "", errors.Wrap(err, "read token failed")
-	}
-	if n == 0 {
-		return "", ErrInvalidToken
-	}
-
-	return fmt.Sprintf("Bearer %s", tokenb[:n]), nil
-}
-
-func setAuthenticate(token string) HTTPRequestOption {
-	return InvokeSetHTTPHeader("Authorization", token)
 }
