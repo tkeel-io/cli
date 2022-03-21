@@ -63,7 +63,6 @@ func UninstallAllPlugin(namespace string, debugMode bool) error {
 		return err
 	}
 	for _, plugin := range list {
-		//_, err = HelmUninstall(namespace, plugin.Name)
 		err = Uninstall(plugin.Name, debugMode)
 		if err != nil {
 			return err
