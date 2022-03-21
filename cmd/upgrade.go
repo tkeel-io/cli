@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -26,11 +25,6 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 	kitconfig "github.com/tkeel-io/kit/config"
 )
-
-//var (
-//	coreVersion   string
-//	rudderVersion string
-//)
 
 var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
@@ -66,15 +60,13 @@ tkeel init --wait --timeout 600
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		successEvent := fmt.Sprintf("Success! tKeel Platform upgrade success!")
+		successEvent := "Success! tKeel Platform upgrade success!"
 		print.SuccessStatusEvent(os.Stdout, successEvent)
 	},
 }
 
 func init() {
 	UpgradeCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	//UpgradeCmd.Flags().StringVarP(&coreVersion, "core-version", "", "latest", "The core component version, for example: 1.0.0")
-	//UpgradeCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "latest", "The rudder component version, for example: 1.0.0")
 	UpgradeCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	UpgradeCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	UpgradeCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")

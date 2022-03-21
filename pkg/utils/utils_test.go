@@ -1,4 +1,4 @@
-package plugin
+package utils
 
 import (
 	"testing"
@@ -7,6 +7,7 @@ import (
 )
 
 func TestParseInstallArg(t *testing.T) {
+	officialRepo := "tkeel"
 	tests := []struct {
 		name  string
 		input string
@@ -22,7 +23,7 @@ func TestParseInstallArg(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			repo, plugin, version := parseInstallArg(test.input)
+			repo, plugin, version := ParseInstallArg(test.input, officialRepo)
 			assert.Equal(t, repo, test.want.repo)
 			assert.Equal(t, plugin, test.want.plugin)
 			assert.Equal(t, version, test.want.version)

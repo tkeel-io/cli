@@ -61,9 +61,9 @@ var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
 var helmConf *helm.Configuration
 
 var defaultPlugins = []string{
-	"tkeel/console-portal-admin@v0.4.1",
-	"tkeel/console-portal-tenant@v0.4.1",
-	"tkeel/console-plugin-admin-plugins@v0.4.1",
+	"tkeel/console-portal-admin",
+	"tkeel/console-portal-tenant",
+	"tkeel/console-plugin-admin-plugins",
 }
 
 type InitConfiguration struct {
@@ -179,7 +179,7 @@ func Init(config InitConfiguration) error {
 		return err
 	}
 
-	installPlugins(config, installConfig.Plugins)
+	installPlugins(config, installConfig.Plugins, keelChart.Metadata.Version)
 
 	return nil
 }
@@ -393,31 +393,6 @@ func getLog(debugMode bool) helm.DebugLog {
 	return func(format string, v ...interface{}) {}
 }
 
-//func Upgrade2(config InitConfiguration) error {
-//	var err error
-//	tKeelHelmRepo = config.Repo.Url
-//	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
-//	keelChart, coreChart, rudderChart, _, err := KeelChart(config)
-//	if err != nil {
-//		return err
-//	}
-//
-//	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
-//	if err != nil {
-//		return err
-//	}
-//
-//	msg := "Upgrading the tKeel Platform..."
-//	stopSpinning := print.Spinner(os.Stdout, msg)
-//	defer stopSpinning(print.Failure)
-//	err = upgradeTkeel(config, keelChart, coreChart, rudderChart)
-//	if err != nil {
-//		return err
-//	}
-//	stopSpinning(print.Success)
-//	return err
-//}
-
 func Upgrade(config InitConfiguration) error {
 	installConfig, err := loadInstallConfig(config)
 	if err != nil {
@@ -518,9 +493,12 @@ func Upgrade(config InitConfiguration) error {
 	return nil
 }
 
-func installPlugins(config InitConfiguration, plugins []string) {
+func installPlugins(config InitConfiguration, plugins []string, keelVersion string) {
 	for _, plugin := range plugins {
 		repo, name, version := utils.ParseInstallArg(plugin, config.Repo.Name)
+		if version == "" {
+			version = keelVersion
+		}
 		if err := Install(repo, name, version, name, nil); err != nil {
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", name, err.Error())
 			continue
