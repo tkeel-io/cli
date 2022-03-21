@@ -27,8 +27,8 @@ var InstallerInfoCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, "please input installer info")
 			return
 		}
-		repo, installer, version := parseInstallArg(args[0])
-		data, err := kubernetes.InstallerInfo(repo, installer, version)
+		tkeelRepo, installer, version := parseInstallArg(args[0])
+		data, err := kubernetes.InstallerInfo(tkeelRepo, installer, version)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)

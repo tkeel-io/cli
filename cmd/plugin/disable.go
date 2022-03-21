@@ -34,12 +34,12 @@ var PluginDisableCmd = &cobra.Command{
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register pluginId")
 			return
 		}
-		pluginId := args[0]
-		if err := kubernetes.DisablePlugin(pluginId, tenant); err != nil {
+		pluginID := args[0]
+		if err := kubernetes.DisablePlugin(pluginID, tenant); err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been disabled for tenant<%s>.", pluginId, tenant))
+		print.SuccessStatusEvent(os.Stdout, fmt.Sprintf("Success! Plugin<%s> has been disabled for tenant<%s>.", pluginID, tenant))
 	},
 }
 

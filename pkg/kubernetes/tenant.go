@@ -17,11 +17,6 @@ const (
 	_createTenantMethodFormat = "apis/rudder/v1/tenants"
 	_deleteTenantMethodFormat = "apis/rudder/v1/tenants/%s"
 	_infoTenantMethodFormat   = "apis/rudder/v1/tenants/%s"
-
-	_listTenantPluginsMethodFormat  = "apis/rudder/v1/tenants/%s/plugins"
-	_createTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins"
-	_deleteTenantPluginMethodFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
-	_infoTenantPluginMethodFormat   = "apis/rudder/v1/tenants/%s/plugins/%s"
 )
 
 type TenantListOutPut struct {
@@ -50,7 +45,7 @@ func CreateTenant(tenant *TenantCreateIn) error {
 	}
 	method := _createTenantMethodFormat
 
-	data, err := json.Marshal(tenant) //nolint
+	data, err := json.Marshal(tenant)
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}
@@ -104,12 +99,12 @@ func TenantList() ([]TenantListOutPut, error) {
 	return list, nil
 }
 
-func TenantInfo(tenantId string) ([]TenantListOutPut, error) {
+func TenantInfo(tenantID string) ([]TenantListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "error getting admin token")
 	}
-	method := fmt.Sprintf(_infoTenantMethodFormat, tenantId)
+	method := fmt.Sprintf(_infoTenantMethodFormat, tenantID)
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
@@ -136,12 +131,12 @@ func TenantInfo(tenantId string) ([]TenantListOutPut, error) {
 	return list, nil
 }
 
-func TenantDelete(tenantId string) error {
+func TenantDelete(tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "error getting admin token")
 	}
-	method := fmt.Sprintf(_deleteTenantMethodFormat, tenantId)
+	method := fmt.Sprintf(_deleteTenantMethodFormat, tenantID)
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
@@ -156,22 +151,6 @@ func TenantDelete(tenantId string) error {
 	if r.Code != terrors.Success.Reason {
 		return errors.New("response error: " + r.Msg)
 	}
-	return nil
-}
-
-// tenant plugin manage
-func TenantPluginEnable(tenantId, pluginId string) error {
-
-	return nil
-}
-
-func TenantPluginDisable(tenantId, pluginId string) error {
-
-	return nil
-}
-
-func TenantPluginList(tenantId string) error {
-
 	return nil
 }
 

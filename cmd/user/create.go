@@ -35,7 +35,7 @@ var UserCreateCmd = &cobra.Command{
 }
 
 func init() {
-	//UserCreateCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
+	// UserCreateCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	UserCreateCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	UserCreateCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "Tenant ID")
 	UserCreateCmd.MarkFlagRequired("tenant")

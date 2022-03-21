@@ -15,7 +15,6 @@ import (
 	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 
 	"github.com/pkg/errors"
-	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
 	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
@@ -25,7 +24,6 @@ import (
 
 const (
 	_getInstallerListFromRepoFormat = "apis/rudder/v1/repos/%s/installers"
-	_showInstallerFormat            = "apis/rudder/v1/repos/%s/installers/%s/%s"
 	_installPluginFormat            = "apis/rudder/v1/plugins/%s"
 	_showPluginFormat               = "apis/rudder/v1/plugins/%s"
 	_uninstallPluginFormat          = "apis/rudder/v1/plugins/%s"
@@ -35,8 +33,6 @@ const (
 	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
 	_enabledPluginFormat = "apis/security/v1/tenants/%s/plugins"
 )
-
-var ErrInvalidToken = errors.New("invalid token")
 
 // ListOutput represents the application ID, application port and creation time.
 type ListOutput struct {
@@ -96,7 +92,7 @@ type DeleteResponse struct {
 }
 
 type EnablePluginRequest struct {
-	PluginId string `json:"plugin_id"`
+	PluginID string `json:"plugin_id"`
 }
 
 type AuthRequest struct {
@@ -196,12 +192,12 @@ func InstalledList() ([]InstalledListOutput, error) {
 	return list, nil
 }
 
-func PluginInfo(pluginId string) ([]InstalledListOutput, error) {
+func PluginInfo(pluginID string) ([]InstalledListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_showPluginFormat, pluginId)
+	method := fmt.Sprintf(_showPluginFormat, pluginID)
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
@@ -234,13 +230,13 @@ func PluginInfo(pluginId string) ([]InstalledListOutput, error) {
 	return list, nil
 }
 
-func EnablePlugin(pluginId, tenantId string) error {
+func EnablePlugin(pluginID, tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_enablePluginFormat, tenantId)
-	req := EnablePluginRequest{PluginId: pluginId}
+	method := fmt.Sprintf(_enablePluginFormat, tenantID)
+	req := EnablePluginRequest{PluginID: pluginID}
 	data, err := json.Marshal(req)
 	if err != nil {
 		return errors.Wrap(err, "can't marshal'")
@@ -262,12 +258,12 @@ func EnablePlugin(pluginId, tenantId string) error {
 	return errors.New("enable failed")
 }
 
-func DisablePlugin(pluginId, tenantId string) error {
+func DisablePlugin(pluginID, tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_disablePluginFormat, tenantId, pluginId)
+	method := fmt.Sprintf(_disablePluginFormat, tenantID, pluginID)
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "invoke "+method+" error")
@@ -414,25 +410,4 @@ func UninstallPlugin(pluginID string) error {
 		return nil
 	}
 	return errors.New("uninstall plugin failed")
-}
-
-func getAdminToken() (string, error) {
-	f, err := fileutil.LocateAdminToken()
-	if err != nil {
-		return "", errors.Wrap(err, "open admin token failed")
-	}
-	tokenb := make([]byte, 512)
-	n, err := f.Read(tokenb)
-	if err != nil {
-		return "", errors.Wrap(err, "read token failed")
-	}
-	if n == 0 {
-		return "", ErrInvalidToken
-	}
-
-	return fmt.Sprintf("Bearer %s", tokenb[:n]), nil
-}
-
-func setAuthenticate(token string) HTTPRequestOption {
-	return InvokeSetHTTPHeader("Authorization", token)
 }

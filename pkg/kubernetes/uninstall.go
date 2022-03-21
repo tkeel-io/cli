@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/tkeel-io/cli/fileutil"
 	helm "helm.sh/helm/v3/pkg/action"
 )
 
@@ -17,6 +18,14 @@ func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
 	uninstallClient := helm.NewUninstall(config)
 	uninstallClient.Timeout = time.Duration(timeout) * time.Second
 	_, err = uninstallClient.Run(tKeelReleaseName)
+	if err != nil {
+		return fmt.Errorf("helm uninstall err:%w", err)
+	}
+	_, err = uninstallClient.Run(fmt.Sprintf("tkeel-%s", tkeelCoreHelmChart))
+	if err != nil {
+		return fmt.Errorf("helm uninstall err:%w", err)
+	}
+	_, err = uninstallClient.Run(fmt.Sprintf("tkeel-%s", tkeelRudderHelmChart))
 	if err != nil {
 		return fmt.Errorf("helm uninstall err:%w", err)
 	}
@@ -46,4 +55,23 @@ func Uninstall(pluginID string, debugMode bool) error {
 
 	_, err = HelmUninstall(namespace, pluginID)
 	return err
+}
+
+func UninstallAllPlugin(namespace string, debugMode bool) error {
+	list, err := InstalledList()
+	if err != nil {
+		return err
+	}
+	for _, plugin := range list {
+		//_, err = HelmUninstall(namespace, plugin.Name)
+		err = Uninstall(plugin.Name, debugMode)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func CleanToken() {
+	_, _ = fileutil.LocateAdminToken(fileutil.RewriteFlag())
 }

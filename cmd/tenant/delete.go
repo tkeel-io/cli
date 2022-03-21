@@ -22,8 +22,8 @@ var TenantDeleteCmd = &cobra.Command{
 			print.FailureStatusEvent(os.Stdout, "please input tenant id")
 			return
 		}
-		tenantId := args[0]
-		err := kubernetes.TenantDelete(tenantId)
+		tenantID := args[0]
+		err := kubernetes.TenantDelete(tenantID)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
