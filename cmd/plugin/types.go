@@ -18,6 +18,7 @@ package plugin
 
 var (
 	outputFormat string
+	tenant       string
 
 	// Unused Declare Variables.
 	/*

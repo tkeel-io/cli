@@ -25,8 +25,6 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var tenant string
-
 var PluginEnableCmd = &cobra.Command{
 	Use:     "enable",
 	Short:   "enable plugins of tenant.",

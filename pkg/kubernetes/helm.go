@@ -229,7 +229,6 @@ func upgradeTkeel(config InitConfiguration, middlewareChart *chart.Chart, keelCh
 			return fmt.Errorf("helm install err:%w", err)
 		}
 		print.InfoStatusEvent(os.Stdout, "upgrade tKeel component <core> done.")
-
 	}
 
 	if rudderChart != nil {
