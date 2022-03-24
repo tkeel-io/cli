@@ -2,7 +2,7 @@ package fileutil
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,7 +24,7 @@ func TestLocateFile(t *testing.T) {
 			NotNil    bool
 			ErrNotNil bool
 		}{true, false}},
-		{[]string{path.Join(tempDir, file)}, struct {
+		{[]string{filepath.Join(tempDir, file)}, struct {
 			NotNil    bool
 			ErrNotNil bool
 		}{true, false}},
@@ -33,7 +33,7 @@ func TestLocateFile(t *testing.T) {
 	var f *os.File
 	var err error
 	for _, test := range tests {
-		err = checkFile(path.Join(tempDir, file))
+		err = checkFile(filepath.Join(tempDir, file))
 		assert.NotNil(t, err)
 
 		if len(test.params) == 1 {
@@ -57,7 +57,7 @@ func TestLocateFile(t *testing.T) {
 		if len(test.params) == 1 {
 			os.RemoveAll(test.params[0])
 		} else {
-			os.RemoveAll(path.Join(test.params...))
+			os.RemoveAll(filepath.Join(test.params...))
 		}
 	}
 	os.RemoveAll(tempDir)
