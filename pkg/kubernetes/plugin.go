@@ -28,6 +28,7 @@ const (
 	_showPluginFormat               = "apis/rudder/v1/plugins/%s"
 	_uninstallPluginFormat          = "apis/rudder/v1/plugins/%s"
 	_getInstalledPluginListFormat   = "apis/rudder/v1/plugins"
+	_registerPluginFormat           = "apis/rudder/v1/tm/plugins/register?id=%s"
 
 	_enablePluginFormat  = "apis/rudder/v1/tenants/%s/plugins"
 	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
@@ -228,6 +229,28 @@ func PluginInfo(pluginID string) ([]InstalledListOutput, error) {
 		Status:        v1.PluginStatus_name[int32(response.Plugin.GetPlugin().Status)],
 	})
 	return list, nil
+}
+
+func RegisterPlugin(plugin string) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return errors.Wrap(err, "get token error")
+	}
+	method := fmt.Sprintf(_registerPluginFormat, plugin)
+
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
+	if err != nil {
+		return errors.Wrap(err, "invoke "+method+" error")
+	}
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == terrors.SUCCESS_CODE {
+		return nil
+	}
+	return errors.New("register failed")
 }
 
 func EnablePlugin(pluginID, tenantID string) error {
