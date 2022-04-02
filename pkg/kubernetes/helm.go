@@ -93,6 +93,14 @@ func chartValues(config InitConfiguration) (map[string]interface{}, error) {
 }
 
 func KeelChart(config InitConfiguration) (*chart.Chart, *chart.Chart, *chart.Chart, map[string]map[string]interface{}, error) {
+	if config.Version != "latest" {
+		if config.CoreVersion == "latest" {
+			config.CoreVersion = config.Version
+		}
+		if config.RudderVersion == "latest" {
+			config.RudderVersion = config.Version
+		}
+	}
 	keelChart, err := tKeelChart(config.Version, tKeelHelmRepo, tkeelKeelHelmChart, helmConf)
 	if err != nil {
 		return nil, nil, nil, nil, err
@@ -114,7 +122,7 @@ func KeelChart(config InitConfiguration) (*chart.Chart, *chart.Chart, *chart.Cha
 		}
 	}
 
-	coreChart, err := tKeelChart(config.Version, tKeelHelmRepo, tkeelCoreHelmChart, helmConf)
+	coreChart, err := tKeelChart(config.CoreVersion, tKeelHelmRepo, tkeelCoreHelmChart, helmConf)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}
@@ -132,7 +140,7 @@ func KeelChart(config InitConfiguration) (*chart.Chart, *chart.Chart, *chart.Cha
 		}
 	}
 
-	rudderChart, err := tKeelChart(config.Version, tKeelHelmRepo, tkeelRudderHelmChart, helmConf)
+	rudderChart, err := tKeelChart(config.RudderVersion, tKeelHelmRepo, tkeelRudderHelmChart, helmConf)
 	if err != nil {
 		return nil, nil, nil, nil, err
 	}

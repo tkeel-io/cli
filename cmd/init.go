@@ -33,6 +33,8 @@ var (
 	wait           bool
 	timeout        uint
 	runtimeVersion string
+	coreVersion    string
+	rudderVersion  string
 	secret         string
 	enableMTLS     bool
 	enableHA       bool
@@ -67,15 +69,17 @@ tkeel init --wait --timeout 600
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		config := kubernetes.InitConfiguration{
-			Namespace:  daprStatus.Namespace,
-			Version:    runtimeVersion,
-			EnableMTLS: enableMTLS,
-			EnableHA:   enableHA,
-			Args:       values,
-			Wait:       wait,
-			Timeout:    timeout,
-			DebugMode:  debugMode,
-			Secret:     secret,
+			Namespace:     daprStatus.Namespace,
+			Version:       runtimeVersion,
+			CoreVersion:   coreVersion,
+			RudderVersion: rudderVersion,
+			EnableMTLS:    enableMTLS,
+			EnableHA:      enableHA,
+			Args:          values,
+			Wait:          wait,
+			Timeout:       timeout,
+			DebugMode:     debugMode,
+			Secret:        secret,
 			Repo: &kitconfig.Repo{
 				Url:  repoURL,
 				Name: repoName,
@@ -95,6 +99,8 @@ tkeel init --wait --timeout 600
 
 func init() {
 	InitCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&coreVersion, "core-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
 	InitCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	InitCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
