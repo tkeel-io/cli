@@ -15,15 +15,15 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	github.com/tkeel-io/kit v0.0.0-20220318074455-2c14ff2895e8
-	github.com/tkeel-io/tkeel v0.3.1-0.20220302083048-b73e776dd063
-	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220218062650-cbf6e212c1bd
+	github.com/tkeel-io/kit v0.0.0-20220325093202-6fee69755ded
+	github.com/tkeel-io/tkeel v0.4.2-0.20220401082636-91f71562b530
+	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220331090824-6d29bf7a4732
 	google.golang.org/protobuf v1.27.1
 	helm.sh/helm/v3 v3.7.2
-	k8s.io/api v0.23.1
-	k8s.io/apimachinery v0.23.1
+	k8s.io/api v0.23.4
+	k8s.io/apimachinery v0.23.4
 	k8s.io/cli-runtime v0.23.1
-	k8s.io/client-go v0.23.1
+	k8s.io/client-go v0.23.4
 	k8s.io/helm v2.16.10+incompatible
 	sigs.k8s.io/yaml v1.2.0
 )
@@ -168,12 +168,12 @@ require (
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	k8s.io/kubectl v0.22.4 // indirect
-	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
+	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
 	oras.land/oras-go v0.4.0 // indirect
 	sigs.k8s.io/json v0.0.0-20211020170558-c049b76a60c6 // indirect
 	sigs.k8s.io/kustomize/api v0.10.2-0.20220110233228-13e26004fd4e // indirect
 	sigs.k8s.io/kustomize/kyaml v0.13.3 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
+	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 )
 
 replace (
