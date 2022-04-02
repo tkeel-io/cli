@@ -68,6 +68,8 @@ var defaultPlugins = []string{
 
 type InitConfiguration struct {
 	Version       string
+	CoreVersion   string
+	RudderVersion string
 	Namespace     string
 	Secret        string
 	EnableMTLS    bool

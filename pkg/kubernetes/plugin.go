@@ -413,6 +413,40 @@ func Install(repo, plugin, version, name string, config []byte) error {
 	return errors.New("can't handle this")
 }
 
+func PluginUpgrade(repo, plugin, version, name string, config []byte) error {
+	token, err := getAdminToken()
+	if err != nil {
+		return err
+	}
+	method := fmt.Sprintf(_installPluginFormat, name)
+	req := pluginAPI.Installer{
+		Name:          plugin,
+		Version:       version,
+		Repo:          repo,
+		Configuration: config,
+		Type:          1,
+	}
+	data, err := json.Marshal(req) //nolint
+	if err != nil {
+		return errors.Wrap(err, "marshal plugin request failed")
+	}
+	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPut, setAuthenticate(token))
+	if err != nil {
+		return errors.Wrap(err, "invoke "+method+" error")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return errors.Wrap(err, "can't unmarshal'")
+	}
+
+	if r.Code == terrors.Success.Reason {
+		return nil
+	}
+
+	return errors.New("can't handle this")
+}
+
 func UninstallPlugin(pluginID string) error {
 	token, err := getAdminToken()
 	if err != nil {
