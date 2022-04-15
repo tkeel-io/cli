@@ -74,6 +74,7 @@ type InitConfiguration struct {
 	Secret        string
 	EnableMTLS    bool
 	EnableHA      bool
+	DaprVersion   string
 	Args          []string
 	Wait          bool
 	Timeout       uint
@@ -154,6 +155,9 @@ func Init(config InitConfiguration) error {
 			coreChart.Values["middleware"] = middlewareConfig
 		}
 	}
+	keelChart.Values["daprVersion"] = config.DaprVersion
+	coreChart.Values["daprVersion"] = config.DaprVersion
+	rudderChart.Values["daprVersion"] = config.DaprVersion
 
 	installConfig.SetMiddleware(middleware)
 
@@ -206,6 +210,9 @@ func afterDeploy(config InitConfiguration) error {
 
 	err = AddRepo(config.Repo.Name, config.Repo.Url)
 	if err != nil {
+		if err.Error() == "response error: REPO已存在" {
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -462,6 +469,9 @@ func Upgrade(config InitConfiguration) error {
 			coreChart.Values["middleware"] = middlewareConfig
 		}
 	}
+	keelChart.Values["daprVersion"] = config.DaprVersion
+	coreChart.Values["daprVersion"] = config.DaprVersion
+	rudderChart.Values["daprVersion"] = config.DaprVersion
 
 	installConfig.SetMiddleware(middleware)
 
