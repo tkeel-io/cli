@@ -57,6 +57,7 @@ tkeel init --wait --timeout 600
 				Url:  repoURL,
 				Name: repoName,
 			},
+			ConfigFile: configFile,
 		}
 		err := kubernetes.Upgrade(config)
 		if err != nil {
