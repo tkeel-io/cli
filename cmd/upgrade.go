@@ -46,6 +46,7 @@ tkeel init --wait --timeout 600
 			Version:       runtimeVersion,
 			CoreVersion:   coreVersion,
 			RudderVersion: rudderVersion,
+			DaprVersion:   daprStatus.Version,
 			EnableMTLS:    enableMTLS,
 			EnableHA:      enableHA,
 			Args:          values,
@@ -56,6 +57,7 @@ tkeel init --wait --timeout 600
 				Url:  repoURL,
 				Name: repoName,
 			},
+			ConfigFile: configFile,
 		}
 		err := kubernetes.Upgrade(config)
 		if err != nil {
