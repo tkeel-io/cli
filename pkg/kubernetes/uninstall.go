@@ -10,7 +10,7 @@ import (
 
 // UninstallPlatform removes tKeel from a Kubernetes cluster.
 func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
-	config, err := helmConfig(namespace, getLog(debugMode))
+	config, err := InitHelmConfig(namespace, getLog(debugMode))
 	if err != nil {
 		return err
 	}

@@ -28,21 +28,25 @@ import (
 	kitconfig "github.com/tkeel-io/kit/config"
 )
 
+const LatestVersion = "latest"
+
 var (
-	debugMode      bool
-	wait           bool
-	timeout        uint
-	runtimeVersion string
-	coreVersion    string
-	rudderVersion  string
-	secret         string
-	enableMTLS     bool
-	enableHA       bool
-	values         []string
-	configFile     string
-	repoURL        string
-	repoName       string
-	password       string
+	debugMode         bool
+	wait              bool
+	timeout           uint
+	runtimeVersion    string
+	keelVersion       string
+	coreVersion       string
+	rudderVersion     string
+	middlewareVersion string
+	secret            string
+	enableMTLS        bool
+	enableHA          bool
+	values            []string
+	configFile        string
+	repoURL           string
+	repoName          string
+	password          string
 )
 
 var InitCmd = &cobra.Command{
@@ -50,14 +54,8 @@ var InitCmd = &cobra.Command{
 	Short: "Install tKeel platform on dapr.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		checkDapr()
-		if configFile != "" && configFile[0] == '~' {
-			home, err := os.UserHomeDir()
-			if err != nil {
-				print.FailureStatusEvent(os.Stdout, err.Error())
-				os.Exit(1)
-			}
-			configFile = strings.Replace(configFile, "~", home, 1)
-		}
+		realConfigPath()
+		initVersion()
 	},
 	Example: `
 # Initialize Keel in Kubernetes
@@ -69,18 +67,19 @@ tkeel init --wait --timeout 600
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		config := kubernetes.InitConfiguration{
-			Namespace:     daprStatus.Namespace,
-			Version:       runtimeVersion,
-			CoreVersion:   coreVersion,
-			RudderVersion: rudderVersion,
-			DaprVersion:   daprStatus.Version,
-			EnableMTLS:    enableMTLS,
-			EnableHA:      enableHA,
-			Args:          values,
-			Wait:          wait,
-			Timeout:       timeout,
-			DebugMode:     debugMode,
-			Secret:        secret,
+			Namespace:         daprStatus.Namespace,
+			KeelVersion:       keelVersion,
+			CoreVersion:       coreVersion,
+			RudderVersion:     rudderVersion,
+			MiddlewareVersion: middlewareVersion,
+			DaprVersion:       daprStatus.Version,
+			EnableMTLS:        enableMTLS,
+			EnableHA:          enableHA,
+			Args:              values,
+			Wait:              wait,
+			Timeout:           timeout,
+			DebugMode:         debugMode,
+			Secret:            secret,
 			Repo: &kitconfig.Repo{
 				Url:  repoURL,
 				Name: repoName,
@@ -100,8 +99,10 @@ tkeel init --wait --timeout 600
 
 func init() {
 	InitCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	InitCmd.Flags().StringVarP(&coreVersion, "core-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	InitCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&keelVersion, "keel-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&coreVersion, "core-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
+	InitCmd.Flags().StringVarP(&middlewareVersion, "middleware-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
 	InitCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	InitCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	InitCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
@@ -113,4 +114,31 @@ func init() {
 	InitCmd.Flags().StringVarP(&password, "password", "", "changeme", "The tkeel admin password")
 	InitCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(InitCmd)
+}
+
+func initVersion() {
+	// upgrade 会执行这一步
+	if runtimeVersion == "" {
+		runtimeVersion = LatestVersion
+	}
+	// 未指定组件版本时，使用最新版本
+	if keelVersion == "" && coreVersion == "" && rudderVersion == "" {
+		keelVersion = runtimeVersion
+		coreVersion = runtimeVersion
+		rudderVersion = runtimeVersion
+	}
+	if middlewareVersion == "" {
+		middlewareVersion = LatestVersion
+	}
+}
+
+func realConfigPath() {
+	if configFile != "" && configFile[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		}
+		configFile = strings.Replace(configFile, "~", home, 1)
+	}
 }

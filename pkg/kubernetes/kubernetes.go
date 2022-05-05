@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/cli/pkg/utils"
@@ -67,22 +66,42 @@ var defaultPlugins = []string{
 }
 
 type InitConfiguration struct {
-	Version       string
-	CoreVersion   string
-	RudderVersion string
-	Namespace     string
-	Secret        string
-	EnableMTLS    bool
-	EnableHA      bool
-	DaprVersion   string
-	Args          []string
-	Wait          bool
-	Timeout       uint
-	DebugMode     bool
-	ConfigFile    string
-	Password      string
-	Repo          *kitconfig.Repo
-	DefaultConfig bool
+	Version           string
+	KeelVersion       string
+	CoreVersion       string
+	RudderVersion     string
+	MiddlewareVersion string
+	Namespace         string
+	Secret            string
+	EnableMTLS        bool
+	EnableHA          bool
+	DaprVersion       string
+	Args              []string
+	Wait              bool
+	Timeout           uint
+	DebugMode         bool
+	ConfigFile        string
+	Password          string
+	Repo              *kitconfig.Repo
+	DefaultConfig     bool
+}
+
+type MiddleConfig map[string]map[string]interface{}
+
+func (mc MiddleConfig) Update(data MiddleConfig) {
+	if data == nil {
+		return
+	}
+	for key1, value1 := range data {
+		value, ok := mc[key1]
+		if !ok {
+			value = make(map[string]interface{})
+		}
+		for key2, value2 := range value1 {
+			value[key2] = value2
+		}
+		mc[key1] = value
+	}
 }
 
 // Init deploys the tKeel operator using the supplied runtime version.
@@ -93,71 +112,44 @@ func Init(config InitConfiguration) error {
 	}
 	tKeelHelmRepo = config.Repo.Url
 
-	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
+	helmConf, err = InitHelmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
 	}
 
-	keelChart, coreChart, rudderChart, componentMiddleware, err := KeelChart(config)
+	tKeelMiddle := MiddleConfig{}
+
+	keelChart, middleConfig, err := ChartMiddleware(tkeelKeelHelmChart, config.KeelVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	coreChart, middleConfig, err := ChartMiddleware(tkeelCoreHelmChart, config.CoreVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	rudderChart, middleConfig, err := ChartMiddleware(tkeelRudderHelmChart, config.RudderVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	middlewareChart, err := tKeelChart(config.MiddlewareVersion, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
 	if err != nil {
 		return err
 	}
 
-	customizedMiddleware := make(map[string]string)
-	middleware := installConfig.GetMiddleware()
-	for _, value := range middleware {
-		if !value.Customized {
-			continue
-		}
-		items := strings.Split(value.Url, ",")
-		if len(items) > 0 {
-			var uri *url.URL
-			uri, err = url.Parse(items[0])
-			if err == nil {
-				customizedMiddleware[uri.Scheme] = value.Url
-			}
-		}
-	}
+	updateMiddlewareDependencies(middlewareChart, installConfig)
 
-	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
-	if err != nil {
-		return err
+	charts := map[string]*chart.Chart{
+		tkeelKeelHelmChart:   keelChart,
+		tkeelCoreHelmChart:   coreChart,
+		tkeelRudderHelmChart: rudderChart,
 	}
-
-	dependencies := make([]*chart.Chart, 0)
-	for _, k := range middlewareChart.Dependencies() {
-		if _, ok := customizedMiddleware[k.Name()]; !ok {
-			dependencies = append(dependencies, k)
-		}
-	}
-	middlewareChart.SetDependencies(dependencies...)
-
-	// cover middleware config with custom middleware
-	for component, middlewareConfig := range componentMiddleware {
-		for service, iuri := range middlewareConfig {
-			if value, exist := middleware[service]; exist {
-				middlewareConfig[service] = value.Url
-			} else if uri, ok := iuri.(string); ok {
-				middleware[service] = &kitconfig.Value{
-					Customized: false,
-					Url:        uri,
-				}
-			}
-		}
-		switch component {
-		case tkeelKeelHelmChart:
-			keelChart.Values["middleware"] = middlewareConfig
-		case tkeelRudderHelmChart:
-			rudderChart.Values["middleware"] = middlewareConfig
-			rudderChart.Values["tkeelRepo"] = tKeelHelmRepo
-			rudderChart.Values["adminPassword"] = config.Password
-		case tkeelCoreHelmChart:
-			coreChart.Values["middleware"] = middlewareConfig
-		}
-	}
-	keelChart.Values["daprVersion"] = config.DaprVersion
-	coreChart.Values["daprVersion"] = config.DaprVersion
-	rudderChart.Values["daprVersion"] = config.DaprVersion
+	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
 
 	installConfig.SetMiddleware(middleware)
 
@@ -183,7 +175,7 @@ func Init(config InitConfiguration) error {
 		return err
 	}
 
-	installPlugins(config, installConfig.Plugins, keelChart.Metadata.Version)
+	installPlugins(config, installConfig.Plugins, "")
 
 	return nil
 }
@@ -218,37 +210,103 @@ func afterDeploy(config InitConfiguration) error {
 	return nil
 }
 
+func updateMiddlewareDependencies(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
+	if middlewareChart == nil {
+		return
+	}
+	customizedMiddleware := make(map[string]string)
+	middleware := config.GetMiddleware()
+	for _, value := range middleware {
+		if !value.Customized {
+			continue
+		}
+		var uri *url.URL
+		uri, err := url.Parse(value.Url)
+		if err == nil {
+			customizedMiddleware[uri.Scheme] = value.Url
+		}
+	}
+
+	dependencies := make([]*chart.Chart, 0)
+	for _, k := range middlewareChart.Dependencies() {
+		if _, ok := customizedMiddleware[k.Name()]; !ok {
+			dependencies = append(dependencies, k)
+		}
+	}
+	middlewareChart.SetDependencies(dependencies...)
+}
+
 func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
-	redisURL, err := url.Parse(config.Middleware.Cache.Url)
+	if middlewareChart == nil {
+		return
+	}
+	CacheURL, err := url.Parse(config.Middleware.Cache.Url)
 	if err != nil {
 		return
 	}
-	kafkaURL, err := url.Parse(config.Middleware.Queue.Url)
+	QueueURL, err := url.Parse(config.Middleware.Queue.Url)
 	if err != nil {
 		return
 	}
-	components := make(map[string]interface{})
-	state := make(map[string]interface{})
-	pubsub := make(map[string]interface{})
-	kafka := map[string]interface{}{
-		"host": kafkaURL.Host,
+
+	cachePassword, _ := CacheURL.User.Password()
+	queuePassword, _ := CacheURL.User.Password()
+
+	components := map[string]interface{}{
+		"state": map[string]interface{}{
+			CacheURL.Scheme: map[string]interface{}{
+				"host":     CacheURL.Host,
+				"password": cachePassword,
+			},
+		},
+		"pubsub": map[string]interface{}{
+			QueueURL.Scheme: map[string]interface{}{
+				"host":     QueueURL.Host,
+				"password": queuePassword,
+			},
+		},
 	}
-	password, ok := redisURL.User.Password()
-	if !ok {
-		password = ""
-	}
-	redis := map[string]interface{}{
-		"host":     redisURL.Host,
-		"password": password,
-	}
-	state["redis"] = redis
-	pubsub["kafka"] = kafka
-	components["state"] = state
-	components["pubsub"] = pubsub
+
 	middlewareChart.Values["components"] = components
 }
 
+func updateChartsValue(charts map[string]*chart.Chart, tKeelMiddle MiddleConfig, installConfig *kitconfig.InstallConfig, config InitConfiguration) map[string]*kitconfig.Value {
+	middleware := installConfig.GetMiddleware()
+
+	for component, middlewareConfig := range tKeelMiddle {
+		for service, iuri := range middlewareConfig {
+			if value, exist := middleware[service]; exist {
+				middlewareConfig[service] = value.Url
+			} else if uri, ok := iuri.(string); ok {
+				middleware[service] = &kitconfig.Value{
+					Customized: false,
+					Url:        uri,
+				}
+			}
+		}
+		c := charts[component]
+		if c == nil {
+			continue
+		}
+		c.Values["middleware"] = middlewareConfig
+		if component == tkeelRudderHelmChart {
+			c.Values["tkeelRepo"] = tKeelHelmRepo
+			c.Values["adminPassword"] = config.Password
+		}
+	}
+	for _, v := range charts {
+		if v == nil {
+			continue
+		}
+		v.Values["daprVersion"] = config.DaprVersion
+	}
+	return middleware
+}
+
 func updateIngresValues(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) {
+	if middlewareChart == nil {
+		return
+	}
 	ingress := make(map[string]interface{})
 	ingress["host"] = map[string]interface{}{
 		"admin":  config.Host.Admin,
@@ -259,6 +317,9 @@ func updateIngresValues(middlewareChart *chart.Chart, config *kitconfig.InstallC
 }
 
 func updateConfigMap(middlewareChart *chart.Chart, config *kitconfig.InstallConfig) error {
+	if middlewareChart == nil {
+		return nil
+	}
 	for _, f := range middlewareChart.Templates {
 		if f.Name == "templates/configmap.yaml" {
 			configmap := make(map[string]interface{})
@@ -407,71 +468,47 @@ func Upgrade(config InitConfiguration) error {
 	}
 	tKeelHelmRepo = config.Repo.Url
 
-	helmConf, err = helmConfig(config.Namespace, getLog(config.DebugMode))
+	helmConf, err = InitHelmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
 		return err
 	}
 
-	keelChart, coreChart, rudderChart, componentMiddleware, err := KeelChart(config)
+	tKeelMiddle := MiddleConfig{}
+
+	keelChart, middleConfig, err := ChartMiddleware(tkeelKeelHelmChart, config.KeelVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	coreChart, middleConfig, err := ChartMiddleware(tkeelCoreHelmChart, config.CoreVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	rudderChart, middleConfig, err := ChartMiddleware(tkeelRudderHelmChart, config.RudderVersion, config)
+	if err != nil {
+		return err
+	}
+	tKeelMiddle.Update(middleConfig)
+
+	middlewareChart, err := tKeelChart(config.MiddlewareVersion, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
 	if err != nil {
 		return err
 	}
 
-	customizedMiddleware := make(map[string]string)
-	middleware := installConfig.GetMiddleware()
-	for _, value := range middleware {
-		if !value.Customized {
-			continue
-		}
-		items := strings.Split(value.Url, ",")
-		if len(items) > 0 {
-			var uri *url.URL
-			uri, err = url.Parse(items[0])
-			if err == nil {
-				customizedMiddleware[uri.Scheme] = value.Url
-			}
-		}
+	// 移除依赖
+	if middlewareChart != nil {
+		middlewareChart.SetDependencies()
 	}
 
-	middlewareChart, err := tKeelChart(config.Version, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
-	if err != nil {
-		return err
+	charts := map[string]*chart.Chart{
+		tkeelKeelHelmChart:   keelChart,
+		tkeelCoreHelmChart:   coreChart,
+		tkeelRudderHelmChart: rudderChart,
 	}
-
-	dependencies := make([]*chart.Chart, 0)
-	for _, k := range middlewareChart.Dependencies() {
-		if _, ok := customizedMiddleware[k.Name()]; !ok {
-			dependencies = append(dependencies, k)
-		}
-	}
-	middlewareChart.SetDependencies(dependencies...)
-
-	// cover middleware config with custom middleware
-	for component, middlewareConfig := range componentMiddleware {
-		for service, iuri := range middlewareConfig {
-			if value, exist := middleware[service]; exist {
-				middlewareConfig[service] = value.Url
-			} else if uri, ok := iuri.(string); ok {
-				middleware[service] = &kitconfig.Value{
-					Customized: false,
-					Url:        uri,
-				}
-			}
-		}
-		switch component {
-		case tkeelKeelHelmChart:
-			keelChart.Values["middleware"] = middlewareConfig
-		case tkeelRudderHelmChart:
-			rudderChart.Values["middleware"] = middlewareConfig
-			rudderChart.Values["tkeelRepo"] = tKeelHelmRepo
-			rudderChart.Values["adminPassword"] = config.Password
-		case tkeelCoreHelmChart:
-			coreChart.Values["middleware"] = middlewareConfig
-		}
-	}
-	keelChart.Values["daprVersion"] = config.DaprVersion
-	coreChart.Values["daprVersion"] = config.DaprVersion
-	rudderChart.Values["daprVersion"] = config.DaprVersion
+	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
 
 	installConfig.SetMiddleware(middleware)
 
@@ -493,19 +530,14 @@ func Upgrade(config InitConfiguration) error {
 	}
 	stopSpinning(print.Success)
 
-	err = dumpInstallConfig(config.ConfigFile, installConfig)
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
-func installPlugins(config InitConfiguration, plugins []string, keelVersion string) {
+func installPlugins(config InitConfiguration, plugins []string, defaultVersion string) {
 	for _, plugin := range plugins {
 		repo, name, version := utils.ParseInstallArg(plugin, config.Repo.Name)
 		if version == "" {
-			version = keelVersion
+			version = defaultVersion
 		}
 		if err := Install(repo, name, version, name, nil); err != nil {
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", name, err.Error())

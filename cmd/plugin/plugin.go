@@ -55,12 +55,15 @@ var PluginHelpExample = `
 # Get status of tKeel plugins from Kubernetes
 tkeel plugin list
 tkeel plugin list -r <repo>
+tkeel plugin list -r <repo> --latest
 tkeel plugin install <repo>/<plugin> <pluginID>
 tkeel plugin install <repo>/<plugin>@v0.1.0 <pluginID>
 tkeel plugin uninstall <pluginID>
 tkeel plugin show <pluginID>
 tkeel plugin enable <pluginID> -t <tenantId>
 tkeel plugin disable <pluginID> -t <tenantId>
+tkeel plugin upgrade <repo>/<plugin> <pluginID>
+tkeel plugin upgrade <repo>/<plugin>@v0.1.0 <pluginID>
 `
 
 var PluginCmd = &cobra.Command{
