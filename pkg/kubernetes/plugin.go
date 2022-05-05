@@ -409,7 +409,7 @@ func Install(repo, plugin, version, name string, config []byte) error {
 		Configuration: config,
 		Type:          1,
 	}
-	data, err := json.Marshal(&req) //nolint
+	data, err := json.Marshal(&req)
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}

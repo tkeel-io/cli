@@ -240,28 +240,28 @@ func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.Inst
 	if middlewareChart == nil {
 		return
 	}
-	CacheUrl, err := url.Parse(config.Middleware.Cache.Url)
+	CacheURL, err := url.Parse(config.Middleware.Cache.Url)
 	if err != nil {
 		return
 	}
-	QueueUrl, err := url.Parse(config.Middleware.Queue.Url)
+	QueueURL, err := url.Parse(config.Middleware.Queue.Url)
 	if err != nil {
 		return
 	}
 
-	cachePassword, _ := CacheUrl.User.Password()
-	queuePassword, _ := CacheUrl.User.Password()
+	cachePassword, _ := CacheURL.User.Password()
+	queuePassword, _ := CacheURL.User.Password()
 
 	components := map[string]interface{}{
 		"state": map[string]interface{}{
-			CacheUrl.Scheme: map[string]interface{}{
-				"host":     CacheUrl.Host,
+			CacheURL.Scheme: map[string]interface{}{
+				"host":     CacheURL.Host,
 				"password": cachePassword,
 			},
 		},
 		"pubsub": map[string]interface{}{
-			QueueUrl.Scheme: map[string]interface{}{
-				"host":     QueueUrl.Host,
+			QueueURL.Scheme: map[string]interface{}{
+				"host":     QueueURL.Host,
 				"password": queuePassword,
 			},
 		},

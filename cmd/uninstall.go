@@ -51,11 +51,9 @@ dapr uninstall -k
 		checkDapr()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var err error
-
 		confirm := false
-		err = survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
-		if !confirm {
+		err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
+		if err != nil || !confirm {
 			return
 		}
 
