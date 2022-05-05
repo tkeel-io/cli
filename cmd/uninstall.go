@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 
 	"github.com/tkeel-io/cli/pkg/kubernetes"
@@ -51,6 +52,12 @@ dapr uninstall -k
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
+
+		confirm := false
+		err = survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
+		if !confirm {
+			return
+		}
 
 		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
 

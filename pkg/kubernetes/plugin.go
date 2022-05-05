@@ -54,8 +54,10 @@ type InstalledListOutput struct {
 }
 
 type RepoPluginListOutput struct {
-	Name    string `csv:"NAME"`
-	Version string `csv:"VERSION"`
+	Name        string `csv:"NAME"`
+	Version     string `csv:"VERSION"`
+	Status      string `csv:"STATUS"`
+	Description string `csv:"DESCRIPTION"`
 }
 
 type RegisterAddons struct {
@@ -339,13 +341,13 @@ func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
 
 	l := make([]RepoPluginListOutput, 0, len(response.Plugins))
 	for _, i := range response.Plugins {
-		l = append(l, RepoPluginListOutput{i, ""})
+		l = append(l, RepoPluginListOutput{i, "", "", ""})
 	}
 
 	return l, nil
 }
 
-func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
+func ListPluginsFromRepo(repo string, latest bool) ([]RepoPluginListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
@@ -371,9 +373,21 @@ func ListPluginsFromRepo(repo string) ([]RepoPluginListOutput, error) {
 		return nil, errors.Wrap(err, "cant handle response data")
 	}
 
-	l := make([]RepoPluginListOutput, 0, len(listResponse.BriefInstallers))
-	for _, i := range listResponse.BriefInstallers {
-		l = append(l, RepoPluginListOutput{i.Name, i.Version})
+	l := make([]RepoPluginListOutput, 0)
+	latestVersion := make(map[string]string)
+	if latest {
+		for _, i := range listResponse.BriefInstallers {
+			if _, ok := latestVersion[i.Name]; ok {
+				l[len(l)-1] = RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc}
+			} else {
+				l = append(l, RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc})
+			}
+			latestVersion[i.Name] = i.Version
+		}
+	} else {
+		for _, i := range listResponse.BriefInstallers {
+			l = append(l, RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc})
+		}
 	}
 
 	return l, nil
@@ -384,6 +398,9 @@ func Install(repo, plugin, version, name string, config []byte) error {
 	if err != nil {
 		return err
 	}
+	if version == "" {
+		version = "latest"
+	}
 	method := fmt.Sprintf(_installPluginFormat, name)
 	req := pluginAPI.Installer{
 		Name:          plugin,
@@ -392,7 +409,7 @@ func Install(repo, plugin, version, name string, config []byte) error {
 		Configuration: config,
 		Type:          1,
 	}
-	data, err := json.Marshal(req) //nolint
+	data, err := json.Marshal(&req) //nolint
 	if err != nil {
 		return errors.Wrap(err, "marshal plugin request failed")
 	}

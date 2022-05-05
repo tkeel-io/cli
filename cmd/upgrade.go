@@ -31,6 +31,8 @@ var UpgradeCmd = &cobra.Command{
 	Short: "Upgrade tKeel platform.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		checkDapr()
+		realConfigPath()
+		initVersion()
 	},
 	Example: `
 # Initialize Keel in Kubernetes
@@ -43,7 +45,7 @@ tkeel init --wait --timeout 600
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		config := kubernetes.InitConfiguration{
 			Namespace:     daprStatus.Namespace,
-			Version:       runtimeVersion,
+			KeelVersion:   keelVersion,
 			CoreVersion:   coreVersion,
 			RudderVersion: rudderVersion,
 			DaprVersion:   daprStatus.Version,
@@ -70,14 +72,16 @@ tkeel init --wait --timeout 600
 }
 
 func init() {
-	UpgradeCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	UpgradeCmd.Flags().StringVarP(&coreVersion, "core-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
-	UpgradeCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "latest", "The version of the tKeel Platform to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&runtimeVersion, "runtime-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&keelVersion, "keel-version", "", "", "The version of the tKeel component keel to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&coreVersion, "core-version", "", "", "The version of the tKeel component core to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "", "The version of the tKeel component rudder to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	UpgradeCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	UpgradeCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	UpgradeCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	UpgradeCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
-	UpgradeCmd.Flags().StringVarP(&configFile, "config", "f", "", "The tkeel installation config file")
+	UpgradeCmd.Flags().StringVarP(&configFile, "config", "f", "~/.tkeel/config.yaml", "The tkeel installation config file")
 	UpgradeCmd.Flags().StringVarP(&repoURL, "repo-url", "", "https://tkeel-io.github.io/helm-charts/", "The tkeel repo url")
 	UpgradeCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
 	UpgradeCmd.Flags().BoolP("help", "h", false, "Print this help message")
