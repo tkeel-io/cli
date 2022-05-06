@@ -49,12 +49,13 @@ const (
 )
 
 const (
-	tkeelAdminHost  = "admin.tkeel.io"
-	tkeelTenantHost = "tkeel.io"
-	tkeelPort       = "30080"
+	tkeelAdminHost    = "admin.tkeel.io"
+	tkeelTenantHost   = "tkeel.io"
+	tkeelPort         = "30080"
+	tKeelHelmRepoURL  = "https://tkeel-io.github.io/helm-charts/"
+	tKeelHelmRepoName = "tkeel"
 )
 
-var tKeelHelmRepo = "https://tkeel-io.github.io/helm-charts/"
 var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
 
 var helmConf *helm.Configuration
@@ -110,7 +111,6 @@ func Init(config InitConfiguration) error {
 	if err != nil {
 		return err
 	}
-	tKeelHelmRepo = config.Repo.Url
 
 	helmConf, err = InitHelmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
@@ -137,7 +137,7 @@ func Init(config InitConfiguration) error {
 	}
 	tKeelMiddle.Update(middleConfig)
 
-	middlewareChart, err := tKeelChart(config.MiddlewareVersion, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
+	middlewareChart, err := tKeelChart(config.MiddlewareVersion, config.Repo.Url, tKeelMiddlewareHelmChart, helmConf)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func updateChartsValue(charts map[string]*chart.Chart, tKeelMiddle MiddleConfig,
 		}
 		c.Values["middleware"] = middlewareConfig
 		if component == tkeelRudderHelmChart {
-			c.Values["tkeelRepo"] = tKeelHelmRepo
+			c.Values["tkeelRepo"] = config.Repo.Url
 			c.Values["adminPassword"] = config.Password
 		}
 	}
@@ -393,10 +393,10 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 	}
 	installConfig.Namespace = config.Namespace
 	if installConfig.Repo != nil {
-		if installConfig.Repo.Url != "" {
+		if installConfig.Repo.Url != "" && config.Repo.Url == tKeelHelmRepoURL {
 			config.Repo.Url = installConfig.Repo.Url
 		}
-		if installConfig.Repo.Name != "" {
+		if installConfig.Repo.Name != "" && config.Repo.Name == tKeelHelmRepoName {
 			config.Repo.Name = installConfig.Repo.Name
 		}
 	} else {
@@ -466,7 +466,6 @@ func Upgrade(config InitConfiguration) error {
 	if err != nil {
 		return err
 	}
-	tKeelHelmRepo = config.Repo.Url
 
 	helmConf, err = InitHelmConfig(config.Namespace, getLog(config.DebugMode))
 	if err != nil {
@@ -493,7 +492,7 @@ func Upgrade(config InitConfiguration) error {
 	}
 	tKeelMiddle.Update(middleConfig)
 
-	middlewareChart, err := tKeelChart(config.MiddlewareVersion, tKeelHelmRepo, tKeelMiddlewareHelmChart, helmConf)
+	middlewareChart, err := tKeelChart(config.MiddlewareVersion, config.Repo.Url, tKeelMiddlewareHelmChart, helmConf)
 	if err != nil {
 		return err
 	}

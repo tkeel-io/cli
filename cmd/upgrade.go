@@ -35,11 +35,11 @@ var UpgradeCmd = &cobra.Command{
 		initVersion()
 	},
 	Example: `
-# Initialize Keel in Kubernetes
-tkeel init 
+# Upgrade Keel in Kubernetes
+tkeel upgrade 
 
-# Initialize Keel in Kubernetes and wait for the installation to complete (default timeout is 300s/5m)
-tkeel init --wait --timeout 600
+# Upgrade Keel in Kubernetes and wait for the installation to complete (default timeout is 300s/5m)
+tkeel upgrade --wait --timeout 600
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")

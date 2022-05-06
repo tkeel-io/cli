@@ -100,7 +100,7 @@ func ChartMiddleware(name, version string, config InitConfiguration) (*chart.Cha
 		return nil, nil, nil
 	}
 	result := MiddleConfig{}
-	c, err := tKeelChart(version, tKeelHelmRepo, name, helmConf)
+	c, err := tKeelChart(version, config.Repo.Url, name, helmConf)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -228,7 +228,7 @@ func addDaprComponentChartDependency(config InitConfiguration, helmConf *action.
 	if version == "" {
 		version = "latest"
 	}
-	componentChart, err := tKeelChart(version, tKeelHelmRepo, tKeelPluginConfigHelmChart, helmConf)
+	componentChart, err := tKeelChart(version, config.Repo.Url, tKeelPluginConfigHelmChart, helmConf)
 	if err != nil {
 		return err
 	}
