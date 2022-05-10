@@ -44,17 +44,18 @@ tkeel init --wait --timeout 600
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Making the jump to hyperspace...")
 		config := kubernetes.InitConfiguration{
-			Namespace:     daprStatus.Namespace,
-			KeelVersion:   keelVersion,
-			CoreVersion:   coreVersion,
-			RudderVersion: rudderVersion,
-			DaprVersion:   daprStatus.Version,
-			EnableMTLS:    enableMTLS,
-			EnableHA:      enableHA,
-			Args:          values,
-			Wait:          wait,
-			Timeout:       timeout,
-			DebugMode:     debugMode,
+			Namespace:         daprStatus.Namespace,
+			KeelVersion:       keelVersion,
+			CoreVersion:       coreVersion,
+			RudderVersion:     rudderVersion,
+			MiddlewareVersion: middlewareVersion,
+			DaprVersion:       daprStatus.Version,
+			EnableMTLS:        enableMTLS,
+			EnableHA:          enableHA,
+			Args:              values,
+			Wait:              wait,
+			Timeout:           timeout,
+			DebugMode:         debugMode,
 			Repo: &kitconfig.Repo{
 				Url:  repoURL,
 				Name: repoName,
@@ -76,6 +77,7 @@ func init() {
 	UpgradeCmd.Flags().StringVarP(&keelVersion, "keel-version", "", "", "The version of the tKeel component keel to install, for example: 1.0.0")
 	UpgradeCmd.Flags().StringVarP(&coreVersion, "core-version", "", "", "The version of the tKeel component core to install, for example: 1.0.0")
 	UpgradeCmd.Flags().StringVarP(&rudderVersion, "rudder-version", "", "", "The version of the tKeel component rudder to install, for example: 1.0.0")
+	UpgradeCmd.Flags().StringVarP(&middlewareVersion, "middleware-version", "", "", "The version of the tKeel Platform to install, for example: 1.0.0")
 	UpgradeCmd.Flags().StringVarP(&secret, "secret", "", "changeme", "The secret of the tKeel Platform to install, for example: dix9vng")
 	UpgradeCmd.Flags().String("network", "", "The Docker network on which to deploy the tKeel Platform")
 	UpgradeCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
