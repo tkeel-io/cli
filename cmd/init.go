@@ -122,13 +122,11 @@ func initVersion() {
 		runtimeVersion = LatestVersion
 	}
 	// 未指定组件版本时，使用最新版本
-	if keelVersion == "" && coreVersion == "" && rudderVersion == "" {
+	if keelVersion == "" && coreVersion == "" && rudderVersion == "" && middlewareVersion == "" {
 		keelVersion = runtimeVersion
 		coreVersion = runtimeVersion
 		rudderVersion = runtimeVersion
-	}
-	if middlewareVersion == "" {
-		middlewareVersion = LatestVersion
+		middlewareVersion = runtimeVersion
 	}
 }
 

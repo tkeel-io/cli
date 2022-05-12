@@ -498,11 +498,6 @@ func Upgrade(config InitConfiguration) error {
 		return err
 	}
 
-	// 移除依赖
-	if middlewareChart != nil {
-		middlewareChart.SetDependencies()
-	}
-
 	charts := map[string]*chart.Chart{
 		tkeelKeelHelmChart:   keelChart,
 		tkeelCoreHelmChart:   coreChart,
