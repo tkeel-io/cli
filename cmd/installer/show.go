@@ -7,16 +7,14 @@ package installer
 
 import (
 	"os"
-	"strings"
 
 	"github.com/gocarina/gocsv"
 	"github.com/spf13/cobra"
 	"github.com/tkeel-io/cli/fmtutil"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
+	"github.com/tkeel-io/cli/pkg/utils"
 )
-
-const officialRepo = "tkeel"
 
 var InstallerInfoCmd = &cobra.Command{
 	Use:     "show",
@@ -25,9 +23,9 @@ var InstallerInfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			print.FailureStatusEvent(os.Stdout, "please input installer info")
-			return
+			os.Exit(1)
 		}
-		tkeelRepo, installer, version := parseInstallArg(args[0])
+		tkeelRepo, installer, version := utils.ParseInstallArg(args[0], officialRepo)
 		data, err := kubernetes.InstallerInfo(tkeelRepo, installer, version)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
@@ -46,27 +44,4 @@ func init() {
 	InstallerInfoCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	InstallerInfoCmd.MarkFlagRequired("tenant")
 	InstallerCmd.AddCommand(InstallerInfoCmd)
-}
-
-func parseInstallArg(arg string) (repo, plugin, version string) {
-	version = ""
-	plugin = arg
-
-	if sp := strings.Split(arg, "@"); len(sp) == 2 {
-		plugin, version = sp[0], sp[1]
-	}
-
-	if version != "" && version[0] == 'v' {
-		version = version[1:]
-	}
-
-	repo = officialRepo
-	if spi := strings.LastIndex(plugin, "/"); spi != -1 {
-		repo, plugin = plugin[:spi], plugin[spi+1:]
-		if repo == "" || strings.EqualFold(repo, "tkeel") {
-			repo = officialRepo
-			return
-		}
-	}
-	return
 }

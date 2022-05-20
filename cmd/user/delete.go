@@ -15,7 +15,7 @@ var UserDeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			print.FailureStatusEvent(os.Stdout, "please input user id")
-			return
+			os.Exit(1)
 		}
 		userID := args[0]
 		err := kubernetes.TenantUserDelete(tenant, userID)

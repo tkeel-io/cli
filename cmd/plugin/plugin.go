@@ -42,7 +42,6 @@ limitations under the License.
 package plugin
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/dapr/cli/utils"
@@ -74,7 +73,7 @@ var PluginCmd = &cobra.Command{
 		// Prompt help information If there is no parameter
 		if len(args) == 0 {
 			cmd.Help()
-			return
+			os.Exit(1)
 		}
 	},
 }
@@ -100,8 +99,8 @@ func outputList(list interface{}, length int) {
 
 		// Standalone mode displays a separate message when no instances are found.
 		if length == 0 {
-			fmt.Println("No Dapr instances found.")
-			return
+			print.FailureStatusEvent(os.Stdout, "No Dapr instances found.")
+			os.Exit(1)
 		}
 
 		utils.PrintTable(table)

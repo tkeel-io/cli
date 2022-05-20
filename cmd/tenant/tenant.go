@@ -19,7 +19,6 @@ var TenantCmd = &cobra.Command{
 		// Prompt help information If there is no parameter
 		if len(args) == 0 {
 			cmd.Help()
-			return
 		}
 	},
 }

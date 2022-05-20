@@ -18,7 +18,7 @@ var TenantCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
-			return
+			os.Exit(1)
 		}
 		title := args[0]
 		err := kubernetes.TenantCreate(title, remark, username, password)

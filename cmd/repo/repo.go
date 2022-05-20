@@ -6,7 +6,9 @@ var RepoCmd = &cobra.Command{
 	Use:   "repo",
 	Short: "show tkeel repo",
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		if len(args) == 0 {
+			cmd.Help()
+		}
 	},
 }
 

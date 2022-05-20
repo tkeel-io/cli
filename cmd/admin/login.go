@@ -26,13 +26,13 @@ var adminLoginCmd = &cobra.Command{
 		if len(args) == 0 && password == "" {
 			if err := survey.AskOne(prompt, &password); err != nil {
 				print.FailureStatusEvent(os.Stdout, "failed to read password from stdin")
-				return
+				os.Exit(1)
 			}
 		}
 		token, err := kubernetes.AdminLogin(password)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "Login Failed: %s", err.Error())
-			return
+			os.Exit(1)
 		}
 
 		print.SuccessStatusEvent(os.Stdout, "You are Login Success!")

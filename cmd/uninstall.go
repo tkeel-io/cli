@@ -54,8 +54,11 @@ dapr uninstall -k
 		confirm := false
 		err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
 		if err != nil || !confirm {
-			return
+			os.Exit(1)
 		}
+		defer func() {
+			kubernetes.CleanToken()
+		}()
 
 		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
 
@@ -72,10 +75,10 @@ dapr uninstall -k
 
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing tKeel: %s", err))
+			os.Exit(1)
 		} else {
 			print.SuccessStatusEvent(os.Stdout, "tKeel Platform has been removed successfully")
 		}
-		kubernetes.CleanToken()
 	},
 }
 

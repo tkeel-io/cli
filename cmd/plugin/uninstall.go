@@ -17,13 +17,13 @@ var PluginUninstallCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			print.PendingStatusEvent(os.Stdout, "please input the plugin name what you installed.")
-			return
+			os.Exit(1)
 		}
 		pluginID := args[0]
 		if err := kubernetes.UninstallPlugin(pluginID); err != nil {
 			log.Warn("remove the plugin failed", err)
 			print.FailureStatusEvent(os.Stdout, "Try to remove installed plugin %q failed, Because: %s", strings.Join(args, ","), err.Error())
-			return
+			os.Exit(1)
 		}
 		print.SuccessStatusEvent(os.Stdout, "Remove %q success!", strings.Join(args, ","))
 	},
