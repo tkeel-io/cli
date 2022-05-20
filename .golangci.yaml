@@ -247,6 +247,7 @@ linters:
   enable-all: true
   disable:
     # TODO Enforce the below linters later
+    - varnamelen
     - dupl
     - errcheck
     - forbidigo
