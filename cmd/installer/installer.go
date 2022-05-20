@@ -5,6 +5,8 @@
 package installer
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +25,7 @@ var InstallerCmd = &cobra.Command{
 		// Prompt help information If there is no parameter
 		if len(args) == 0 {
 			cmd.Help()
-			return
+			os.Exit(1)
 		}
 	},
 }

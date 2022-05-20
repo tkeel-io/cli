@@ -28,7 +28,7 @@ var PluginInstallCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
-			return
+			os.Exit(1)
 		}
 		var configb []byte
 		var err error

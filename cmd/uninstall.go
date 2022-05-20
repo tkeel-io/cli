@@ -54,7 +54,7 @@ dapr uninstall -k
 		confirm := false
 		err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
 		if err != nil || !confirm {
-			return
+			os.Exit(1)
 		}
 		defer func() {
 			kubernetes.CleanToken()
