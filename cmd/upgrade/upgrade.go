@@ -14,25 +14,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package upgrade
 
 import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/utils"
 
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	kitconfig "github.com/tkeel-io/kit/config"
 )
 
+const LatestVersion = "latest"
+
+var (
+	debugMode         bool
+	wait              bool
+	timeout           uint
+	runtimeVersion    string
+	keelVersion       string
+	coreVersion       string
+	rudderVersion     string
+	middlewareVersion string
+	secret            string
+	enableMTLS        bool
+	enableHA          bool
+	values            []string
+	configFile        string
+	repoURL           string
+	repoName          string
+	daprStatus        *kubernetes.DaprStatus
+)
 var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
 	Short: "Upgrade tKeel platform.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		checkDapr()
-		realConfigPath()
 		initVersion()
+		if path, err := utils.GetRealPath(configFile); err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		} else {
+			configFile = path
+		}
 	},
 	Example: `
 # Initialize Keel in Kubernetes
@@ -87,5 +113,26 @@ func init() {
 	UpgradeCmd.Flags().StringVarP(&repoURL, "repo-url", "", "https://tkeel-io.github.io/helm-charts/", "The tkeel repo url")
 	UpgradeCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
 	UpgradeCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	RootCmd.AddCommand(UpgradeCmd)
+}
+
+func initVersion() {
+	// upgrade 会执行这一步
+	if runtimeVersion == "" {
+		runtimeVersion = LatestVersion
+	}
+	// 未指定组件版本时，使用最新版本
+	if keelVersion == "" && coreVersion == "" && rudderVersion == "" && middlewareVersion == "" {
+		keelVersion = runtimeVersion
+		coreVersion = runtimeVersion
+		rudderVersion = runtimeVersion
+		middlewareVersion = runtimeVersion
+	}
+}
+
+func checkDapr() {
+	daprStatus = kubernetes.Check()
+	if !daprStatus.Installed {
+		print.FailureStatusEvent(os.Stdout, daprStatus.Error.Error())
+		os.Exit(1)
+	}
 }

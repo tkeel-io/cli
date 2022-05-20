@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"os"
+	"strings"
+)
 
 // ParseInstallArg parse the first arg, get repo, plugin and version information.
 // More efficient and concise support for both formats：
@@ -27,4 +30,15 @@ func ParseInstallArg(arg string, defaultRepo string) (repo, name, version string
 		}
 	}
 	return
+}
+
+func GetRealPath(path string) (string, error) {
+	if path != "" && path[0] == '~' {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		path = strings.Replace(path, "~", home, 1)
+	}
+	return path, nil
 }

@@ -19,9 +19,9 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/tkeel-io/cli/pkg/utils"
 
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
@@ -54,8 +54,13 @@ var InitCmd = &cobra.Command{
 	Short: "Install tKeel platform on dapr.",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		checkDapr()
-		realConfigPath()
 		initVersion()
+		if path, err := utils.GetRealPath(configFile); err != nil {
+			print.FailureStatusEvent(os.Stdout, err.Error())
+			os.Exit(1)
+		} else {
+			configFile = path
+		}
 	},
 	Example: `
 # Initialize Keel in Kubernetes
@@ -116,6 +121,14 @@ func init() {
 	RootCmd.AddCommand(InitCmd)
 }
 
+func checkDapr() {
+	daprStatus = kubernetes.Check()
+	if !daprStatus.Installed {
+		print.FailureStatusEvent(os.Stdout, daprStatus.Error.Error())
+		os.Exit(1)
+	}
+}
+
 func initVersion() {
 	// upgrade 会执行这一步
 	if runtimeVersion == "" {
@@ -127,16 +140,5 @@ func initVersion() {
 		coreVersion = runtimeVersion
 		rudderVersion = runtimeVersion
 		middlewareVersion = runtimeVersion
-	}
-}
-
-func realConfigPath() {
-	if configFile != "" && configFile[0] == '~' {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			print.FailureStatusEvent(os.Stdout, err.Error())
-			os.Exit(1)
-		}
-		configFile = strings.Replace(configFile, "~", home, 1)
 	}
 }

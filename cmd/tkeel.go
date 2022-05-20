@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/tkeel-io/cli/cmd/installer"
+	"github.com/tkeel-io/cli/cmd/upgrade"
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 
 	"github.com/spf13/cobra"
@@ -109,14 +110,6 @@ func initConfig() {
 	viper.AutomaticEnv()
 }
 
-func checkDapr() {
-	daprStatus = kubernetes.Check()
-	if !daprStatus.Installed {
-		print.FailureStatusEvent(os.Stdout, daprStatus.Error.Error())
-		os.Exit(1)
-	}
-}
-
 func init() {
 	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
 	RootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "c", "", "The Kubernetes cluster which you want")
@@ -128,4 +121,5 @@ func init() {
 	RootCmd.AddCommand(repo.RepoCmd)
 	RootCmd.AddCommand(user.UserCmd)
 	RootCmd.AddCommand(installer.InstallerCmd)
+	RootCmd.AddCommand(upgrade.UpgradeCmd)
 }
