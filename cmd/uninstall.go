@@ -56,6 +56,9 @@ dapr uninstall -k
 		if err != nil || !confirm {
 			return
 		}
+		defer func() {
+			kubernetes.CleanToken()
+		}()
 
 		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
 
@@ -72,10 +75,10 @@ dapr uninstall -k
 
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing tKeel: %s", err))
+			os.Exit(1)
 		} else {
 			print.SuccessStatusEvent(os.Stdout, "tKeel Platform has been removed successfully")
 		}
-		kubernetes.CleanToken()
 	},
 }
 

@@ -71,7 +71,7 @@ tkeel invoke --plugin-id target --method v1/sample --verb GET
 		if err != nil {
 			err = fmt.Errorf("error invoking plugin %s: %w", invokeAppID, err)
 			print.FailureStatusEvent(os.Stdout, err.Error())
-			return
+			os.Exit(1)
 		}
 
 		if response != "" {

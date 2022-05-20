@@ -15,7 +15,7 @@ var UserCreateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			print.FailureStatusEvent(os.Stdout, "please input 1 arguments, 1st username, 2nd password")
-			return
+			os.Exit(1)
 		}
 		username := args[0]
 		password := args[1]

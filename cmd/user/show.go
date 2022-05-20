@@ -17,7 +17,7 @@ var UserInfoCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
 			print.FailureStatusEvent(os.Stdout, "please input 1 arguments,1st user id")
-			return
+			os.Exit(1)
 		}
 		userID := args[0]
 		data, err := kubernetes.TenantUserInfo(tenant, userID)

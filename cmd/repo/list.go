@@ -16,7 +16,7 @@ var ListCmd = &cobra.Command{
 		list, err := kubernetes.ListRepo()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "unable to list tkeel repositories")
-			return
+			os.Exit(1)
 		}
 		fmtutil.Output(list)
 	},

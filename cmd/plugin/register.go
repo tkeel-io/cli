@@ -32,7 +32,7 @@ var PluginRegisterCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
 			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins.  \n tkeel plugin register <pluginID>")
-			return
+			os.Exit(1)
 		}
 
 		pluginID := args[0]

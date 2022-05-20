@@ -14,12 +14,13 @@ var DeleteCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			print.FailureStatusEvent(os.Stdout, "please input repo name which is you want to delete")
+			os.Exit(1)
 		}
 		name := args[0]
 		err := kubernetes.DeleteRepo(name)
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, "unable delete repo to tkeel")
-			return
+			os.Exit(1)
 		}
 		print.SuccessStatusEvent(os.Stdout, "Successfully delete!")
 	},

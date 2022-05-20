@@ -27,7 +27,6 @@ var PluginInstallCmd = &cobra.Command{
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			cmd.Help()
 			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
 			return
 		}
@@ -39,19 +38,19 @@ var PluginInstallCmd = &cobra.Command{
 			configFile, err = filepath.Abs(configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
-				return
+				os.Exit(1)
 			}
 			configb, err = ioutil.ReadFile(configFile)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to read config file")
-				return
+				os.Exit(1)
 			}
 		}
 
 		if err := kubernetes.Install(repo, plugin, version, name, configb); err != nil {
 			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
-			return
+			os.Exit(1)
 		}
 		print.SuccessStatusEvent(os.Stdout, "Install %q success! It's named %q in k8s", plugin, name)
 	},
