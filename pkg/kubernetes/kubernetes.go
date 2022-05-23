@@ -65,6 +65,11 @@ var defaultPlugins = []string{
 	"tkeel/console-plugin-admin-plugins",
 }
 
+const (
+	Always       = "Always"
+	IfNotPresent = "IfNotPresent"
+)
+
 type InitConfiguration struct {
 	Version           string
 	KeelVersion       string
@@ -84,6 +89,7 @@ type InitConfiguration struct {
 	Password          string
 	Repo              *kitconfig.Repo
 	DefaultConfig     bool
+	ImagePolicy       string
 }
 
 type MiddleConfig map[string]map[string]interface{}
@@ -149,8 +155,9 @@ func Init(config InitConfiguration) error {
 		tkeelCoreHelmChart:   coreChart,
 		tkeelRudderHelmChart: rudderChart,
 	}
-	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
+	updateImagePolicy(charts, installConfig.ImagePolicy)
 
+	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
 	installConfig.SetMiddleware(middleware)
 
 	updateComponentsValues(middlewareChart, installConfig)
@@ -268,6 +275,23 @@ func updateComponentsValues(middlewareChart *chart.Chart, config *kitconfig.Inst
 	}
 
 	middlewareChart.Values["components"] = components
+}
+
+func updateImagePolicy(charts map[string]*chart.Chart, policy string) {
+	for _, v := range charts {
+		if v == nil {
+			continue
+		}
+		if image, ok := v.Values["image"]; ok {
+			if temp, ok := image.(map[string]interface{}); ok {
+				if policy == Always {
+					temp["pullPolicy"] = Always
+				} else {
+					temp["pullPolicy"] = IfNotPresent
+				}
+			}
+		}
+	}
 }
 
 func updateChartsValue(charts map[string]*chart.Chart, tKeelMiddle MiddleConfig, installConfig *kitconfig.InstallConfig, config InitConfiguration) map[string]*kitconfig.Value {
@@ -417,6 +441,9 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 	if installConfig.Plugins == nil {
 		installConfig.Plugins = defaultPlugins
 	}
+	if installConfig.ImagePolicy == "" {
+		installConfig.ImagePolicy = config.ImagePolicy
+	}
 	return installConfig, nil
 }
 
@@ -503,8 +530,9 @@ func Upgrade(config InitConfiguration) error {
 		tkeelCoreHelmChart:   coreChart,
 		tkeelRudderHelmChart: rudderChart,
 	}
-	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
+	updateImagePolicy(charts, installConfig.ImagePolicy)
 
+	middleware := updateChartsValue(charts, tKeelMiddle, installConfig, config)
 	installConfig.SetMiddleware(middleware)
 
 	updateComponentsValues(middlewareChart, installConfig)

@@ -46,6 +46,7 @@ var (
 	repoURL           string
 	repoName          string
 	daprStatus        *kubernetes.DaprStatus
+	policy            string
 )
 var UpgradeCmd = &cobra.Command{
 	Use:   "upgrade",
@@ -86,7 +87,8 @@ tkeel init --wait --timeout 600
 				Url:  repoURL,
 				Name: repoName,
 			},
-			ConfigFile: configFile,
+			ConfigFile:  configFile,
+			ImagePolicy: policy,
 		}
 		err := kubernetes.Upgrade(config)
 		if err != nil {
@@ -112,6 +114,7 @@ func init() {
 	UpgradeCmd.Flags().StringVarP(&configFile, "config", "f", "~/.tkeel/config.yaml", "The tkeel installation config file")
 	UpgradeCmd.Flags().StringVarP(&repoURL, "repo-url", "", "https://tkeel-io.github.io/helm-charts/", "The tkeel repo url")
 	UpgradeCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
+	UpgradeCmd.Flags().StringVarP(&policy, "image-policy", "p", "", "The tkeel image pull policy")
 	UpgradeCmd.Flags().BoolP("help", "h", false, "Print this help message")
 }
 

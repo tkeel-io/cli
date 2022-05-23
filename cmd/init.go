@@ -47,6 +47,7 @@ var (
 	repoURL           string
 	repoName          string
 	password          string
+	policy            string
 )
 
 var InitCmd = &cobra.Command{
@@ -89,8 +90,9 @@ tkeel init --wait --timeout 600
 				Url:  repoURL,
 				Name: repoName,
 			},
-			Password:   password,
-			ConfigFile: configFile,
+			Password:    password,
+			ConfigFile:  configFile,
+			ImagePolicy: policy,
 		}
 		err := kubernetes.Init(config)
 		if err != nil {
@@ -118,6 +120,7 @@ func init() {
 	InitCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
 	InitCmd.Flags().StringVarP(&password, "password", "", "changeme", "The tkeel admin password")
 	InitCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	InitCmd.Flags().StringVarP(&policy, "image-policy", "p", "IfNotPresent", "The tkeel image pull policy")
 	RootCmd.AddCommand(InitCmd)
 }
 

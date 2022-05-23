@@ -20,4 +20,3 @@ const officialRepo = "tkeel"
 
 var repo string
 var all bool
-var latest bool
