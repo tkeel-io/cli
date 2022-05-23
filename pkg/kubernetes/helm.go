@@ -46,7 +46,7 @@ func InitHelmConfig(namespace string, log action.DebugLog) (*action.Configuratio
 
 func tKeelChart(version, repo, chartName string, config *action.Configuration) (*chart.Chart, error) {
 	if version == "" {
-		return nil, nil
+		return nil, nil // nolint
 	}
 	pull := action.NewPull()
 	pull.RepoURL = repo
