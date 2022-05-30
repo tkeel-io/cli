@@ -11,12 +11,16 @@ import (
 )
 
 var TenantInfoCmd = &cobra.Command{
-	Use:     "show",
-	Short:   "show tenant info.",
-	Example: TenantHelpExample,
+	Use:   "show",
+	Short: "Show tenant info.",
+	Example: `
+# Show tenant info by tenant id
+tkeel tenant show <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			print.FailureStatusEvent(os.Stdout, "please input tenant id")
+			print.WarningStatusEvent(os.Stdout, "Please specify the tenant id")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel tenant show <tenant-id>")
 			os.Exit(1)
 		}
 		tenantID := args[0]

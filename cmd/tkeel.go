@@ -59,6 +59,7 @@ Things Keel Platform`,
 var (
 	logAsJSON  bool
 	kubeconfig string
+	verbose    bool
 	daprStatus *kubernetes.DaprStatus
 
 	gitCommit = ""
@@ -111,8 +112,9 @@ func initConfig() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "Log output in JSON format")
-	RootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "c", "", "The Kubernetes cluster which you want")
+	RootCmd.PersistentFlags().BoolVarP(&logAsJSON, "log-as-json", "", false, "log output in JSON format")
+	RootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "c", "", "the Kubernetes cluster which you want")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose ", "V", false, "Show more output info")
 
 	RootCmd.AddCommand(plugin.PluginCmd)
 	RootCmd.AddCommand(tenant.TenantCmd)

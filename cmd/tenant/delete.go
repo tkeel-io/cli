@@ -9,12 +9,15 @@ import (
 )
 
 var TenantDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "delete tenant info.",
-	Example: TenantHelpExample,
+	Use:   "delete",
+	Short: "Delete tenant info.",
+	Example: `
+# Delete tenant by tenant id
+tkeel tenant delete <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			print.FailureStatusEvent(os.Stdout, "please input tenant id")
+			print.WarningStatusEvent(os.Stdout, "Please specify tenant id")
 			os.Exit(1)
 		}
 		tenantID := args[0]

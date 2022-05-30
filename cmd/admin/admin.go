@@ -6,7 +6,7 @@ import (
 
 var AdminCmd = &cobra.Command{
 	Use:   "admin",
-	Short: "use admin control the tkeel",
+	Short: "Use admin control the tkeel.",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

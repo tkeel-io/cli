@@ -29,9 +29,9 @@ var port string
 // ConfigCmd is a command from removing a tKeel installation.
 var ConfigCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Print default install config.",
+	Short: "Show default install config.",
 	Example: `
-# Print default install config
+# Show default install config
 tkeel config
 
 # Save default install config to file

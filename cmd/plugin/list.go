@@ -25,9 +25,12 @@ import (
 )
 
 var PluginStatusCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "Show the health status of tKeel plugins.",
-	Example: PluginHelpExample,
+	Use:   "list",
+	Short: "List all installed plugin in tkeel.",
+	Example: `
+# List the installed plugins 
+tkeel plugin list
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if tenant != "" {
 			list, err := kubernetes.ListPluginsFromTenant(tenant)
@@ -36,7 +39,7 @@ var PluginStatusCmd = &cobra.Command{
 				os.Exit(1)
 			}
 			outputList(list, len(list))
-			os.Exit(1)
+			os.Exit(0)
 		}
 
 		status, err := kubernetes.InstalledList()
@@ -45,8 +48,8 @@ var PluginStatusCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		if len(status) == 0 {
-			print.FailureStatusEvent(os.Stdout, "No status returned. Is tKeel plugins not install in your cluster?")
-			os.Exit(1)
+			print.WarningStatusEvent(os.Stdout, "There is not plugin in your cluster.")
+			os.Exit(0)
 		}
 
 		outputList(status, len(status))

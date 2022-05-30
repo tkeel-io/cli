@@ -29,6 +29,7 @@ import (
 
 var (
 	uninstallAll bool
+	yes          bool
 )
 
 // UninstallCmd is a command from removing a tKeel installation.
@@ -36,26 +37,25 @@ var UninstallCmd = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstall tKeel Platform.",
 	Example: `
-# Uninstall from self-hosted mode
+# Uninstall from kubernetes
 tkeel uninstall
-
-@TODO
-
-# Uninstall from self-hosted mode and remove .dapr directory, Redis, Placement and Zipkin containers
-dapr uninstall --all
-
-# Uninstall from Kubernetes
-dapr uninstall -k
 `,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		checkDapr()
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		confirm := false
-		err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
-		if err != nil || !confirm {
-			os.Exit(1)
+		var confirm bool
+		var err error
+		if !yes {
+			err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
+			if err != nil {
+				os.Exit(1)
+			}
+			if !confirm {
+				os.Exit(0)
+			}
 		}
+
 		defer func() {
 			kubernetes.CleanToken()
 		}()
@@ -87,6 +87,7 @@ func init() {
 	UninstallCmd.Flags().BoolVar(&uninstallAll, "all", false, "Remove @TODO .dapr directory, Redis, Placement and Zipkin containers")
 	UninstallCmd.Flags().String("network", "", "The Docker network from which to remove the tKeel Platform")
 	UninstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
+	UninstallCmd.Flags().BoolVarP(&yes, "yes", "y", false, "Uninstall the tkeel platform directly")
 	UninstallCmd.Flags().BoolP("help", "h", false, "Print this help message")
 	RootCmd.AddCommand(UninstallCmd)
 }

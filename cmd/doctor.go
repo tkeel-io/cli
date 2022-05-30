@@ -32,22 +32,39 @@ var DoctorCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 	},
 	Example: `
+# Check the tkeel installation environment
 tkeel doctor
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
 		status := kubernetes.Check()
 		installed := fmt.Sprintf("dapr installed: %v", status.Installed)
-		print.SuccessStatusEvent(os.Stdout, installed)
+		if status.Installed {
+			print.SuccessStatusEvent(os.Stdout, installed)
+		} else {
+			print.FailureStatusEvent(os.Stdout, installed)
+		}
 
 		version := fmt.Sprintf("dapr version: %s", status.Version)
-		print.SuccessStatusEvent(os.Stdout, version)
+		if status.Version != "" {
+			print.SuccessStatusEvent(os.Stdout, version)
+		} else {
+			print.FailureStatusEvent(os.Stdout, version)
+		}
 
 		namespace := fmt.Sprintf("dapr namespace: %s", status.Namespace)
-		print.SuccessStatusEvent(os.Stdout, namespace)
+		if status.Namespace != "" {
+			print.SuccessStatusEvent(os.Stdout, namespace)
+		} else {
+			print.FailureStatusEvent(os.Stdout, namespace)
+		}
 
 		mtlsEnabled := fmt.Sprintf("dapr mtls enabled: %v", status.MTLSEnabled)
-		print.SuccessStatusEvent(os.Stdout, mtlsEnabled)
+		if status.MTLSEnabled {
+			print.SuccessStatusEvent(os.Stdout, mtlsEnabled)
+		} else {
+			print.FailureStatusEvent(os.Stdout, mtlsEnabled)
+		}
 	},
 }
 

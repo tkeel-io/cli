@@ -10,10 +10,15 @@ import (
 
 var DeleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete the target tkeel repository",
+	Short: "Delete repository",
+	Example: `
+# Delete the repository by name
+tkeel repo delete <name>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			print.FailureStatusEvent(os.Stdout, "please input repo name which is you want to delete")
+			print.WarningStatusEvent(os.Stdout, "Please specify the repo name.")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel repo delete <name>")
 			os.Exit(1)
 		}
 		name := args[0]

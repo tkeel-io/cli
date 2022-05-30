@@ -18,7 +18,6 @@ import (
 	"github.com/tkeel-io/kit/result"
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
 	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
-	repoAPI "github.com/tkeel-io/tkeel/api/repo/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -242,17 +241,17 @@ func RegisterPlugin(plugin string) error {
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal")
 	}
 
 	if r.Code == terrors.SUCCESS_CODE {
 		return nil
 	}
-	return errors.New("register failed")
+	return errors.Wrap(errors.New(r.Msg), "register failed")
 }
 
 func EnablePlugin(pluginID, tenantID string) error {
@@ -269,18 +268,18 @@ func EnablePlugin(pluginID, tenantID string) error {
 
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal")
 	}
 
 	if r.Code == terrors.Success.Reason {
 		return nil
 	}
 
-	return errors.New("enable failed")
+	return errors.Wrap(errors.New(r.Msg), "enable failed")
 }
 
 func DisablePlugin(pluginID, tenantID string) error {
@@ -291,18 +290,18 @@ func DisablePlugin(pluginID, tenantID string) error {
 	method := fmt.Sprintf(_disablePluginFormat, tenantID, pluginID)
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal'")
 	}
 
-	if r.Code == terrors.Success.Reason {
-		return nil
+	if r.Code != terrors.Success.Reason {
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
-	return errors.New("register failed")
+	return nil
 }
 
 func Unregister(pluginID string) (*Plugin, error) {
@@ -322,72 +321,26 @@ func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
 	method := fmt.Sprintf(_enabledPluginFormat, tenant)
 	body, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
 	if err != nil {
-		return nil, errors.Wrap(err, "invoke "+method+" error")
+		return nil, errors.Wrap(err, "error invoke")
 	}
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(body), r); err != nil {
-		return nil, errors.Wrap(err, "unmarshal response context error")
+		return nil, errors.Wrap(err, "error unmarshal")
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, fmt.Errorf("invalid response: %s", r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := tenantApi.ListTenantPluginResponse{}
 	if err = r.Data.UnmarshalTo(&response); err != nil {
-		return nil, errors.Wrap(err, "cant handle response data")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	l := make([]RepoPluginListOutput, 0, len(response.Plugins))
 	for _, i := range response.Plugins {
 		l = append(l, RepoPluginListOutput{i, "", "", ""})
-	}
-
-	return l, nil
-}
-
-func ListPluginsFromRepo(repo string, latest bool) ([]RepoPluginListOutput, error) {
-	token, err := getAdminToken()
-	if err != nil {
-		return nil, errors.Wrap(err, "get token error")
-	}
-	// if auth token is not bearer type ?
-	method := fmt.Sprintf(_getInstallerListFromRepoFormat, repo)
-	body, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
-	if err != nil {
-		return nil, errors.Wrap(err, "invoke "+method+" error")
-	}
-
-	var r = &result.Http{}
-	if err = protojson.Unmarshal([]byte(body), r); err != nil {
-		return nil, errors.Wrap(err, "unmarshal response context error")
-	}
-
-	if r.Code != terrors.Success.Reason {
-		return nil, fmt.Errorf("invalid response: %s", r.Msg)
-	}
-
-	listResponse := repoAPI.ListRepoInstallerResponse{}
-	if err = r.Data.UnmarshalTo(&listResponse); err != nil {
-		return nil, errors.Wrap(err, "cant handle response data")
-	}
-
-	l := make([]RepoPluginListOutput, 0)
-	latestVersion := make(map[string]string)
-	if latest {
-		for _, i := range listResponse.BriefInstallers {
-			if _, ok := latestVersion[i.Name]; ok {
-				l[len(l)-1] = RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc}
-			} else {
-				l = append(l, RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc})
-			}
-			latestVersion[i.Name] = i.Version
-		}
-	} else {
-		for _, i := range listResponse.BriefInstallers {
-			l = append(l, RepoPluginListOutput{i.Name, i.Version, i.State.String(), i.Desc})
-		}
 	}
 
 	return l, nil
@@ -411,29 +364,29 @@ func Install(repo, plugin, version, name string, config []byte) error {
 	}
 	data, err := json.Marshal(&req)
 	if err != nil {
-		return errors.Wrap(err, "marshal plugin request failed")
+		return errors.Wrap(err, "error marshal")
 	}
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal")
 	}
 
-	if r.Code == terrors.Success.Reason {
-		return nil
+	if r.Code != terrors.Success.Reason {
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
-	return errors.New("can't handle this")
+	return nil
 }
 
 func PluginUpgrade(repo, plugin, version, name string, config []byte) error {
 	token, err := getAdminToken()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "get token error")
 	}
 	method := fmt.Sprintf(_installPluginFormat, name)
 	req := pluginAPI.Installer{
@@ -443,45 +396,45 @@ func PluginUpgrade(repo, plugin, version, name string, config []byte) error {
 		Configuration: config,
 		Type:          1,
 	}
-	data, err := json.Marshal(req) //nolint
+	data, err := json.Marshal(&req)
 	if err != nil {
-		return errors.Wrap(err, "marshal plugin request failed")
+		return errors.Wrap(err, "error marshal")
 	}
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPut, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal")
 	}
 
-	if r.Code == terrors.Success.Reason {
-		return nil
+	if r.Code != terrors.Success.Reason {
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
-	return errors.New("can't handle this")
+	return nil
 }
 
 func UninstallPlugin(pluginID string) error {
 	token, err := getAdminToken()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "get token error")
 	}
 
 	method := fmt.Sprintf(_uninstallPluginFormat, pluginID)
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke "+method+" error")
+		return errors.Wrap(err, "error invoke")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return errors.Wrap(err, "can't unmarshal'")
+		return errors.Wrap(err, "error unmarshal")
 	}
 
-	if r.Code == terrors.Success.Reason {
-		return nil
+	if r.Code != terrors.Success.Reason {
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
-	return errors.New("uninstall plugin failed")
+	return nil
 }
