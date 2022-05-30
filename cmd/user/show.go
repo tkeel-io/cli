@@ -11,12 +11,17 @@ import (
 )
 
 var UserInfoCmd = &cobra.Command{
-	Use:     "show",
-	Short:   "show user info.",
-	Example: UserHelpExample,
+	Use:   "show",
+	Short: "Show user info.",
+	Example: `
+# Show user info by user id
+tkeel user show <user-id> -t <tenant-id>
+
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			print.FailureStatusEvent(os.Stdout, "please input 1 arguments,1st user id")
+			print.WarningStatusEvent(os.Stdout, "Please specify the user id")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel user show <user-id> -t <tenant-id>")
 			os.Exit(1)
 		}
 		userID := args[0]

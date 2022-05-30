@@ -16,9 +16,9 @@ require (
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tkeel-io/kit v0.0.0-20220522082406-248e4772e711
-	github.com/tkeel-io/tkeel v0.4.2-0.20220401082636-91f71562b530
-	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220331090824-6d29bf7a4732
-	google.golang.org/protobuf v1.27.1
+	github.com/tkeel-io/tkeel v0.4.2-0.20220525100311-b65416ac6109
+	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220424073125-8edc0200490f
+	google.golang.org/protobuf v1.28.0
 	helm.sh/helm/v3 v3.7.2
 	k8s.io/api v0.23.4
 	k8s.io/apimachinery v0.23.4
@@ -155,8 +155,8 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220211171837-173942840c17 // indirect
-	google.golang.org/grpc v1.44.0 // indirect
+	google.golang.org/genproto v0.0.0-20220505152158-f39f71e6c8f3 // indirect
+	google.golang.org/grpc v1.46.0 // indirect
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect

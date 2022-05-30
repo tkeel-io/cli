@@ -51,30 +51,23 @@ import (
 )
 
 var PluginHelpExample = `
-# Get status of tKeel plugins from Kubernetes
 tkeel plugin list
-tkeel plugin list -r <repo>
-tkeel plugin list -r <repo> --latest
-tkeel plugin install <repo>/<plugin> <pluginID>
-tkeel plugin install <repo>/<plugin>@v0.1.0 <pluginID>
-tkeel plugin uninstall <pluginID>
-tkeel plugin show <pluginID>
-tkeel plugin enable <pluginID> -t <tenantId>
-tkeel plugin disable <pluginID> -t <tenantId>
-tkeel plugin upgrade <repo>/<plugin> <pluginID>
-tkeel plugin upgrade <repo>/<plugin>@v0.1.0 <pluginID>
+tkeel plugin install <repo-name>/<installer-id> <plugin-id>
+tkeel plugin install <repo-name>/<installer-id>@<version> <plugin-id>
+tkeel plugin uninstall <plugin-id>
+tkeel plugin show <plugin-id>
+tkeel plugin enable <plugin-id> -t <tenant-id>
+tkeel plugin disable <plugin-id> -t <tenant-id>
+tkeel plugin upgrade <repo-name>/<installer-id> <plugin-id>
+tkeel plugin upgrade <repo-name>/<installer-id>@<version> <plugin-id>
 `
 
 var PluginCmd = &cobra.Command{
 	Use:     "plugin",
-	Short:   "manage plugins.",
+	Short:   "Plugin manage.",
 	Example: PluginHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Prompt help information If there is no parameter
-		if len(args) == 0 {
-			cmd.Help()
-			os.Exit(1)
-		}
+		cmd.Help()
 	},
 }
 

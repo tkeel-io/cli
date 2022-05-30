@@ -26,12 +26,16 @@ import (
 )
 
 var PluginInfoCmd = &cobra.Command{
-	Use:     "show",
-	Short:   "show plugin info.",
-	Example: PluginHelpExample,
+	Use:   "show",
+	Short: "Show plugin info.",
+	Example: `
+# Show information of the specified plugin
+tkeel plugin show <plugin-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// TODO 显示详细信息。 启用的租户等
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register pluginID")
+			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register plugin-id")
 			os.Exit(1)
 		}
 

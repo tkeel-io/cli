@@ -10,16 +10,21 @@ import (
 
 var AddCmd = &cobra.Command{
 	Use:   "add",
-	Short: "add repository into tkeel",
+	Short: "Add repository into tkeel",
+	Example: `
+# Add repository and specify a name
+tkeel repo add <name> <url>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			print.FailureStatusEvent(os.Stdout, "please input 2 arguments,1st repo name 2nd repo url")
+			print.WarningStatusEvent(os.Stdout, "Please specify the name and url.")
+			print.WarningStatusEvent(os.Stdout, " For example, tkeel repo add <name> <url>")
 			os.Exit(1)
 		}
 		name, url := args[0], args[1]
 		err := kubernetes.AddRepo(name, url)
 		if err != nil {
-			print.FailureStatusEvent(os.Stdout, "unable add repo to tkeel")
+			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
 		print.SuccessStatusEvent(os.Stdout, "Successfully added!")

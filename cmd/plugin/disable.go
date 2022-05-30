@@ -26,12 +26,16 @@ import (
 )
 
 var PluginDisableCmd = &cobra.Command{
-	Use:     "disable",
-	Short:   "disable plugins of tenant.",
-	Example: PluginHelpExample,
+	Use:   "disable",
+	Short: "Disable plugins of tenant.",
+	Example: `
+# Disable plugin for tenant
+tkeel plugin disable <plugin-id> -t <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. \n tkeel plugin register pluginId")
+			print.WarningStatusEvent(os.Stdout, "Please specify the ID of the plugin you want to disable.")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel plugin disable <plugin-id> -t <tenant-id>.")
 			os.Exit(1)
 		}
 		pluginID := args[0]

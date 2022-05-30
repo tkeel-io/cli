@@ -12,14 +12,20 @@ import (
 
 const UserHelpExample = `
 # Manage installer.
-tkeel installer show <repo>/<installerId>@v<version>
-tkeel installer list -r <repo>
+
+# Show the specified installer
+tkeel installer show <repo-name>/<installer-id>@v<version>
+
+# List the installer for the specified repo
+tkeel installer list -r <repo-name>
+
+# List the installers for all repositories
 tkeel installer list -a
 `
 
 var InstallerCmd = &cobra.Command{
 	Use:     "installer",
-	Short:   "installer manager.",
+	Short:   "Installer manage.",
 	Example: UserHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Prompt help information If there is no parameter

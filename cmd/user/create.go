@@ -9,12 +9,16 @@ import (
 )
 
 var UserCreateCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "create user info.",
-	Example: UserHelpExample,
+	Use:   "create",
+	Short: "Create new user.",
+	Example: `
+# Create user with username and password
+tkeel user create <username> <password> -t <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			print.FailureStatusEvent(os.Stdout, "please input 1 arguments, 1st username, 2nd password")
+			print.WarningStatusEvent(os.Stdout, "Please specify the username and password")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel user create <username> <password> -t <tenant-id>")
 			os.Exit(1)
 		}
 		username := args[0]

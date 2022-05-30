@@ -6,25 +6,21 @@ import (
 
 const UserHelpExample = `
 # Manage plugins.
-tkeel user create <username> <password> -t <tenantId>
-tkeel user show <userId> -t <tenantId>
-tkeel user delete <userId> -t <tenantId>
-tkeel user list -t <tenantId>
+tkeel user create <username> <password> -t <tenant-id>
+tkeel user show <user-id> -t <tenant-id>
+tkeel user delete <user-id> -t <tenant-id>
+tkeel user list -t <tenant-id>
 `
 
 var UserCmd = &cobra.Command{
 	Use:     "user",
-	Short:   "tenant user manage.",
+	Short:   "User manage of tenant.",
 	Example: UserHelpExample,
 	Run: func(cmd *cobra.Command, args []string) {
-		// Prompt help information If there is no parameter
-		if len(args) == 0 {
-			cmd.Help()
-		}
+		cmd.Help()
 	},
 }
 
 func init() {
-	// UserCmd.Flags().BoolVarP(&kubernetesMode, "kubernetes", "k", true, "List tenant's enabled plugins in a Kubernetes cluster")
 	UserCmd.Flags().BoolP("help", "h", false, "Print this help message")
 }
