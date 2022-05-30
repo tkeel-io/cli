@@ -22,12 +22,11 @@ import (
 )
 
 const (
-	_getInstallerListFromRepoFormat = "apis/rudder/v1/repos/%s/installers"
-	_installPluginFormat            = "apis/rudder/v1/plugins/%s"
-	_showPluginFormat               = "apis/rudder/v1/plugins/%s"
-	_uninstallPluginFormat          = "apis/rudder/v1/plugins/%s"
-	_getInstalledPluginListFormat   = "apis/rudder/v1/plugins"
-	_registerPluginFormat           = "apis/rudder/v1/tm/plugins/register?id=%s"
+	_installPluginFormat          = "apis/rudder/v1/plugins/%s"
+	_showPluginFormat             = "apis/rudder/v1/plugins/%s"
+	_uninstallPluginFormat        = "apis/rudder/v1/plugins/%s"
+	_getInstalledPluginListFormat = "apis/rudder/v1/plugins"
+	_registerPluginFormat         = "apis/rudder/v1/tm/plugins/register?id=%s"
 
 	_enablePluginFormat  = "apis/rudder/v1/tenants/%s/plugins"
 	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"

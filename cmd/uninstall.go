@@ -47,7 +47,7 @@ tkeel uninstall
 		var confirm bool
 		var err error
 		if !yes {
-			err := survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
+			err = survey.AskOne(&survey.Confirm{Message: "Do you want to uninstall tkeel platform ?"}, &confirm)
 			if err != nil {
 				os.Exit(1)
 			}

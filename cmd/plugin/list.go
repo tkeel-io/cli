@@ -58,8 +58,6 @@ tkeel plugin list
 
 func init() {
 	PluginStatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	//PluginStatusCmd.Flags().BoolVarP(&latest, "latest", "l", false, "Only show the latest plugin list of this repository")
-	//PluginStatusCmd.Flags().StringVarP(&repo, "repo", "r", "", "Show the plugin list of this repository")
 	PluginStatusCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "Show the plugin of this tenant")
 	PluginCmd.AddCommand(PluginStatusCmd)
 }
