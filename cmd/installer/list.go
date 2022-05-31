@@ -16,9 +16,15 @@ import (
 )
 
 var InstallerListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "list installer.",
-	Example: UserHelpExample,
+	Use:   "list",
+	Short: "List installer in repository.",
+	Example: `
+# List the installer for the specified repository
+tkeel installer list -r <repo-name>
+
+# List the installers for all repositories
+tkeel installer list --all
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if repo != "" {
 			data, err := kubernetes.InstallerList(repo)

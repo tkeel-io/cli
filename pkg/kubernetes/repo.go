@@ -31,7 +31,7 @@ type AddRepoRequest struct {
 func ListRepo() ([]RepoListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "error get token")
 	}
 
 	resp, err := InvokeByPortForward(_pluginKeel, _listReposMethodFormat, nil, http.MethodGet, setAuthenticate(token))
@@ -41,17 +41,17 @@ func ListRepo() ([]RepoListOutput, error) {
 
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
-		return nil, errors.Wrap(err, "error unmarsh")
+		return nil, errors.Wrap(err, "error unmarshal")
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Code), "error response code")
 	}
 
 	listResponse := repoAPI.ListRepoResponse{}
 	err = r.Data.UnmarshalTo(&listResponse)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]RepoListOutput, 0, len(listResponse.Repos))
@@ -70,11 +70,11 @@ func AddRepo(name, url string) error {
 	req := AddRepoRequest{URL: url}
 	data, err := json.Marshal(req)
 	if err != nil {
-		return errors.Wrap(err, "marshal add repo request failed")
+		return errors.Wrap(err, "error marshal")
 	}
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
-		return errors.Wrap(err, "invoke by port forward error")
+		return errors.Wrap(err, "error invoke")
 	}
 	var r = &result.Http{}
 	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
@@ -82,7 +82,7 @@ func AddRepo(name, url string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: " + r.Msg)
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	return nil

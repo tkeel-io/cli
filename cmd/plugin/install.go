@@ -15,19 +15,22 @@ import (
 const officialRepo = "tkeel"
 
 var (
-	debugMode  bool
-	wait       bool
-	timeout    uint
 	configFile string
 )
 
 var PluginInstallCmd = &cobra.Command{
-	Use:     "install",
-	Short:   "Install the plugin which you want",
-	Example: PluginHelpExample,
+	Use:   "install",
+	Short: "Install the plugin which you want",
+	Example: `
+# Install the latest version
+tkeel plugin install <repo-name>/<installer-id> <plugin-id>
+# Install the specified version
+tkeel plugin install <repo-name>/<installer-id>@<version> <plugin-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 2 {
-			print.PendingStatusEvent(os.Stdout, "please input the plugin which you want and the name you want")
+			print.WarningStatusEvent(os.Stdout, "Please specify the installer info and plugin id")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel plugin install <repo-name>/<installer-id>[@<version>] <plugin-id>")
 			os.Exit(1)
 		}
 		var configb []byte
@@ -57,9 +60,6 @@ var PluginInstallCmd = &cobra.Command{
 }
 
 func init() {
-	PluginInstallCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
-	PluginInstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
-	PluginInstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginInstallCmd.Flags().StringVarP(&configFile, "config", "", "", "The plugin config file.")
 
 	PluginCmd.AddCommand(PluginInstallCmd)

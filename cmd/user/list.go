@@ -11,9 +11,12 @@ import (
 )
 
 var UserListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "list user of tenant.",
-	Example: UserHelpExample,
+	Use:   "list",
+	Short: "List user in tenant.",
+	Example: `
+# List user info of tenant
+tkeel user list -t <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		data, err := kubernetes.TenantUserList(tenant)
 		if err != nil {

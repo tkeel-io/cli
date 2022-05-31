@@ -26,12 +26,15 @@ import (
 )
 
 var PluginRegisterCmd = &cobra.Command{
-	Use:     "register",
-	Short:   "Register plugins.",
-	Example: PluginHelpExample,
+	Use:   "register",
+	Short: "Register plugins.",
+	Example: `
+# Manually register the ERR_REGISTERED plugins
+tkeel plugin register <plugin-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins.  \n tkeel plugin register <pluginID>")
+			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins.  \n tkeel plugin register <plugin-id>")
 			os.Exit(1)
 		}
 

@@ -39,7 +39,7 @@ func TenantUserCreate(tenantID, username, password string) error {
 	userinfo := UserInfo{Username: username, Password: password}
 	data, err := json.Marshal(userinfo)
 	if err != nil {
-		return errors.Wrap(err, "marshal plugin request failed")
+		return errors.Wrap(err, "error marshal")
 	}
 	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
 	if err != nil {
@@ -52,7 +52,7 @@ func TenantUserCreate(tenantID, username, password string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: " + r.Msg)
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	return nil
@@ -76,7 +76,7 @@ func TenantUserDelete(tenantID, userID string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: " + r.Msg)
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	return nil
@@ -85,7 +85,7 @@ func TenantUserDelete(tenantID, userID string) error {
 func TenantUserInfo(tenantID, userID string) ([]UserListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "error get token")
 	}
 	method := fmt.Sprintf(_infoTenantUserMethodFormat, tenantID, userID)
 
@@ -100,13 +100,13 @@ func TenantUserInfo(tenantID, userID string) ([]UserListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := tenantApi.GetUserResponse{}
 	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]UserListOutPut, 0, 1)
@@ -117,7 +117,7 @@ func TenantUserInfo(tenantID, userID string) ([]UserListOutPut, error) {
 func TenantUserList(tenantID string) ([]UserListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "error get token")
 	}
 	method := fmt.Sprintf(_listTenantUserMethodFormat, tenantID)
 
@@ -132,13 +132,13 @@ func TenantUserList(tenantID string) ([]UserListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := tenantApi.ListUserResponse{}
 	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]UserListOutPut, 0, len(response.Users))

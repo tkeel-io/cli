@@ -69,7 +69,7 @@ func CreateTenant(tenant *TenantCreateIn) error {
 func TenantList() ([]TenantListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "error get token")
 	}
 
 	resp, err := InvokeByPortForward(_pluginKeel, _listTenantsMethodFormat, nil, http.MethodGet, setAuthenticate(token))
@@ -83,7 +83,7 @@ func TenantList() ([]TenantListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	listResponse := tenantApi.ListTenantResponse{}
@@ -102,7 +102,7 @@ func TenantList() ([]TenantListOutPut, error) {
 func TenantInfo(tenantID string) ([]TenantListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "error get token")
 	}
 	method := fmt.Sprintf(_infoTenantMethodFormat, tenantID)
 
@@ -117,7 +117,7 @@ func TenantInfo(tenantID string) ([]TenantListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	tenantResponse := tenantApi.GetTenantResponse{}
@@ -134,7 +134,7 @@ func TenantInfo(tenantID string) ([]TenantListOutPut, error) {
 func TenantDelete(tenantID string) error {
 	token, err := getAdminToken()
 	if err != nil {
-		return errors.Wrap(err, "error getting admin token")
+		return errors.Wrap(err, "error get token")
 	}
 	method := fmt.Sprintf(_deleteTenantMethodFormat, tenantID)
 
@@ -149,7 +149,7 @@ func TenantDelete(tenantID string) error {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return errors.New("response error: " + r.Msg)
+		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 	return nil
 }

@@ -17,12 +17,16 @@ import (
 )
 
 var InstallerInfoCmd = &cobra.Command{
-	Use:     "show",
-	Short:   "show installer.",
-	Example: UserHelpExample,
+	Use:   "show",
+	Short: "Show installer.",
+	Example: `
+# Show the specified installer
+tkeel installer show <repo-name>/<installer-id>@v<version>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			print.FailureStatusEvent(os.Stdout, "please input installer info")
+			print.WarningStatusEvent(os.Stdout, "Please specify installer info")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel installer show <repo-name>/<installer-id>[@<version>]")
 			os.Exit(1)
 		}
 		tkeelRepo, installer, version := utils.ParseInstallArg(args[0], officialRepo)

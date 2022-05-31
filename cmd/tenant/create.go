@@ -12,12 +12,16 @@ var username string
 var password string
 var remark string
 var TenantCreateCmd = &cobra.Command{
-	Use:     "create",
-	Short:   "create tenant.",
-	Example: TenantHelpExample,
+	Use:   "create",
+	Short: "Create new tenant.",
+	Example: `
+# Create tenant
+tkeel tenant create <tenant-name>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "tenantTitle not fount ...\n # auth plugins. in Kubernetes mode \n tkeel auth createtenant -k tenantTitle adminName adminPassword")
+			print.WarningStatusEvent(os.Stdout, "Please specify the name of tenant.")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel tenant create <tenant-name>")
 			os.Exit(1)
 		}
 		title := args[0]
@@ -27,7 +31,7 @@ var TenantCreateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		print.SuccessStatusEvent(os.Stdout, "Success! ")
+		print.SuccessStatusEvent(os.Stdout, "Successfully created!")
 	},
 }
 

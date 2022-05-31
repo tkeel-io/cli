@@ -70,7 +70,7 @@ var completionExample = `
 func newCompletionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "completion",
-		Short:   "Generates shell completion scripts",
+		Short:   "Generates shell completion scripts.",
 		Example: completionExample,
 		Run: func(cmd *cobra.Command, args []string) {
 			_ = cmd.Help()

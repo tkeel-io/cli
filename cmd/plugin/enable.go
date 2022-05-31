@@ -26,12 +26,16 @@ import (
 )
 
 var PluginEnableCmd = &cobra.Command{
-	Use:     "enable",
-	Short:   "enable plugins of tenant.",
-	Example: PluginHelpExample,
+	Use:   "enable",
+	Short: "Enable plugins of tenant.",
+	Example: `
+# Enable the plugin for tenant
+tkeel plugin enable <plugin-id> -t <tenant-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			print.PendingStatusEvent(os.Stdout, "PluginID not fount ...\n # Manager plugins. in Kubernetes mode \n tkeel plugin register pluginID")
+		if len(args) != 1 {
+			print.WarningStatusEvent(os.Stdout, "Please specify the plugin id.")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel plugin enable <plugin-id> -t <tenant-id>.")
 			os.Exit(1)
 		}
 

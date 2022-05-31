@@ -11,12 +11,16 @@ import (
 )
 
 var PluginUninstallCmd = &cobra.Command{
-	Use:     "uninstall",
-	Short:   "uninstall the plugin which you want",
-	Example: PluginHelpExample,
+	Use:   "uninstall",
+	Short: "Uninstall the plugin which you want",
+	Example: `
+# Uninstall the specified plugin by id
+tkeel plugin uninstall <plugin-id>
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			print.PendingStatusEvent(os.Stdout, "please input the plugin name what you installed.")
+			print.WarningStatusEvent(os.Stdout, "Please specify the plugin id.")
+			print.WarningStatusEvent(os.Stdout, "For example, tkeel plugin uninstall <plugin-id>")
 			os.Exit(1)
 		}
 		pluginID := args[0]
@@ -30,6 +34,5 @@ var PluginUninstallCmd = &cobra.Command{
 }
 
 func init() {
-	PluginUninstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	PluginCmd.AddCommand(PluginUninstallCmd)
 }

@@ -27,7 +27,7 @@ type InstallerListOutPut struct {
 func InstallerList(repo string) ([]InstallerListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "get token error")
 	}
 	method := fmt.Sprintf(_installerListFormat, repo)
 
@@ -42,13 +42,13 @@ func InstallerList(repo string) ([]InstallerListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := repoApi.ListRepoInstallerResponse{}
 	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]InstallerListOutPut, 0, len(response.BriefInstallers))
@@ -61,7 +61,7 @@ func InstallerList(repo string) ([]InstallerListOutPut, error) {
 func InstallerListAll() ([]InstallerListOutPut, error) {
 	token, err := getAdminToken()
 	if err != nil {
-		return nil, errors.Wrap(err, "error getting admin token")
+		return nil, errors.Wrap(err, "get token error")
 	}
 	method := _installerListAllFormat
 
@@ -76,13 +76,13 @@ func InstallerListAll() ([]InstallerListOutPut, error) {
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := repoApi.ListAllRepoInstallerResponse{}
 	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]InstallerListOutPut, 0, len(response.BriefInstallers))
@@ -110,13 +110,13 @@ func InstallerInfo(repo, installer, version string) ([]InstallerListOutPut, erro
 	}
 
 	if r.Code != terrors.Success.Reason {
-		return nil, errors.New("response error: " + r.Msg)
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 
 	response := repoApi.GetRepoInstallerResponse{}
 	err = r.Data.UnmarshalTo(&response)
 	if err != nil {
-		return nil, errors.Wrap(err, "error unmarshal")
+		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
 	var list = make([]InstallerListOutPut, 0, 1)
