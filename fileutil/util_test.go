@@ -54,6 +54,7 @@ func TestLocateFile(t *testing.T) {
 			assert.Nil(t, f)
 		}
 
+		f.Close()
 		if len(test.params) == 1 {
 			os.RemoveAll(test.params[0])
 		} else {
