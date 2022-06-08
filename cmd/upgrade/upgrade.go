@@ -111,7 +111,7 @@ func init() {
 	UpgradeCmd.Flags().BoolVarP(&wait, "wait", "", true, "Wait for Plugins initialization to complete")
 	UpgradeCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The wait timeout for the Kubernetes installation")
 	UpgradeCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
-	UpgradeCmd.Flags().StringVarP(&configFile, "config", "f", "~/.tkeel/config.yaml", "The tkeel installation config file")
+	UpgradeCmd.Flags().StringVarP(&configFile, "config", "f", "", "The tkeel installation config file")
 	UpgradeCmd.Flags().StringVarP(&repoURL, "repo-url", "", "https://tkeel-io.github.io/helm-charts/", "The tkeel repo url")
 	UpgradeCmd.Flags().StringVarP(&repoName, "repo-name", "", "tkeel", "The tkeel repo name")
 	UpgradeCmd.Flags().StringVarP(&policy, "image-policy", "p", "", "The tkeel image pull policy")

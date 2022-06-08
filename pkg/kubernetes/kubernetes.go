@@ -414,6 +414,21 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 		if err != nil {
 			return nil, errors.Wrap(err, "unmarshal install config error")
 		}
+	} else {
+		// load config from configmap
+		client, err := Client()
+		if err != nil {
+			return nil, err
+		}
+		configmap, err := GetConfig(client, "tkeel-install-config", config.Namespace)
+		if err != nil {
+			return nil, err
+		}
+		data := configmap.Data["config"]
+		err = yaml.Unmarshal([]byte(data), &installConfig)
+		if err != nil {
+			return nil, errors.Wrap(err, "unmarshal install config error")
+		}
 	}
 	installConfig.Namespace = config.Namespace
 	if installConfig.Repo != nil {
