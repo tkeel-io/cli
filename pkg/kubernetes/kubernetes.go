@@ -112,7 +112,7 @@ func (mc MiddleConfig) Update(data MiddleConfig) {
 
 // Init deploys the tKeel operator using the supplied runtime version.
 func Init(config InitConfiguration) error {
-	installConfig, err := loadInstallConfig(config)
+	installConfig, err := loadInstallConfig(config, false)
 	if err != nil {
 		return err
 	}
@@ -398,7 +398,7 @@ func dumpInstallConfig(configFile string, config *kitconfig.InstallConfig) error
 }
 
 // load middleware config form file.
-func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, error) {
+func loadInstallConfig(config InitConfiguration, upgrade bool) (*kitconfig.InstallConfig, error) {
 	installConfig := &kitconfig.InstallConfig{}
 	if config.ConfigFile != "" {
 		file, err := fileutil.LocateFile(fileutil.RWFlag(), config.ConfigFile)
@@ -414,7 +414,7 @@ func loadInstallConfig(config InitConfiguration) (*kitconfig.InstallConfig, erro
 		if err != nil {
 			return nil, errors.Wrap(err, "unmarshal install config error")
 		}
-	} else {
+	} else if upgrade {
 		// load config from configmap
 		client, err := Client()
 		if err != nil {
@@ -504,7 +504,7 @@ func getLog(debugMode bool) helm.DebugLog {
 }
 
 func Upgrade(config InitConfiguration) error {
-	installConfig, err := loadInstallConfig(config)
+	installConfig, err := loadInstallConfig(config, true)
 	if err != nil {
 		return err
 	}
