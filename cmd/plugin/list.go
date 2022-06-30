@@ -42,7 +42,7 @@ tkeel plugin list
 			os.Exit(0)
 		}
 
-		status, err := kubernetes.InstalledList()
+		status, err := kubernetes.InstalledPlugin()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)

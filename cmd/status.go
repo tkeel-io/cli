@@ -26,51 +26,44 @@ import (
 	"github.com/tkeel-io/cli/pkg/print"
 )
 
-var DoctorCmd = &cobra.Command{
-	Use:   "doctor",
-	Short: "Check tkeel install environment.",
+var StatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "CheckDapr tkeel install status.",
 	Example: `
-# Check the tkeel installation environment
-tkeel doctor
+# CheckDapr the tkeel installation environment
+tkeel status
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		print.PendingStatusEvent(os.Stdout, "Checking the Dapr runtime status...")
-		status, err := kubernetes.CheckDapr()
+		status, err := kubernetes.CheckTKeel()
 		if err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
 			os.Exit(1)
 		}
-		installed := fmt.Sprintf("dapr installed: %v", status.Installed)
+		installed := fmt.Sprintf("tkeel installed: %v", status.Installed)
 		if status.Installed {
 			print.SuccessStatusEvent(os.Stdout, installed)
 		} else {
 			print.FailureStatusEvent(os.Stdout, installed)
 		}
 
-		version := fmt.Sprintf("dapr version: %s", status.Version)
+		version := fmt.Sprintf("tkeel version: %s", status.Version)
 		if status.Version != "" {
 			print.SuccessStatusEvent(os.Stdout, version)
 		} else {
 			print.FailureStatusEvent(os.Stdout, version)
 		}
 
-		namespace := fmt.Sprintf("dapr namespace: %s", status.Namespace)
+		namespace := fmt.Sprintf("tkeel namespace: %s", status.Namespace)
 		if status.Namespace != "" {
 			print.SuccessStatusEvent(os.Stdout, namespace)
 		} else {
 			print.FailureStatusEvent(os.Stdout, namespace)
 		}
-
-		mtlsEnabled := fmt.Sprintf("dapr mtls enabled: %v", status.MTLSEnabled)
-		if status.MTLSEnabled {
-			print.SuccessStatusEvent(os.Stdout, mtlsEnabled)
-		} else {
-			print.FailureStatusEvent(os.Stdout, mtlsEnabled)
-		}
 	},
 }
 
 func init() {
-	DoctorCmd.Flags().BoolP("help", "h", false, "Print this help message")
-	RootCmd.AddCommand(DoctorCmd)
+	StatusCmd.Flags().BoolP("help", "h", false, "Print this help message")
+	RootCmd.AddCommand(StatusCmd)
 }

@@ -125,9 +125,10 @@ func init() {
 }
 
 func checkDapr() {
-	daprStatus = kubernetes.Check()
-	if !daprStatus.Installed {
-		print.FailureStatusEvent(os.Stdout, daprStatus.Error.Error())
+	var err error
+	daprStatus, err = kubernetes.CheckDapr()
+	if err != nil {
+		print.FailureStatusEvent(os.Stdout, err.Error())
 		os.Exit(1)
 	}
 }

@@ -27,7 +27,7 @@ import (
 
 var PluginDisableCmd = &cobra.Command{
 	Use:   "disable",
-	Short: "Disable plugins of tenant.",
+	Short: "Disable plugins for tenant.",
 	Example: `
 # Disable plugin for tenant
 tkeel plugin disable <plugin-id> -t <tenant-id>
@@ -38,6 +38,12 @@ tkeel plugin disable <plugin-id> -t <tenant-id>
 			print.WarningStatusEvent(os.Stdout, "For example, tkeel plugin disable <plugin-id> -t <tenant-id>.")
 			os.Exit(1)
 		}
+		//if !all && tenant == "" {
+		//	print.WarningStatusEvent(os.Stdout, "Please specify the ID of tenant you want to disable.")
+		//	print.WarningStatusEvent(os.Stdout, "If you want to disable plugin for all tenant, use tkeel plugin disable <plugin-id> --all.")
+		//	os.Exit(1)
+		//}
+
 		pluginID := args[0]
 		if err := kubernetes.DisablePlugin(pluginID, tenant); err != nil {
 			print.FailureStatusEvent(os.Stdout, err.Error())
@@ -48,6 +54,7 @@ tkeel plugin disable <plugin-id> -t <tenant-id>
 }
 
 func init() {
+	//PluginDisableCmd.Flags().BoolVar(&all, "all", false, "Disable plugin for all tenants")
 	PluginDisableCmd.Flags().StringVarP(&tenant, "tenant", "t", "", "tenant id")
 	PluginDisableCmd.MarkFlagRequired("tenant")
 	PluginCmd.AddCommand(PluginDisableCmd)

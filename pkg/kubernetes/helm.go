@@ -18,7 +18,6 @@ package kubernetes
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -27,7 +26,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/helm/pkg/strvals"
 )
@@ -238,22 +236,4 @@ func addDaprComponentChartDependency(config InitConfiguration, helmConf *action.
 	componentChart.Values["secret"] = config.Secret
 	root.AddDependency(componentChart)
 	return nil
-}
-
-func HelmUninstall(namespace, pluginName string) (*release.UninstallReleaseResponse, error) {
-	settings := cli.New()
-
-	actionConfig := new(action.Configuration)
-	// You can pass an empty string instead of settings.Namespace() to list
-	// all namespaces
-	if err := actionConfig.Init(settings.RESTClientGetter(), namespace, os.Getenv("HELM_DRIVER"), log.Printf); err != nil {
-		return nil, fmt.Errorf("error init helm config: %w", err)
-	}
-
-	client := action.NewUninstall(actionConfig)
-	ret, err := client.Run(pluginName)
-	if err != nil {
-		return nil, fmt.Errorf("error helm uninstall: %w", err)
-	}
-	return ret, nil
 }

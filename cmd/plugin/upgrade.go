@@ -9,7 +9,6 @@ import (
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/cli/pkg/utils"
-	"github.com/tkeel-io/kit/log"
 )
 
 var PluginUpgradeCmd = &cobra.Command{
@@ -46,7 +45,6 @@ tkeel plugin upgrade <repo-name>/<installer-id>@<version> <plugin-id>
 		}
 
 		if err := kubernetes.PluginUpgrade(repo, plugin, version, name, configb); err != nil {
-			log.Warn("upgrade failed", err)
 			print.FailureStatusEvent(os.Stdout, "Upgrade %q failed, Because: %s", plugin, err.Error())
 			os.Exit(1)
 		}

@@ -27,7 +27,7 @@ import (
 
 var PluginEnableCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "Enable plugins of tenant.",
+	Short: "Enable plugins for tenant.",
 	Example: `
 # Enable the plugin for tenant
 tkeel plugin enable <plugin-id> -t <tenant-id>
