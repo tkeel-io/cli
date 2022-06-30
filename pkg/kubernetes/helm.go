@@ -105,7 +105,8 @@ func ChartMiddleware(name, version string, config InitConfiguration) (*chart.Cha
 		return nil, nil, err
 	}
 
-	if err = addDaprComponentChartDependency(config, helmConf, c, name); err != nil {
+	err = InjectConfig(c, name, config.Secret)
+	if err != nil {
 		return nil, nil, err
 	}
 
@@ -154,16 +155,6 @@ func installTkeel(config InitConfiguration, middlewareChart *chart.Chart, keelCh
 		}
 		print.InfoStatusEvent(os.Stdout, "install tKeel platform  done.")
 	}
-
-	if coreChart != nil {
-		print.InfoStatusEvent(os.Stdout, "install tKeel coreChart begin.")
-		installClient.ReleaseName = fmt.Sprintf("tkeel-%s", tkeelCoreHelmChart)
-		if _, err = installClient.Run(coreChart, values); err != nil {
-			return fmt.Errorf("helm install err:%w", err)
-		}
-		print.InfoStatusEvent(os.Stdout, "install tKeel component <core> done.")
-	}
-
 	if rudderChart != nil {
 		print.InfoStatusEvent(os.Stdout, "install tKeel rudderChart begin.")
 		installClient.ReleaseName = fmt.Sprintf("tkeel-%s", tkeelRudderHelmChart)
@@ -171,6 +162,14 @@ func installTkeel(config InitConfiguration, middlewareChart *chart.Chart, keelCh
 			return fmt.Errorf("helm install err:%w", err)
 		}
 		print.InfoStatusEvent(os.Stdout, "install tKeel component <rudder> done.")
+	}
+	if coreChart != nil {
+		print.InfoStatusEvent(os.Stdout, "install tKeel coreChart begin.")
+		installClient.ReleaseName = fmt.Sprintf("tkeel-%s", tkeelCoreHelmChart)
+		if _, err = installClient.Run(coreChart, values); err != nil {
+			return fmt.Errorf("helm install err:%w", err)
+		}
+		print.InfoStatusEvent(os.Stdout, "install tKeel component <core> done.")
 	}
 	return nil
 }
@@ -222,21 +221,75 @@ func upgradeTkeel(config InitConfiguration, middlewareChart *chart.Chart, keelCh
 	return nil
 }
 
-func addDaprComponentChartDependency(config InitConfiguration, helmConf *action.Configuration,
-	root *chart.Chart, daprAppID string) error {
-	version := config.KeelVersion
-	if version == "" {
-		version = "latest"
-	}
-	componentChart, err := tKeelChart(version, tKeelHelmRepo, tKeelPluginConfigHelmChart, helmConf)
+const (
+	PluginConfig = `apiVersion: dapr.io/v1alpha1
+kind: Configuration
+metadata:
+  name: {{ .Values.pluginID }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  accessControl:
+    trustDomain: "tkeel"
+    {{- if (eq .Values.pluginID "keel") }}
+    defaultAction: allow
+    {{- else }}
+    defaultAction: deny
+    policies:
+    - appId: rudder
+      defaultAction: allow
+      trustDomain: 'tkeel'
+      namespace: {{ .Release.Namespace | quote }}
+    - appId: keel
+      defaultAction: allow
+      trustDomain: 'tkeel'
+      namespace: {{ .Release.Namespace | quote }}
+    {{- end }}
+{{- if (ne .Values.pluginID "keel") }}
+  httpPipeline:
+    handlers:
+    - name: {{ .Values.pluginID }}-oauth2-client
+      type: middleware.http.oauth2clientcredentials
+{{- end -}}`
+	PluginOAuth2 = `{{- if (ne .Values.pluginID "keel") -}}
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: {{ .Values.pluginID }}-oauth2-client
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: middleware.http.oauth2clientcredentials
+  version: v1
+  metadata:
+  - name: clientId
+    value: {{ .Values.pluginID | quote }}
+  - name: clientSecret
+    value: {{ .Values.secret | quote }}
+  - name: scopes
+    value: "http://{{ .Values.pluginID }}.com"
+  - name: tokenURL
+  {{- if (eq .Values.pluginID "rudder") }}
+    value: "http://127.0.0.1:{{ .Values.rudderPort }}/v1/oauth2/plugin"
+  {{- else }}
+    value: "http://rudder:{{ .Values.rudderPort }}/v1/oauth2/plugin"
+  {{- end }}
+  - name: headerName
+    value: "x-plugin-jwt"
+  - name: authStyle
+    value: 1
+{{- end -}}`
+)
+
+func InjectConfig(root *chart.Chart, name, secret string) error {
+	root.Values["pluginID"] = name
+	root.Values["secret"] = secret
+	root.Values["rudderPort"] = 31234
+	root.Values["daprConfig"] = name
+	root.Templates = append(root.Templates, &chart.File{Name: "templates/plugin_config.yaml", Data: []byte(PluginConfig)})
+	root.Templates = append(root.Templates, &chart.File{Name: "templates/plugin_oauth2.yaml", Data: []byte(PluginOAuth2)})
+	err := root.Validate()
 	if err != nil {
 		return err
 	}
-
-	root.Values["daprConfig"] = daprAppID
-	componentChart.Values["pluginID"] = daprAppID
-	componentChart.Values["secret"] = config.Secret
-	root.AddDependency(componentChart)
 	return nil
 }
 
