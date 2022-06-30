@@ -20,5 +20,4 @@ var (
 	outputFormat string
 	tenant       string
 	force        bool
-	all          bool
 )

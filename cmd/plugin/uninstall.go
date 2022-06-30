@@ -26,13 +26,13 @@ tkeel plugin uninstall <plugin-id>
 		if force {
 			tenantList, err := kubernetes.TenantList()
 			if err != nil {
-				print.FailureStatusEvent(os.Stdout, "TenantList", err.Error())
+				print.FailureStatusEvent(os.Stdout, "Get tenant list error, %s", err.Error())
 				os.Exit(1)
 			}
 			for _, tenant := range tenantList {
 				err = kubernetes.DisablePlugin(pluginID, tenant.ID)
 				if err != nil {
-					print.FailureStatusEvent(os.Stdout, "DisablePlugin, %s - %s. err: %s,", pluginID, tenant.ID, err.Error())
+					print.FailureStatusEvent(os.Stdout, "Disable plugin error, %s,", err.Error())
 					os.Exit(1)
 				}
 			}
