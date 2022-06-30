@@ -9,7 +9,6 @@ import (
 	"github.com/tkeel-io/cli/pkg/kubernetes"
 	"github.com/tkeel-io/cli/pkg/print"
 	"github.com/tkeel-io/cli/pkg/utils"
-	"github.com/tkeel-io/kit/log"
 )
 
 const officialRepo = "tkeel"
@@ -51,7 +50,6 @@ tkeel plugin install <repo-name>/<installer-id>@<version> <plugin-id>
 		}
 
 		if err := kubernetes.Install(repo, plugin, version, name, configb); err != nil {
-			log.Warn("install failed", err)
 			print.FailureStatusEvent(os.Stdout, "Install %q failed, Because: %s", plugin, err.Error())
 			os.Exit(1)
 		}

@@ -19,14 +19,5 @@ package plugin
 var (
 	outputFormat string
 	tenant       string
-
-	// Unused Declare Variables.
-	/*
-		debugMode      bool
-		wait           bool
-		timeout        uint
-		runtimeVersion string
-		initNamespace  string
-		values         []string
-	*/
+	force        bool
 )

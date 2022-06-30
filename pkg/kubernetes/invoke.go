@@ -81,7 +81,7 @@ func InvokeByPortForward(pluginID, method string, data []byte, verb string, reqO
 	if err = portForward.Init(); err == nil {
 		url := makeEndpoint(portForward.App, portForward, method)
 		// initialize port forwarding.
-		fmt.Println(url)
+		// fmt.Println(verb, url)
 		var req *http.Request
 		req, err = http.NewRequest(verb, url, bytes.NewBuffer(data))
 		if err != nil {

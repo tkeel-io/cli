@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	terrors "github.com/tkeel-io/kit/errors"
 	"github.com/tkeel-io/kit/result"
+	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
 	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -17,6 +18,7 @@ const (
 	_createTenantMethodFormat = "apis/rudder/v1/tenants"
 	_deleteTenantMethodFormat = "apis/rudder/v1/tenants/%s"
 	_infoTenantMethodFormat   = "apis/rudder/v1/tenants/%s"
+	_enabledPluginListFormat  = "apis/rudder/v1/plugins/%s/tenants"
 )
 
 type TenantListOutPut struct {
@@ -152,6 +154,41 @@ func TenantDelete(tenantID string) error {
 		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 	return nil
+}
+
+func TenantPluginList(pluginID string) ([]TenantListOutPut, error) {
+	token, err := getAdminToken()
+	if err != nil {
+		return nil, errors.Wrap(err, "error get token")
+	}
+
+	method := fmt.Sprintf(_enabledPluginListFormat, pluginID)
+
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodGet, setAuthenticate(token))
+	if err != nil {
+		return nil, errors.Wrap(err, "error invoke")
+	}
+
+	var r = &result.Http{}
+	if err = protojson.Unmarshal([]byte(resp), r); err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	if r.Code != terrors.Success.Reason {
+		return nil, errors.Wrap(errors.New(r.Msg), "error response code")
+	}
+
+	listResponse := pluginAPI.ListEnabledTenantsResponse{}
+	err = r.Data.UnmarshalTo(&listResponse)
+	if err != nil {
+		return nil, errors.Wrap(err, "error unmarshal")
+	}
+
+	var list = make([]TenantListOutPut, 0, len(listResponse.Tenants))
+	for _, t := range listResponse.Tenants {
+		list = append(list, TenantListOutPut{t.TenantId, t.Title, t.Remark})
+	}
+	return list, nil
 }
 
 type TenantCreateIn struct {

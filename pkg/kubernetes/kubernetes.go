@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/tkeel-io/cli/fileutil"
 	"github.com/tkeel-io/cli/pkg/utils"
@@ -56,6 +57,7 @@ const (
 
 var tKeelHelmRepo = "https://tkeel-io.github.io/helm-charts/"
 var ErrDaprNotInstall = errors.New("dapr is not installed in your cluster")
+var ErrTKeelNotInstall = errors.New("tkeel is not installed in your cluster")
 
 var helmConf *helm.Configuration
 
@@ -209,7 +211,7 @@ func afterDeploy(config InitConfiguration) error {
 
 	err = AddRepo(config.Repo.Name, config.Repo.Url)
 	if err != nil {
-		if err.Error() == "response error: REPO已存在" {
+		if strings.Contains(err.Error(), "REPO已存在") {
 			return nil
 		}
 		return err

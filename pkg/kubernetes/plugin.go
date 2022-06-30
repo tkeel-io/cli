@@ -27,20 +27,10 @@ const (
 	_uninstallPluginFormat        = "apis/rudder/v1/plugins/%s"
 	_getInstalledPluginListFormat = "apis/rudder/v1/plugins"
 	_registerPluginFormat         = "apis/rudder/v1/tm/plugins/register?id=%s"
-
-	_enablePluginFormat  = "apis/rudder/v1/tenants/%s/plugins"
-	_disablePluginFormat = "apis/rudder/v1/tenants/%s/plugins/%s"
-	_enabledPluginFormat = "apis/security/v1/tenants/%s/plugins"
+	_enablePluginFormat           = "apis/rudder/v1/tm/plugins/%s/tenants/%s"
+	_disablePluginFormat          = "apis/rudder/v1/tm/plugins/%s/tenants/%s"
+	_enabledPluginFormat          = "apis/rudder/v1/tenants/%s/plugins"
 )
-
-// ListOutput represents the application ID, application port and creation time.
-type ListOutput struct {
-	AppID   string `csv:"APP ID"`
-	AppPort string `csv:"APP PORT"`
-	Age     string `csv:"AGE"`
-	Created string `csv:"CREATED"`
-	Status  string `json:"status"`
-}
 
 type InstalledListOutput struct {
 	Name          string `csv:"NAME"`
@@ -49,6 +39,7 @@ type InstalledListOutput struct {
 	Repo          string `csv:"REPO"`
 	RegisterAt    string `csv:"REGISTER_AT"`
 	Status        string `csv:"STATE"`
+	Description   string `csv:"DESCRIPTION"`
 }
 
 type RepoPluginListOutput struct {
@@ -154,7 +145,7 @@ func List() ([]StatusOutput, error) {
 	return statuses, nil
 }
 
-func InstalledList() ([]InstalledListOutput, error) {
+func InstalledPlugin() ([]InstalledListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
@@ -188,6 +179,7 @@ func InstalledList() ([]InstalledListOutput, error) {
 			PluginVersion: o.InstallerBrief.Version,
 			RegisterAt:    registeredAt,
 			Status:        v1.PluginStatus_name[int32(o.Status)],
+			Description:   o.InstallerBrief.Desc,
 		})
 	}
 	return list, nil
@@ -258,14 +250,9 @@ func EnablePlugin(pluginID, tenantID string) error {
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_enablePluginFormat, tenantID)
-	req := EnablePluginRequest{PluginID: pluginID}
-	data, err := json.Marshal(req)
-	if err != nil {
-		return errors.Wrap(err, "can't marshal'")
-	}
+	method := fmt.Sprintf(_enablePluginFormat, pluginID, tenantID)
 
-	resp, err := InvokeByPortForward(_pluginKeel, method, data, http.MethodPost, setAuthenticate(token))
+	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodPost, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "error invoke")
 	}
@@ -286,7 +273,7 @@ func DisablePlugin(pluginID, tenantID string) error {
 	if err != nil {
 		return errors.Wrap(err, "get token error")
 	}
-	method := fmt.Sprintf(_disablePluginFormat, tenantID, pluginID)
+	method := fmt.Sprintf(_disablePluginFormat, pluginID, tenantID)
 	resp, err := InvokeByPortForward(_pluginKeel, method, nil, http.MethodDelete, setAuthenticate(token))
 	if err != nil {
 		return errors.Wrap(err, "error invoke")
@@ -337,9 +324,23 @@ func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
 		return nil, errors.Wrap(err, "error unmarshal response")
 	}
 
+	pluginList, err := InstalledPlugin()
+	if err != nil {
+		return nil, err
+	}
 	l := make([]RepoPluginListOutput, 0, len(response.Plugins))
 	for _, i := range response.Plugins {
-		l = append(l, RepoPluginListOutput{i, "", "", ""})
+		for _, plugin := range pluginList {
+			if plugin.Name == i {
+				temp := RepoPluginListOutput{
+					i,
+					plugin.PluginVersion,
+					plugin.Status,
+					plugin.Description,
+				}
+				l = append(l, temp)
+			}
+		}
 	}
 
 	return l, nil

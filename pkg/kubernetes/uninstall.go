@@ -2,9 +2,11 @@ package kubernetes
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/tkeel-io/cli/fileutil"
+	"github.com/tkeel-io/cli/pkg/print"
 	helm "helm.sh/helm/v3/pkg/action"
 )
 
@@ -36,34 +38,25 @@ func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
 	return nil
 }
 
-// Uninstall removes tKeel's plugin from a Kubernetes cluster.
-func Uninstall(pluginID string, debugMode bool) error {
-	clientset, err := Client()
+func UninstallAllPlugin() error {
+	tenantList, err := TenantList()
 	if err != nil {
 		return err
 	}
-
-	namespace, err := GetTKeelNamespace(clientset)
+	pluginList, err := InstalledPlugin()
 	if err != nil {
 		return err
 	}
-
-	_, err = Unregister(pluginID)
-	if err != nil {
-		return err
-	}
-
-	_, err = HelmUninstall(namespace, pluginID)
-	return err
-}
-
-func UninstallAllPlugin(namespace string, debugMode bool) error {
-	list, err := InstalledList()
-	if err != nil {
-		return err
-	}
-	for _, plugin := range list {
-		err = Uninstall(plugin.Name, debugMode)
+	for _, plugin := range pluginList {
+		// TODO 为所有租户禁用插件
+		print.InfoStatusEvent(os.Stdout, "Removing plugin %s ...", plugin.Name)
+		for _, tenant := range tenantList {
+			err = DisablePlugin(plugin.Name, tenant.ID)
+			if err != nil {
+				return err
+			}
+		}
+		err = UninstallPlugin(plugin.Name)
 		if err != nil {
 			return err
 		}

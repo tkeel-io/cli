@@ -60,16 +60,17 @@ tkeel uninstall
 			kubernetes.CleanToken()
 		}()
 
-		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
-
 		if uninstallAll {
-			err = kubernetes.UninstallAllPlugin(daprStatus.Namespace, debugMode)
+			print.InfoStatusEvent(os.Stdout, "Removing tKeel plugins from your cluster...")
+			err = kubernetes.UninstallAllPlugin()
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, fmt.Sprintf("Error removing plugins: %s", err))
+				os.Exit(1)
 			} else {
 				print.SuccessStatusEvent(os.Stdout, "tKeel plugins has been removed successfully")
 			}
 		}
+		print.InfoStatusEvent(os.Stdout, "Removing tKeel Platform from your cluster...")
 
 		err = kubernetes.UninstallPlatform(daprStatus.Namespace, timeout, debugMode)
 
@@ -84,7 +85,7 @@ tkeel uninstall
 
 func init() {
 	UninstallCmd.Flags().UintVarP(&timeout, "timeout", "", 300, "The timeout for the Kubernetes uninstall")
-	UninstallCmd.Flags().BoolVar(&uninstallAll, "all", false, "Remove @TODO .dapr directory, Redis, Placement and Zipkin containers")
+	UninstallCmd.Flags().BoolVar(&uninstallAll, "all", false, "Remove all plugins")
 	UninstallCmd.Flags().String("network", "", "The Docker network from which to remove the tKeel Platform")
 	UninstallCmd.Flags().BoolVarP(&debugMode, "debug", "", false, "The log mode")
 	UninstallCmd.Flags().BoolVarP(&yes, "yes", "y", false, "Uninstall the tkeel platform directly")
