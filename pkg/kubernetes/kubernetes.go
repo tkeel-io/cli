@@ -42,7 +42,6 @@ import (
 const (
 	tKeelReleaseName           = "tkeel-platform"
 	tKeelMiddlewareReleaseName = "tkeel-middleware"
-	tKeelPluginConfigHelmChart = "tkeel-plugin-components"
 	tKeelMiddlewareHelmChart   = "tkeel-middleware"
 	tkeelKeelHelmChart         = "keel"
 	tkeelRudderHelmChart       = "rudder"
