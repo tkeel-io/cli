@@ -284,10 +284,11 @@ func InjectConfig(root *chart.Chart, name, secret string) error {
 	root.Values["secret"] = secret
 	root.Values["rudderPort"] = 31234
 	root.Values["daprConfig"] = name
-	root.Templates = append(root.Templates, &chart.File{Name: "templates/plugin_config.yaml", Data: []byte(PluginConfig)})
-	root.Templates = append(root.Templates, &chart.File{Name: "templates/plugin_oauth2.yaml", Data: []byte(PluginOAuth2)})
-	err := root.Validate()
-	if err != nil {
+	root.Templates = append(root.Templates,
+		&chart.File{Name: "templates/plugin_config.yaml", Data: []byte(PluginConfig)},
+		&chart.File{Name: "templates/plugin_oauth2.yaml", Data: []byte(PluginOAuth2)},
+	)
+	if err := root.Validate(); err != nil {
 		return err
 	}
 	return nil
