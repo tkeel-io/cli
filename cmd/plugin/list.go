@@ -33,7 +33,7 @@ tkeel plugin list
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		if tenant != "" {
-			list, err := kubernetes.ListPluginsFromTenant(tenant)
+			list, err := kubernetes.ListPluginsOfTenant(tenant)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "unable to list plugins:%s", err.Error())
 				os.Exit(1)

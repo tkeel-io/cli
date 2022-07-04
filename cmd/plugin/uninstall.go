@@ -24,7 +24,7 @@ tkeel plugin uninstall <plugin-id>
 		}
 		pluginID := args[0]
 		if force {
-			tenantList, err := kubernetes.TenantList()
+			tenantList, err := kubernetes.TenantPluginList(pluginID)
 			if err != nil {
 				print.FailureStatusEvent(os.Stdout, "Get tenant list error, %s", err.Error())
 				os.Exit(1)

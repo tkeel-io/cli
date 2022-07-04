@@ -39,16 +39,16 @@ func UninstallPlatform(namespace string, timeout uint, debugMode bool) error {
 }
 
 func UninstallAllPlugin() error {
-	tenantList, err := TenantList()
-	if err != nil {
-		return err
-	}
 	pluginList, err := InstalledPlugin()
 	if err != nil {
 		return err
 	}
 	for _, plugin := range pluginList {
 		// TODO 为所有租户禁用插件
+		tenantList, err := TenantPluginList(plugin.Name)
+		if err != nil {
+			return err
+		}
 		print.InfoStatusEvent(os.Stdout, "Removing plugin %s ...", plugin.Name)
 		for _, tenant := range tenantList {
 			err = DisablePlugin(plugin.Name, tenant.ID)
