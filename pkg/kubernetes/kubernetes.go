@@ -433,10 +433,10 @@ func loadInstallConfig(config InitConfiguration, upgrade bool) (*kitconfig.Insta
 	}
 	installConfig.Namespace = config.Namespace
 	if installConfig.Repo != nil {
-		if installConfig.Repo.Url != "" {
+		if config.Repo.Url == tKeelHelmRepo && installConfig.Repo.Url != "" {
 			config.Repo.Url = installConfig.Repo.Url
 		}
-		if installConfig.Repo.Name != "" {
+		if config.Repo.Url == tKeelHelmRepo && installConfig.Repo.Name != "" {
 			config.Repo.Name = installConfig.Repo.Name
 		}
 	} else {

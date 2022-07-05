@@ -299,7 +299,7 @@ func Unregister(pluginID string) (*Plugin, error) {
 	return UnregisterPlugins(clientset, pluginID)
 }
 
-func ListPluginsFromTenant(tenant string) ([]RepoPluginListOutput, error) {
+func ListPluginsOfTenant(tenant string) ([]RepoPluginListOutput, error) {
 	token, err := getAdminToken()
 	if err != nil {
 		return nil, errors.Wrap(err, "get token error")
