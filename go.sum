@@ -1575,10 +1575,10 @@ github.com/tidwall/pretty v1.1.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhV
 github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
 github.com/tkeel-io/kit v0.0.0-20220522082406-248e4772e711 h1:sjomik8MznWAiB938kJ5l71w6MUwu9D17v0gt2KOUsY=
 github.com/tkeel-io/kit v0.0.0-20220522082406-248e4772e711/go.mod h1:hTI3tXXqyXfc+eE1wjv1D1dEO4TgArDbaaKKl7RTCZI=
-github.com/tkeel-io/tkeel v0.4.2-0.20220525100311-b65416ac6109 h1:BbId2Aml2F3nQ9Y0cpFuXI2wFxsvkVnvrLWDhMlIgbI=
-github.com/tkeel-io/tkeel v0.4.2-0.20220525100311-b65416ac6109/go.mod h1:VceDT1GuqVKu8Lq3nGv7GyuVIj+oQ89QGeiNntzJy9k=
-github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220424073125-8edc0200490f h1:ceiytk2mifoDUxdKqCmaapngRv5EXNRQ2GQ+S25qI3Y=
-github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220424073125-8edc0200490f/go.mod h1:tjJgHPar2pFjydhnOCLspww8tSOvcKch241PeP9OL8E=
+github.com/tkeel-io/tkeel v1.0.1-0.20220722033200-9ed37e162616 h1:il4LoNnMZlP9Gr1BFuXsU/Hjy25iCAbnOjMp0xgshrU=
+github.com/tkeel-io/tkeel v1.0.1-0.20220722033200-9ed37e162616/go.mod h1:y2U9U15cXVZiHIdoksHF9oLC+iKjgC4pX7dLq2YemOQ=
+github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220624023618-32db91cf0860 h1:k8EFmOucfdYpdz6EuD9q+wOOdkGMNzx9rApTPrksiBY=
+github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220624023618-32db91cf0860/go.mod h1:tjJgHPar2pFjydhnOCLspww8tSOvcKch241PeP9OL8E=
 github.com/tklauser/go-sysconf v0.3.6/go.mod h1:MkWzOF4RMCshBAMXuhXJs64Rte09mITnppBXY/rYEFI=
 github.com/tklauser/numcpus v0.2.2/go.mod h1:x3qojaO3uyYt0i56EW/VUYs7uBvdl2fkfZFu0T9wgjM=
 github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
