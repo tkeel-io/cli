@@ -67,7 +67,7 @@ plugins:
   - tkeel/console-portal-admin@latest
   - tkeel/console-portal-tenant@latest
   - tkeel/console-plugin-admin-plugins@latest
-
+image_policy: IfNotPresent
 `
 		config := fmt.Sprintf(configFromat, adminHost, tenantHost, port)
 		fmt.Println(config)
