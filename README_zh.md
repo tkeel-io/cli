@@ -109,11 +109,38 @@ $ tkeel plugin list
 
 ```bash
 $ plugin list              
-NAME       NAMESPACE    HEALTHY  STATUS    PLUGINSTATUS  REPLICAS  VERSION  AGE  CREATED              
-auth       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
-plugins    keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00  
-keel       keel-system  True     Running   ACTIVE        1         0.0.1    37m  2021-10-07 16:07.00
-echo-demo  keel-system  False    Running   UNKNOWN       1         0.0.1    1m   2021-10-05 11:25.19  
+ NAME                                        PLUGIN                                      PLUGIN VERSION  REPO         REGISTER AT          STATE    DESCRIPTION
+  console-plugin-admin-custom-config          console-plugin-admin-custom-config          2.0.2           tkeel        2022-08-17 20:35:37  RUNNING  前端管理平台的「平台配置」插件
+  console-plugin-admin-notification-configs   console-plugin-admin-notification-configs   2.0.2           tkeel        2022-08-17 20:35:44  RUNNING  前端管理平台的「通知方式配置」插件
+  console-plugin-admin-plugins                console-plugin-admin-plugins                2.0.2           tkeel        2022-08-17 20:35:49  RUNNING  前端管理平台的「插件管理」插件
+  console-plugin-admin-service-monitoring     console-plugin-admin-service-monitoring     2.0.2           tkeel        2022-08-17 20:35:53  RUNNING  前端管理平台的「服务监控」插件。
+  console-plugin-admin-tenants                console-plugin-admin-tenants                2.0.2           tkeel        2022-08-17 20:35:57  RUNNING  前端管理平台的「租户管理」插件
+  console-plugin-admin-usage-statistics       console-plugin-admin-usage-statistics       2.0.2           tkeel        2022-08-17 20:36:00  RUNNING  前端管理平台的「用量统计」插件。
+  console-plugin-tenant-alarm-policy          console-plugin-tenant-alarm-policy          2.0.2           tkeel        2022-08-17 20:36:04  RUNNING  前端租户平台的「告警策略」插件
+  console-plugin-tenant-alarms                console-plugin-tenant-alarms                2.0.2           tkeel        2022-08-17 20:36:08  RUNNING  前端租户平台的「告警记录」插件
+  console-plugin-tenant-data-query            console-plugin-tenant-data-query            2.0.2           tkeel        2022-08-17 20:36:11  RUNNING  前端租户平台的「数据查询」插件
+  console-plugin-tenant-data-subscription     console-plugin-tenant-data-subscription     2.0.2           tkeel        2022-08-17 20:36:14  RUNNING  前端租户平台的「数据订阅」插件
+  console-plugin-tenant-device-templates      console-plugin-tenant-device-templates      2.0.2           tkeel        2022-08-17 20:36:18  RUNNING  前端租户平台的「设备模板」插件
+  console-plugin-tenant-devices               console-plugin-tenant-devices               2.0.2           tkeel        2022-08-17 20:36:21  RUNNING  前端租户平台的「设备列表」插件
+  console-plugin-tenant-networks              console-plugin-tenant-networks              2.0.2           tkeel        2022-08-17 20:36:26  RUNNING  前端租户平台的「网络服务」插件
+  console-plugin-tenant-notification-objects  console-plugin-tenant-notification-objects  2.0.2           tkeel        2022-08-17 20:36:30  RUNNING  前端租户平台的「通知对象」插件
+  console-plugin-tenant-plugins               console-plugin-tenant-plugins               2.0.2           tkeel        2022-08-17 20:36:34  RUNNING  前端租户平台的「插件管理」插件
+  console-plugin-tenant-roles                 console-plugin-tenant-roles                 2.0.2           tkeel        2022-08-17 20:36:37  RUNNING  前端租户平台的「角色管理」插件
+  console-plugin-tenant-routing-rules         console-plugin-tenant-routing-rules         2.0.2           tkeel        2022-08-17 20:36:41  RUNNING  前端租户平台的「数据路由」插件
+  console-plugin-tenant-users                 console-plugin-tenant-users                 2.0.2           tkeel        2022-08-17 20:36:44  RUNNING  前端租户平台的「用户管理」插件
+  console-portal-admin                        console-portal-admin                        2.0.2           tkeel        2022-08-17 20:36:48  RUNNING  前端管理平台
+  console-portal-tenant                       console-portal-tenant                       2.0.2           tkeel        2022-08-17 20:36:52  RUNNING  前端租户平台
+  core-broker                                 core-broker                                 2.0.2           tkeel        2022-08-17 21:18:12  RUNNING  后端租户平台的「数据订阅」插件
+  fluxswitch                                  fluxswitch                                  2.0.2           tkeel        2022-08-17 21:18:10  RUNNING  为物联网设备和物联网平台之间建立一个安全的双向TCP通道
+  iothub                                      iothub                                      2.0.2           tkeel        2022-08-17 21:18:23  RUNNING  设备接入插件
+  rule-manager                                rule-manager                                2.0.2           tkeel        2022-08-17 21:19:58  RUNNING  后端租户平台的「数据路由」插件
+  tkeel-alarm                                 tkeel-alarm                                 2.0.2           tkeel        2022-08-17 21:19:29  RUNNING  监控告警插件
+  tkeel-calc                                  tkeel-calc                                  0.0.1           helm-charts  2022-12-01 21:04:58  RUNNING  A Helm chart for Kubernetes
+  tkeel-calc-console                          tkeel-calc-console                          0.0.1           helm-charts  2022-12-01 21:40:58  RUNNING  A Helm chart for Kubernetes
+  tkeel-calc-mul                              tkeel-calc-mul                              0.0.1           helm-charts  2022-12-01 21:08:58  RUNNING  A Helm chart for Kubernetes
+  tkeel-device                                tkeel-device                                2.0.2           tkeel        2022-08-17 21:19:16  RUNNING  设备管理插件
+  tkeel-docs                                  tkeel-docs                                  2.0.2           tkeel        2022-08-17 21:23:46  RUNNING  帮助文档
+  tkeel-monitor                               tkeel-monitor                               2.0.2           tkeel        2022-08-17 21:19:37  RUNNING  服务监控与用量统计
 ```
 
 #### 注册插件
