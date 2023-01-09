@@ -6,11 +6,14 @@
 package kubernetes
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/dapr/cli/pkg/kubernetes"
+	"github.com/tkeel-io/cli/pkg/client/redis"
 	terrors "github.com/tkeel-io/kit/errors"
 	tenantApi "github.com/tkeel-io/tkeel/api/tenant/v1"
 
@@ -19,6 +22,7 @@ import (
 	v1 "github.com/tkeel-io/tkeel-interface/openapi/v1"
 	pluginAPI "github.com/tkeel-io/tkeel/api/plugin/v1"
 	"google.golang.org/protobuf/encoding/protojson"
+	mate_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -437,4 +441,90 @@ func UninstallPlugin(pluginID string) error {
 		return errors.Wrap(errors.New(r.Msg), "error response code")
 	}
 	return nil
+}
+
+type PluginEnableInfo struct {
+	ID        string `json:"id"`
+	Installer struct {
+		Repo       string `json:"repo"`
+		Name       string `json:"name"`
+		Version    string `json:"version"`
+		Desc       string `json:"desc"`
+		Maintainer []struct {
+			Name  string `json:"name"`
+			URL   string `json:"url"`
+			Email string `json:"email"`
+		} `json:"maintainer"`
+	} `json:"installer"`
+	TkeelVersion      string         `json:"tkeel_version"`
+	Secret            string         `json:"secret"`
+	RegisterTimestamp int            `json:"register_timestamp"`
+	Version           string         `json:"version"`
+	Status            int            `json:"status"`
+	EnableTenantes    []EnableTenant `json:"enable_tenantes"`
+}
+type EnableTenant struct {
+	TenantID        string `json:"tenant_id"`
+	OperatorID      string `json:"operator_id"`
+	EnableTimestamp int    `json:"enable_timestamp"`
+}
+
+func CleanInvalidTenants(pluginID string, tenants []string, namespace string) error {
+	tenantMap := make(map[string]struct{})
+	for _, tenant := range tenants {
+		tenantMap[tenant] = struct{}{}
+	}
+	password, err := GetRedisPassword(namespace)
+	if err != nil {
+		return err
+	}
+	pf, err := GetPodPortForward("tkeel-middleware-redis-master-0", namespace, 6379)
+	if err != nil {
+		return err
+	}
+	defer pf.Stop()
+
+	err = pf.Init()
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	rdb := redis.NewClient("127.0.0.1", pf.LocalPort, password, 0)
+	res := rdb.HGet(ctx, fmt.Sprintf("rudder||p_%s", pluginID), "data")
+	if res.Err() != nil {
+		return res.Err()
+	}
+	data, err := res.Bytes()
+	info := &PluginEnableInfo{}
+	err = json.Unmarshal(data, info)
+	newEnableTenants := make([]EnableTenant, 0)
+	for _, tenant := range info.EnableTenantes {
+		if tenant.TenantID == "_tKeel_system" {
+			newEnableTenants = append(newEnableTenants, tenant)
+		} else if _, ok := tenantMap[tenant.TenantID]; ok {
+			newEnableTenants = append(newEnableTenants, tenant)
+		}
+	}
+	info.EnableTenantes = newEnableTenants
+	data, err = json.Marshal(info)
+	rdb.HSet(ctx, fmt.Sprintf("rudder||p_%s", pluginID), "data", string(data))
+	return nil
+}
+
+func GetRedisPassword(namespace string) (string, error) {
+	_, client, err := kubernetes.GetKubeConfigClient()
+	if err != nil {
+		return "", fmt.Errorf("get kube config error: %w", err)
+	}
+	opts := mate_v1.GetOptions{}
+	secret, err := client.CoreV1().Secrets(namespace).Get(context.TODO(), "tkeel-middleware-redis", opts)
+	if err != nil {
+		return "", fmt.Errorf("get secret error: %w", err)
+	}
+
+	if value := secret.Data["redis-password"]; value != nil {
+		return string(value), err
+	}
+	return "", fmt.Errorf("get redis password error")
 }
