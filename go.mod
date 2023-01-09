@@ -1,12 +1,13 @@
 module github.com/tkeel-io/cli
 
-go 1.17
+go 1.18
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
 	github.com/briandowns/spinner v1.6.1
 	github.com/dapr/cli v1.5.0
 	github.com/fatih/color v1.13.0
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gocarina/gocsv v0.0.0-20210516172204-ca9e8a8ddea8
 	github.com/gorilla/websocket v1.4.2
 	github.com/gosuri/uitable v0.0.4
@@ -16,8 +17,8 @@ require (
 	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tkeel-io/kit v0.0.0-20220522082406-248e4772e711
-	github.com/tkeel-io/tkeel v1.0.1-0.20220722033200-9ed37e162616
-	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220624023618-32db91cf0860
+	github.com/tkeel-io/tkeel v0.4.2-0.20220525100311-b65416ac6109
+	github.com/tkeel-io/tkeel-interface/openapi v0.0.0-20220424073125-8edc0200490f
 	google.golang.org/protobuf v1.28.0
 	helm.sh/helm/v3 v3.7.2
 	k8s.io/api v0.23.4
@@ -32,7 +33,7 @@ require (
 	cloud.google.com/go v0.93.3 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
-	github.com/Azure/go-autorest/autorest v0.11.21 // indirect
+	github.com/Azure/go-autorest/autorest v0.11.23 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.16 // indirect
 	github.com/Azure/go-autorest/autorest/date v0.3.0 // indirect
 	github.com/Azure/go-autorest/logger v0.2.1 // indirect
@@ -53,8 +54,9 @@ require (
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/containerd/continuity v0.1.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.2 // indirect
-	github.com/dapr/dapr v1.5.0-rc.3 // indirect
+	github.com/dapr/dapr v1.6.0-rc.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/docker/cli v20.10.7+incompatible // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v20.10.3+incompatible // indirect
@@ -126,8 +128,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
-	github.com/prometheus/common v0.26.0 // indirect
-	github.com/prometheus/procfs v0.6.0 // indirect
+	github.com/prometheus/common v0.32.1 // indirect
+	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rubenv/sql-migrate v0.0.0-20210614095031-55d5740dbbcc // indirect
 	github.com/russross/blackfriday v2.0.0+incompatible // indirect
@@ -150,7 +152,7 @@ require (
 	golang.org/x/net v0.0.0-20211209124913-491a49abca63 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect

@@ -177,6 +177,38 @@ func GetPortforward(appName string, options ...PortForwardConfigureOption) (*Por
 	return portForward, nil
 }
 
+func GetPodPortForward(name, namespace string, port int) (*PortForward, error) {
+	config, _, err := kubernetes.GetKubeConfigClient()
+	if err != nil {
+		return nil, fmt.Errorf("get kube config error: %w", err)
+	}
+
+	// manage termination of port forwarding connection on interrupt
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt)
+	defer signal.Stop(signals)
+
+	portForward, err := NewPortForward(
+		config,
+		namespace,
+		name,
+		"127.0.0.1",
+		0,
+		port,
+		false,
+	)
+
+	go func() {
+		<-signals
+		os.Exit(0)
+	}()
+
+	if err != nil {
+		return nil, fmt.Errorf("new portforward failed: %w", err)
+	}
+	return portForward, nil
+}
+
 type PortForwardConfigureOption func(*PortForward, *AppPod) error
 
 func WithHTTPPort(pf *PortForward, app *AppPod) error {
